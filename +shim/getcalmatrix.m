@@ -1,7 +1,9 @@
 function A = getcalmatrix(F, H, S)
 % function A = getcalmatrix(F, H, S)
 %
-% Get 2nd order shim calibration matrix
+% Get 2nd order shim calibration matrix.
+% Not that this function 'quietly' inserts the DC (constant B0 offset) terms in F and S
+% prior to calculating A.
 %
 % Inputs:
 %   F    [N 8]      (Hz) Phase-unwrapped fieldmaps obtained by turning on/off each of the 8 (3 linear + 5 2nd order) shims.

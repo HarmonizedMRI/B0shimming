@@ -5,7 +5,7 @@ function [s,f] = getshimsWLS(f0, H, A, W)
 % Provided here as an example; other loss functions may be more useful depending on the application.
 %
 % Inputs:
-%   f0     [N 1]      (Hz) Phase-unwrapped 3D fieldmap
+%   f0     [N 1]      (Hz) Phase-unwrapped 3D fieldmap. N = number of voxels ('control points').
 %   H      [N 9]      SH basis matrix, evaluated at the same spatial locations (control points) as f0.
 %   A      [9 9]      shim calibration matrix. See getcalmatrix.m
 %   W      [N N]      optional sparse diagonal weighting matrix. Default = diag_sp(ones(N,1)) (from MIRT toolbox)

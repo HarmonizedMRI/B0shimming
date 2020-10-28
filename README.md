@@ -17,7 +17,7 @@ f:  [N 1]              fieldmap (Hz), where N = number of voxels
 f0: [N 1]              observed 'baseline' field map, e.g., after setting all shim currents to zero
 H:  [N nShim]          spherical harmonic basis (see getSHbasis.m)
 A:  [nShim nShim]      calibration matrix
-s:  [nShim 1]          shim current amplitudes, or change thereof (hardware units)
+s:  [nShim 1]          change in shim current amplitudes from baseline (hardware units)
 ```
 For 2nd order shim systems (e.g., GE MR750), we have
 ```
@@ -62,7 +62,7 @@ Example:
 `A` should be close to diagonal.
 As an example, here is the calibration matrix obtained on a GE 3T scanner:
 
-<img src="A.png" alt="Example calibration matrix" width="400"/>
+<img src="doc/A.png" alt="Example calibration matrix" width="400"/>
 
 
 ## How to perform 2nd order shimming
