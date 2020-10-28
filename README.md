@@ -1,4 +1,4 @@
-# B0 shimming 
+# An open toolbox for B0 shimming 
 
 
 ##  Goal
@@ -12,17 +12,17 @@ For example, the user may want to:
 
 To do this we define the system shim model
 ```
-   f(s) = H*A*s + f(s=0)         
-   f:  [N 1]              fieldmap (Hz), where N = number of voxels
-   H:  [N nShim]          spherical harmonic basis (see getSHbasis.m)
-   A:  [nShim nShim]      calibration matrix
-   s:  [nShim 1]          shim current amplitudes (hardware units)
+f(s) = H*A*s + f0         
+f:  [N 1]              fieldmap (Hz), where N = number of voxels
+f0: [N 1]              observed 'baseline' field map, e.g., after setting all shim currents to zero
+H:  [N nShim]          spherical harmonic basis (see getSHbasis.m)
+A:  [nShim nShim]      calibration matrix
+s:  [nShim 1]          shim current amplitudes, or change thereof (hardware units)
 ```
-where `f(s=0)` is the observed B0 field map when all shim currents are set to zero.
 For 2nd order shim systems (e.g., GE MR750), we have
 ```
-   nShim = 9
-   H = [1 x y z z2 xy zx x2-y2 zy] 
+nShim = 9
+H = [1 x y z z2 xy zx x2-y2 zy] 
 ```
 where each term in `H` is an `[N 1]` vector, evaluated at the same `N` spatial locations as `f`. 
 The first column corresponds to the DC (spatially invariant) offset.
@@ -38,22 +38,19 @@ To do this we need to first **calibrate** the shim system to obtain `A`.
 
 We obtain `A` by turning the shims on/off one-by-one and acquiring a 3D fieldmap for each shim setting.
 This can be done in a stationary phantom, and only needs to be done once for each scanner.
-
 We then obtain `A` as follows:
 ```
-   F = HAS
-   F: [N nShim]                          fieldmaps (Hz) obtained by turning on individual shim coils
-   S: [nShim nShim]                      applied shim amplitudes
-   mask: [N 1]                           binary mask (object support)
-   W = diag_sp(mask(:));
-   A = inv(H'*H)*H'*F*inv(S);            [nShim nShim] 
+F = HAS
+F: [N nShim]                          fieldmaps (Hz) obtained by turning on/off individual shim coils
+S: [nShim nShim]                      applied shim currents (pairwise differences) used to obtain F
+A = inv(H'*H)*H'*F*inv(S);            [nShim nShim] 
 ```
 
 Example:
 ```
 >> % reconstruct unwrapped field maps F = [nx ny nz 8], obtained with shim settings S = [8 8]
->> nx = 64; ny = 64; nz = 30;                              % fieldmap matrix size
->> FOV = [20 20 10];                                       % fieldmap FOV (cm) 
+>> nx = 64; ny = 64; nz = 64;                              % fieldmap matrix size
+>> FOV = [20 20 20];                                       % fieldmap FOV (cm) 
 >> [X,Y,Z] = getgrid(nx,ny,nz,FOV);                        % [nx ny nz], in same units as FOV
 >> % define mask = [nx ny nz] (object support)
 >> H = getSHbasis(X(mask),Y(mask),Z(mask),2);              % [N 9] where N = numel(X(mask))
@@ -62,46 +59,34 @@ Example:
 >> A = getcalmatrix(F, H, S);
 ```
 
-`A` will be close to diagonal.
+`A` should be close to diagonal.
 As an example, here is the calibration matrix obtained on a GE 3T scanner:
-![Example calibration matrix](A.png)
+
+<img src="A.png" alt="Example calibration matrix" width="400"/>
 
 
 ## How to perform 2nd order shimming
 
+1. Acquire a baseline fieldmap `f0`. This does not need to use the same matrix size or FOV as the calibration scan.
+2. Define a binary `mask` (control points), and reshape `f0` to `[N 1]` where `N = numel(X(mask))`
+3. Construct the basis `H` on the control points, e.g.,
 ```
-  >> nx = 64; ny = 64; nz = 30;                    % fieldmap matrix size
+  >> nx = 64; ny = 64; nz = 20;                    % fieldmap matrix size
   >> FOV = [20 20 10];                             % fieldmap FOV (cm) 
   >> [X,Y,Z] = getgrid(nx,ny,nz,FOV);              % [nx ny nz], in same units as FOV
-  >> H = getSHbasis(X(),Y(mask),Z(mask),2);              % [N 9] where N = numel(X(mask))
-  >> % Obtain H as described above
-  >> W = diag_sp(mask(:));                         % Alternatively, W can be non-binary weight
-  >> % load A
-  >> s = -(W*H*A)\(W*f(mask)); 
-  >> s = round(s);      % scanner hardware uses integer units
+  >> H = getSHbasis(X(mask),Y(mask),Z(mask),2);    % [N 9] where N = numel(X(mask))
 ```
+4. Load the calibration matrix `A`.
+5. Apply the model `f = HAs + f0` and solve for `s` according to your desired loss function.
+For example, to minimize the weighted RMS B0 field the Matlab solution is
 
-1. Acquire fieldmap with ../psd/Cartesian/
-1. Reconstruct UNWRAPPED fieldmap 'fmap' ([nx ny nz])
-1. Calculate shim amplitudes and create the file 'newshims.atp':
 ```
->> s = getshims(fmap, A, seq, mask);
+  >> s = -(W*H*A)\(W*f0); 
 ```
-1. Copy 'newshims.atp' to scanner and apply shims.
-```
-$ atp newshims.atp 
-```
-1. Set scanner center frequency to the value of s(1).  **TODO:** add B0 offset to atp file
-1. (optional) Acquire fieldmap again and compare with predicted field map (the figure produced by getshims).
+where `W` is a diagonal spatial weighting matrix.
 
 
 ## Test the scripts
 
-```
->> addpath ..
->> seq = getparams();
->> A = getcalmatrix('test',seq)
->> s = getshims('test',A,seq)
-```
-
+TODO
 
