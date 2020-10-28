@@ -1,62 +1,26 @@
-function A = getcalmatrix(fmaps, p, mask)
-% function A = getcalmatrix(fmaps, p, mask)
+function A = getcalmatrix(F, H, S)
+% function A = getcalmatrix(F, H, S)
+%
+% Get 2nd order shim calibration matrix
 %
 % Inputs:
-%   fmaps    [nx ny nz 8]    (Hz) Phase-unwrapped 3D fieldmaps obtained by turning on/off each shim term.
+%   F    [N 8]      (Hz) Phase-unwrapped fieldmaps obtained by turning on/off each of the 8 (3 linear + 5 2nd order) shims.
+%                   N = number of voxels ('observation points')
+%   H    [N 9]      SH basis matrix, evaluated at the same spatial locations (observation points) as F.
+%                   Unlike F and S, H also contains the DC term (1st column in H). See getSHshims.m.
+%   S    [8 8]      (Pairwise difference in) shim currents used to obtain F (hardware units)
 %   
-%   seq      struct          experimental parameters. See ../getparams.m.
-%   mask     [nx ny nz]      ROI to shim over
-%
 % Output:
-%   A        [9 9]   calibration matrix (includes zero-order term)
-%
-% Test function:
-%  >> addpath ..
-%  >> seq = getparams();
-%  >> A = getCalMatrix('test',seq);
+%   A    [9 9]      calibration matrix (includes DC term), expressed in hardware units
 
-if ischar(fmaps)
-	% test this script
-	% synthesize noisy fieldmaps
-	[nx,ny,nz] = deal(seq.n, seq.n, seq.n);
-	[X,Y,Z] = getGrid(nx,ny,nz);
-	mask = ones(nx,ny,nz);
-	C = getSHbasis(X,Y,Z);
-	fmaps = zeros(nx,ny,nz,8);
-	for ii = 1:8
-		s = zeros(9,1);
-		s(ii+1) = 100;
-		s(1) = randn(1)/2;
-		fmaps(:,:,:,ii) = reshape(C*s, [nx ny nz]);
-	end
-	fmaps = fmaps + randn(size(fmaps))/40;
-end
+% Add DC term to F and S
+Sfull = zeros(9,9);
+Sfull(2:end,2:dn) = S;
+S = Sfull; 
+F = [ones(N,1) F]; 
 
-% image dimensions
-[nx,ny,nz,nshim] = size(fmaps);
-
-% grid
-[X,Y,Z] = getGrid(nx,ny,nz);
-
-% spherical harmonics basis
-C = getSHbasis(X,Y,Z);    % C = [nx*ny*nz 9]
-
-% applied shim values 
-% see shimcal.pl. Values are the difference in amplitude between the two acquisitions.
-S = zeros(9,9);
-S(1,1) = 1;           % zero-order term (center-frequency offset)
-for ii = 2:4
-	S(ii,ii) = diff(seq.AmpLinear);   % x, y, z
-end
-for ii = 5:9
-	S(ii,ii) = diff(seq.AmpHO);       % z2, xy, zx, x2-y2, zy
-end
-
-% calculate calibration matrix
-W = spdiag(mask(:));
-N = nx*ny*nz;
-F = [ones(N,1) reshape(fmaps, [N nshim])];     % [N 9]   Here we add the zero-order (B0) term.
-%A = inv(C'*C)*C'*F*inv(S);                    % [9 9]
-A = inv(C'*W*W*C)*C'*W*W*F*inv(S);             % [9 9]
+% get A
+A = inv(C'*C)*C'*F*inv(S);                    % [9 9]
+%A = inv(C'*W*W*C)*C'*W*W*F*inv(S);             % [9 9]
 
 return

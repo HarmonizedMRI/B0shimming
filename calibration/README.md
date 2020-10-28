@@ -2,10 +2,10 @@
 
 ##  Model
 ```
-   W*f = W*C*A*s         
+   W*f = W*H*A*s         
    W: diag_sp(mask(:))    Real-valued weighting matrix. mask = [nx ny nz]
    f: [nx*ny*nz 1]        fieldmap (Hz)
-   C: [nx*ny*nz 9]        spherical harmonic basis. See getSHbasis.m.
+   H: [nx*ny*nz 9]        spherical harmonic basis. See getSHbasis.m.
    A: [9 9]               calibration matrix. See getcalmatrix.m.
    s: [9 1]               shim amplitudes, in the following order: 
                           (b0 x y z z2 xy zx x2-y2 zy). Hardware units, except b0 (Hz).
@@ -21,7 +21,7 @@ For an example, see
 
 The model here is
 ```
-   F = CAS
+   F = HAS
    F: [nx*ny*nz 8]    fieldmaps (Hz) obtained by turning on individual shim coils. See shimcal.pl.
    S: [9 9]           applied shim values (see shimcal.pl and getcalmatrix.m)
 ```
@@ -74,6 +74,11 @@ Calibration matrices are saved in ./calMatrices/
 
 
 ## How to perform 2nd order shimming using A
+
+```
+   W*f = W*H*A*s         
+   W: diag_sp(mask(:))    Real-valued weighting matrix. mask = [nx ny nz]
+```
 
 1. Acquire fieldmap with ../psd/Cartesian/
 1. Reconstruct UNWRAPPED fieldmap 'fmap' ([nx ny nz])

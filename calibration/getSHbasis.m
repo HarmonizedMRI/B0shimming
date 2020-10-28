@@ -5,7 +5,7 @@ function H = getSHbasis(X,Y,Z,ord)
 %
 % Inputs:
 %  X/Y/Z    [N 1]    x/y/z coordinates at which to evaluate (discretize) the basis (cm)
-%  ord      int      SH order   
+%  ord      int      SH order (0, 1, or 2)
 %
 % Output:
 %   H       [N 9]    SH basis, including dc (B0 offset) term
