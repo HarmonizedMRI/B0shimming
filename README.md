@@ -46,18 +46,7 @@ S: [nShim nShim]                      applied shim currents (pairwise difference
 A = inv(H'*H)*H'*F*inv(S);            [nShim nShim] 
 ```
 
-Example:
-```
->> % reconstruct unwrapped field maps F = [nx ny nz 8], obtained with shim settings S = [8 8]
->> nx = 64; ny = 64; nz = 64;                              % fieldmap matrix size
->> FOV = [20 20 20];                                       % fieldmap FOV (cm) 
->> [X,Y,Z] = getgrid(nx,ny,nz,FOV);                        % [nx ny nz], in same units as FOV
->> % define mask = [nx ny nz] (object support)
->> H = getSHbasis(X(mask),Y(mask),Z(mask),2);              % [N 9] where N = numel(X(mask))
->> % similarly, mask F and reshape to [N 8]
->> % form 8x8 matrix S containing (pairwise differences in) shim currents used to obtain F
->> A = getcalmatrix(F, H, S);
-```
+Example: ./examples/demoWLS.m  
 
 As an example, here is the calibration matrix obtained on a GE 3T scanner:
 <img src="doc/A.png" alt="Example calibration matrix" width="400"/>
