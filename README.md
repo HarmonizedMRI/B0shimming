@@ -13,11 +13,11 @@ For example, the user may want to:
 To do this we define the system shim model
 ```
 f(s) = H*A*s + f0         
-f:  [N 1]              fieldmap (Hz), where N = number of voxels
-f0: [N 1]              observed 'baseline' field map, e.g., after setting all shim currents to zero
-H:  [N nShim]          spherical harmonic basis (see getSHbasis.m)
-A:  [nShim nShim]      calibration matrix
-s:  [nShim 1]          change in shim current amplitudes from baseline (hardware units)
+f:  [N 1]           fieldmap (Hz), where N = number of voxels
+f0: [N 1]           observed 'baseline' field map, e.g., after setting all shim currents to zero
+H:  [N nShim]       spherical harmonic basis (see getSHbasis.m)
+A:  [nShim nShim]   calibration matrix
+s:  [nShim 1]       change in shim current amplitudes from baseline (hardware units)
 ```
 For 2nd order shim systems (e.g., GE MR750), we have
 ```
@@ -41,9 +41,9 @@ This can be done in a stationary phantom, and only needs to be done once for eac
 We then obtain `A` as follows:
 ```
 F = HAS
-F: [N nShim]                          fieldmaps (Hz) obtained by turning on/off individual shim coils
-S: [nShim nShim]                      applied shim currents (pairwise differences) used to obtain F
-A = inv(H'*H)*H'*F*inv(S);            [nShim nShim] 
+F: [N nShim]                   fieldmaps (Hz) obtained by turning on/off individual shim coils
+S: [nShim nShim]               applied shim currents (pairwise differences) used to obtain F
+A = inv(H'*H)*H'*F*inv(S);     [nShim nShim] 
 ```
 
 Example: ./examples/demoWLS.m  
