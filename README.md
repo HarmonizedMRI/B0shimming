@@ -86,7 +86,10 @@ For example, to minimize the weighted RMS B0 field the Matlab solution is
 where `W` is a diagonal spatial weighting matrix.
 
 
-## Test the scripts
+## Demo the code
 
-TODO
+```
+>> cd examples;
+>> demoWLS;
+```
 
