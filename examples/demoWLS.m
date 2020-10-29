@@ -27,13 +27,13 @@ nx = 64; ny = 64; nz = 9;
 FOV = [20 20 5];
 [X,Y,Z] = shim.getgrid(nx,ny,nz,FOV);
 H = shim.getSHbasis(X(:),Y(:),Z(:));   % [N 9]
-struth(1:4) = 0.2*randn([1 4]);
-s(5:9) = 1e0*randn([1 5]);
-f0 = reshape(H*A*s(:), [nx ny nz]);
+s(1:4) = randn([1 4]);
+s(5:9) = randn([1 5]);
+R = sqrt(X(:).^2+Y(:).^1.5);
+f0 = 10*H*A*s(:)./(10+R.^1.5);
 f0 = f0 + randn(size(f0))*max(f0(:))/10;
-f0 = f0(:);
 
-% get shim adjustment that minimizes RMS fieldmap
+% get shim amplitudes 'shat' that minimize RMS fieldmap
 N = size(f0,1);
 W = diag_sp(ones(N,1));
 shat = -(W*H*A)\(W*f0(:));    % [9 1]. NB! May need to be rounded before applying settings on scanner.
@@ -42,8 +42,6 @@ shat = -(W*H*A)\(W*f0(:));    % [9 1]. NB! May need to be rounded before applyin
 f = f0 + H*A*shat;
 f = reshape(f, [nx ny nz]);
 f0 = reshape(f0, [nx ny nz]);
-
 im(cat(1, f0, f)); colorbar;
 
-return;
 
