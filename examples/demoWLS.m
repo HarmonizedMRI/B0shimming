@@ -4,31 +4,49 @@
 % 
 % Goal is to calculate shim setting changes s that minimize the weighted RMS B0 inhomogeneity.
 % Provided here as an example; other loss functions may be more useful depending on the application.
-%
-% Inputs:
-%   f0     [N 1]      (Hz) Phase-unwrapped 3D fieldmap. N = number of voxels ('control points').
-%   H      [N 9]      SH basis matrix, evaluated at the same spatial locations (control points) as f0.
-%   A      [9 9]      shim calibration matrix. See getcalmatrix.m
-%   W      [N N]      optional sparse diagonal weighting matrix. Default = diag_sp(ones(N,1)) (from MIRT toolbox)
-% 
-% Output:
-%   s      [9 1]      change in shim settings from the baseline settings used to acquire f0
-%                     s(1) is the B0 frequency offset (Hz)
-%                     s(2:9) are the linear and 2nd order shim amplitude changes in hardware units (e.g., mA)
-%   f      [N 1]      predicted fieldmap after applying s (f = H*A*s + f0)
 
 addpath ..   % path to +shim package
 
-% load calibration matrix
-load A
+
+%% Calculate calibration matrix A
+
+% load calibration data
+load Ffull                             % [nx ny nz 8]  (does not include DC offset term)
+[nx, ny, nz, nShim] = size(Ffull);
+FOV = 19.8*[1 1 1];   % cm
+
+% generate mask
+mask = sum(abs(Ffull),4) > 10;         % [nx ny nz]     
+N = sum(mask(:));
+
+% create F by applying mask 
+F = zeros(N, nShim);
+for ii = 1:nShim
+	tmp = Ffull(:,:,:,ii);
+	F(:,ii) = tmp(mask);   % [N 8]
+end
+
+% specify shim amplitudes (differences) used to obtain F (hardware units)
+S = diag([20*ones(1,3) 100*ones(1,5)]);  % do not include DC term
+
+% Get spherical harmonic basis
+[X,Y,Z] = shim.getgrid(nx,ny,nz,FOV);
+H = shim.getSHbasis(X(mask),Y(mask),Z(mask));   % [N 9]
+
+% Calculate calibration matrix A
+% F and S do NOT include the DC term, i.e., F: [N 8], S: [8 8]
+A = shim.getcalmatrix(F, H, S)
+
+
+%%  Perform 2nd order shimming using A
 
 % synthesize noisy fieldmap f0 = [N 1]
-nx = 64; ny = 64; nz = 9;
-FOV = [20 20 5];
+nx = 60; ny = 60; nz = 20;
+FOV = [20 20 8];   % cm
 [X,Y,Z] = shim.getgrid(nx,ny,nz,FOV);
 H = shim.getSHbasis(X(:),Y(:),Z(:));   % [N 9]
-s(1:4) = randn([1 4]);
-s(5:9) = randn([1 5]);
+s(1:4) = 10*randn([1 4]);
+s(5:9) = 20*randn([1 5]);
 R = sqrt(X(:).^2+Y(:).^1.5);
 f0 = 10*H*A*s(:)./(10+R.^1.5);
 f0 = f0 + randn(size(f0))*max(f0(:))/10;

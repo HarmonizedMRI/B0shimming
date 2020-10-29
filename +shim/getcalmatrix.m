@@ -15,14 +15,18 @@ function A = getcalmatrix(F, H, S)
 % Output:
 %   A    [9 9]      calibration matrix (includes DC term), expressed in hardware units
 
-% Add DC term to S and F
-Sfull = zeros(9,9);
-Sfull(2:end,2:dn) = S;
-S = Sfull; 
+N = size(F,1);
+
+% Add DC offset term (column) to F and S
+% We do it here so the user doesn't have to remember to do it.
 F = [ones(N,1) F]; 
+Sin = S;
+S = zeros(9);
+S(1,1) = 1;
+S(2:end,2:end) = Sin;
 
 % get A
-A = inv(C'*C)*C'*F*inv(S);                    % [9 9]
+A = inv(H'*H)*H'*F*inv(S);                    % [9 9]
 %A = inv(C'*W*W*C)*C'*W*W*F*inv(S);             % [9 9]
 
 return

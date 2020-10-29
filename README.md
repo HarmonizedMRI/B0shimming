@@ -22,7 +22,7 @@ s:  [nShim 1]          change in shim current amplitudes from baseline (hardware
 For 2nd order shim systems (e.g., GE MR750), we have
 ```
 nShim = 9
-H = [1 x y z z2 xy zx x2-y2 zy] 
+H = [1 x y z z2 xy zx x2-y2 zy]
 ```
 where each term in `H` is an `[N 1]` vector, evaluated at the same `N` spatial locations as `f`. 
 The first column corresponds to the DC (spatially invariant) offset.
@@ -59,13 +59,13 @@ Example:
 >> A = getcalmatrix(F, H, S);
 ```
 
-`A` should be close to diagonal.
 As an example, here is the calibration matrix obtained on a GE 3T scanner:
-
 <img src="doc/A.png" alt="Example calibration matrix" width="400"/>
 
 
 ## How to perform 2nd order shimming
+
+See also ./examples/demoWLS.m.
 
 1. Acquire a baseline fieldmap `f0`. This does not need to use the same matrix size or FOV as the calibration scan.
 2. Define a binary `mask` (control points), and reshape `f0` to `[N 1]` where `N = numel(X(mask))`
