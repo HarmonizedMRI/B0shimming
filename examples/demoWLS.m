@@ -61,6 +61,9 @@ shat = -(W*H*A)\(W*f0(:));    % [9 1]. NB! May need to be rounded before applyin
 f = f0 + H*A*shat;
 f = reshape(f, [nx ny nz]);
 f0 = reshape(f0, [nx ny nz]);
-im(cat(1, f0, f)); colorbar;
+im(cat(1, f0, f)); 
+title(sprintf('fieldmaps: original (left in each panel),\nand after 2nd order shimming (right)'));
+h = colorbar; h.TickLabels{end} = 'Hz'; % h.Label.String = 'B0 field (Hz)';
+
 
 
