@@ -9,6 +9,7 @@ addpath ..   % path to +shim package
 
 
 %% Calculate calibration matrix A
+% This only needs to be done once per scanner
 
 % load calibration data
 load Ffull                             % [nx ny nz 8]  (does not include DC offset term)
@@ -23,13 +24,13 @@ N = sum(mask(:));
 F = zeros(N, nShim);
 for ii = 1:nShim
 	tmp = Ffull(:,:,:,ii);
-	F(:,ii) = tmp(mask);   % [N 8]
+	F(:,ii) = tmp(mask); 
 end
 
 % specify shim amplitudes (differences) used to obtain F (hardware units)
 S = diag([20*ones(1,3) 100*ones(1,5)]);  % do not include DC term
 
-% Get spherical harmonic basis
+% Get spherical harmonic basis evaluated at the same N spatial locations as F
 [X,Y,Z] = shim.getgrid(nx,ny,nz,FOV);
 H = shim.getSHbasis(X(mask),Y(mask),Z(mask));   % [N 9]
 
