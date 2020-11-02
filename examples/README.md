@@ -3,5 +3,5 @@
 ## Weighted least-squares loss
 
 ```
->> demoWLS;
+>> shimdemoWLS;
 ```
