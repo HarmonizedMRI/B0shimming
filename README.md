@@ -79,6 +79,6 @@ where `W` is a diagonal spatial weighting matrix.
 
 ```
 >> cd examples;
->> demoWLS;
+>> shimdemoWLS;
 ```
 
