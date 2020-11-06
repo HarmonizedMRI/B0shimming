@@ -1,10 +1,10 @@
 using LinearAlgebra
 
 """
-	function signalloss(ρ, Tf, Ts, T1, T2, α, β, Δθ)
+   function signalloss(r, g, Δ, A, Δs)
 
-Calculate (relative/normalized) signal loss resulting
-from through-voxel B0 (field) dephasing.
+Calculate (relative/normalized) signal loss due to
+intra-voxel dephasing from B0 inhomogeneity.
 
 # Inputs
 - `r`       [3 1]      Spatial position (cm) (distance from scanner iso-center)
@@ -25,24 +25,21 @@ function signalloss(r::Vector{<:Real}, g::Vector{<:Real}, Δ::Vector{<:Real}, A:
 			0 0 0 1 2*z 0 x 0 y];   # dy/dz
 	AΔs = A*Δs;
 	dhAΔs = [dot(dh[1,:], AΔs), dot(dh[2,:], AΔs), dot(dh[3,:], AΔs)]
-
-	print("Additional B0 gradient due to applied shim changes: $dhAΔs\n");
+	# print("Additional B0 gradient due to applied shim changes: $dhAΔs\n");
 
 	# return relative signal loss
-	print("Δ: $Δ, g: $g \n");
-	f = sinc(dot(Δ, dhAΔs + g));
+	# print("Δ: $Δ, g: $g \n");
+	return sinc(dot(Δ, dhAΔs + g));
 
-	return f
 end
 
 # test function
 function signalloss(str::String)
 
-	r = [2,2,2];            # cm
-	g = 1.95*[1,0,0];       # Hz/cm
+	r = [2,3,4];            # cm
+	g = 0*[1,2,3];          # Hz/cm
 	Δ  = [0.3, 0.3, 0.3];   # cm
 
-	# shim calibration matrix
 	A = [1 0.1 0 -0.1 2.3 0 0 0 0;
 		  0 1 0.001 0.002 0 0 0 0 0;
 		  0 0 1 0 0 0 0 0 0;
@@ -53,10 +50,8 @@ function signalloss(str::String)
 		  0 0 0 0 0 0 0 1 0;
 		  0 0 0 0 0 0 0 0 1];
 
-	Δs = [0,0,0,0,0,0,0,0,0];  # change in shim settings
+	Δs = [0,-2,0,0,0,0,-0.2,0,0.2];  # change in shim settings
 	
 	f = signalloss(r, g, Δ, A, Δs);
-
 	print("Relative signal: $f");
-
 end
