@@ -11,15 +11,13 @@ intra-voxel dephasing from B0 inhomogeneity.
 - `g`       [3 1]      Observed B0 field gradient (Hz/cm) at position `r` 
 - `Δ`       [3 1]      Voxel size (cm)
 - `A`       [9 9]      Shim calibration matrix (includes the B0 term)
-- `Δs`      [9 1]      Change in shim settings (from those used to acquire `g`)
+- `Δs`      [9 1]      Change in shim settings (from those used when observing `g`)
 """
 function signalloss(r::Vector{<:Real}, g::Vector{<:Real}, Δ::Vector{<:Real}, A::Array{<:Real,2}, Δs::Vector{<:Real})
 
-	# Spherical harmonic basis evaluated at r
+	# Change in field gradient at position r due to applied shim changes Δs
+	# The shim basis functions are h = [1 x y z z.^2 x.*y z.*x x.^2-y.^2 z.*y];
 	(x,y,z) = r;
-	h = [1 x y z z.^2 x.*y z.*x x.^2-y.^2 z.*y];
-
-	# Change in field gradient due to applied shim changes Δs
 	dh = [0 1 0 0 0 y z 2*x 0;    # dh/dx
 			0 0 1 0 0 x 0 -2*y z;   # dh/dy
 			0 0 0 1 2*z 0 x 0 y];   # dy/dz
