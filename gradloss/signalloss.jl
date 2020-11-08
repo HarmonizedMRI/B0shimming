@@ -1,55 +1,89 @@
 using LinearAlgebra
+using Plots
 
 """
-   function signalloss(r, g, Δ, A, Δs)
+   function signalloss(r, g, Δ, A, Δs, te)
 
-Calculate (relative/normalized) signal loss due to
+Calculate relative/normalized signal loss due to
 intra-voxel dephasing from B0 inhomogeneity.
 
 # Inputs
-- `r`       [3 1]      Spatial position (cm) (distance from scanner iso-center)
-- `g`       [3 1]      Observed B0 field gradient (Hz/cm) at position `r` 
-- `Δ`       [3 1]      Voxel size (cm)
-- `A`       [9 9]      Shim calibration matrix (includes the B0 term)
-- `Δs`      [9 1]      Change in shim settings (from those used when observing `g`)
+- `r`   vector of length 3     Spatial position (cm) (distance from scanner iso-center)
+- `g`   vector of length 3     Observed B0 field gradient (Hz/cm) at position `r` 
+- `Δ`   vector of length 3     Voxel size (cm)
+- `A`   [9 9]                  Shim calibration matrix (includes the B0 term)
+- `Δs`  vector of length 9     Change in shim settings (from those used when observing `g`)
+- `te`  scalar                 Time to echo (sec)
 """
-function signalloss(r::Vector{<:Real}, g::Vector{<:Real}, Δ::Vector{<:Real}, A::Array{<:Real,2}, Δs::Vector{<:Real})
+function signalloss(
+	r::Vector{<:Real}, 
+	g::Vector{<:Real}, 
+	Δ::Vector{<:Real}, 
+	A::Array{<:Real,2}, 
+	Δs::Vector{<:Real},
+	te::Real)
 
 	# Change in field gradient at position r due to applied shim changes Δs
 	# The shim basis functions are h = [1 x y z z.^2 x.*y z.*x x.^2-y.^2 z.*y];
 	(x,y,z) = r;
-	dh = [0 1 0 0 0 y z 2*x 0;    # dh/dx
-			0 0 1 0 0 x 0 -2*y z;   # dh/dy
-			0 0 0 1 2*z 0 x 0 y];   # dy/dz
-	AΔs = A*Δs;
-	dhAΔs = [dot(dh[1,:], AΔs), dot(dh[2,:], AΔs), dot(dh[3,:], AΔs)]
-	# print("Additional B0 gradient due to applied shim changes: $dhAΔs\n");
+	dh = [0 1 0 0 0   y z  2*x 0;    # dh/dx
+			0 0 1 0 0   x 0 -2*y z;    # dh/dy
+			0 0 0 1 2*z 0 x  0   y]    # dh/dz
+	dhAΔs = [dot(dh[1,:], A, Δs), dot(dh[2,:], A, Δs), dot(dh[3,:], A, Δs)]   # Hz/cm
+	print("Change in B0 gradient (Hz/cm) due to applied shims: $dhAΔs Hz/cm\n")
 
-	# return relative signal loss
-	# print("Δ: $Δ, g: $g \n");
-	return sinc(dot(Δ, dhAΔs + g));
+	# phase gradient at te (cycles/cm)
+	gw = (dhAΔs + g)*te;        
+
+	# return relative signal
+	return sinc(dot(Δ, gw))
+end
+
+"""
+	Accept vector of points (and their B0 gradients) as input.
+"""
+function signalloss(
+	r::Vector{Vector{Float64}}, 
+	g::Vector{Vector{Float64}}, 
+	Δ::Vector{<:Real}, 
+	A::Array{<:Real,2}, 
+	Δs::Vector{<:Real},
+	te::Real)
+
+	return map((r,g) -> signalloss(r,g,Δ,A,Δs,te), r, g)  
 
 end
 
-# test function
+"""
+	function signalloss(str::String)
+
+Toy test function. Plot signal vs gradient.
+Try different Δs settings and observe the effect.
+"""
 function signalloss(str::String)
 
-	r = [2,3,4];            # cm
-	g = 0*[1,2,3];          # Hz/cm
-	Δ  = [0.3, 0.3, 0.3];   # cm
+	N = 20;
+	r = Vector{Vector{Float64}}(undef,N)
+	g = Vector{Vector{Float64}}(undef,N)
+	for i in 1:N
+		r[i] = [2,2,2];                      # cm
+		g[i] = 100*(i-N/2-0.5)/(N/2)*[1,1,1];         # Hz/cm
+	end
 
-	A = [1 0.1 0 -0.1 2.3 0 0 0 0;
-		  0 1 0.001 0.002 0 0 0 0 0;
-		  0 0 1 0 0 0 0 0 0;
-		  0 0 0 1 0 0 0 0 0;
-		  0 0 0 0 1 0 0 0 0;
-		  0 0 0 0 0 1 0 0 0;
-		  0 0 0 0 0 0 1 0 0;
-		  0 0 0 0 0 0 0 1 0;
-		  0 0 0 0 0 0 0 0 1];
+	Δ  = 0.3*[1, 1, 1]     # cm
 
-	Δs = [0,-2,0,0,0,0,-0.2,0,0.2];  # change in shim settings
+	A = collect(I(9)*1.)
+
+	# h = [1   x   y   z   z.^2 x.*y z.*x x.^2-y.^2 z.*y]
+	Δs =  [0., 0., 0,  0., 0,   0,   0,   100,        0   ]  # change in shim settings
+	te = 0.025 # 30e-2;   # echo time (sec)
 	
-	f = signalloss(r, g, Δ, A, Δs);
-	print("Relative signal: $f");
+	f = signalloss(r, g, Δ, A, Δs, te);
+
+	df = Vector{Float64}(undef,N)
+	for i in 1:N
+		df[i] = g[i][1]
+	end
+	display(plot(df,f))
+
 end
