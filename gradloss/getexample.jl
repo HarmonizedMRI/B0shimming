@@ -14,13 +14,16 @@ function getexample()
    3.3644e-18  -1.9634e-04  -4.1191e-05   1.4665e-05  -1.8696e-05  -3.9703e-05  -2.9870e-05   9.6190e-03   2.5017e-05;
    5.6107e-18   1.8954e-04   5.3357e-05  -8.4566e-05  -3.8129e-05   1.1254e-04   1.1934e-04   2.3482e-05   1.1446e-02]
 
-	Δs = [0,10,10,10,300,200,300.,500,500.];  # change in shim settings
+	A = collect(I(9)*1.)
 
-	te = 30e-3; # echo time (sec)
+	# h = [1   x   y   z   z.^2   x.*y   z.*x   x.^2-y.^2   z.*y]
+	Δs =  [0., 1., 0,  0., 1,     0,     0,     0,          0   ]  # change in shim settings
 
-	# voxel locations
+	te = 25e-3; # echo time (sec)
+
+	# voxel locations. Dummy 1d locations for testing.
 	fov = 20;   # cm
-	dx = 0.2;   # cm
+	dx = 1e-3;   # cm
 	x = (-fov/2+dx/2):dx:(fov-dx/2)
 	y = -x
 	z = x/2
@@ -33,5 +36,6 @@ function getexample()
 		g[i] = [0.,0.,0.];
 	end
 
+	return (r,g,Δ,A,Δs,te) 
 end
 
