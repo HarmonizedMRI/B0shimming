@@ -1,5 +1,6 @@
 using LinearAlgebra
 
+include("signalloss.jl")
 include("getexample.jl")
 
 """
@@ -23,7 +24,6 @@ function cost(
 	te::Float64, 
 	w::Vector{Float64})
 
-	#f = map((r,g) -> signalloss(r,g,Δ,A,Δs,te), r, g)  
 	f = signalloss(r,g,Δ,A,Δs,te)  
 
 	return norm((1 .- f).*w)/sqrt(length(f))

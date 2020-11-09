@@ -42,7 +42,7 @@ end
 """
    function signalloss(r, g, Δ, A, Δs, te)
 
-	Accept vector of voxel locations r (and their B0 gradients g) as input.
+Accept vector of voxel locations r (and their B0 gradients g) as input.
 """
 function signalloss(
 	r::Vector{Vector{Float64}},    # TODO: why doesn't <:Real work here?
@@ -59,7 +59,8 @@ end
 """
 	function signalloss(str::String)
 
-Toy test function.
+Toy test function.  
+Usage: `signalloss("test")`
 """
 function signalloss(str::String)
 

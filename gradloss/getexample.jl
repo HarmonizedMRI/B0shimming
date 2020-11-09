@@ -17,7 +17,7 @@ function getexample()
 	A = collect(I(9)*1.)
 
 	# h = [1   x   y   z   z.^2   x.*y   z.*x   x.^2-y.^2   z.*y]
-	Δs =  [0., 1., 0,  0., 1,     0,     0,     0,          0   ]  # change in shim settings
+	Δs =  [0., 3., 5,  0., 1,     2,     0,     0,          0   ]  # change in shim settings
 
 	te = 25e-3; # echo time (sec)
 
