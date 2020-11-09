@@ -34,6 +34,7 @@ end
 	cost(str::String)
 
 Test function.
+Usage: `cost("test")`
 """
 function cost(str::String)
 

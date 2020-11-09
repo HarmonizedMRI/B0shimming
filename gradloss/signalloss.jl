@@ -36,7 +36,7 @@ function signalloss(
 	gw = (dhAΔs + g)*te;        
 
 	# return relative signal
-	return sinc(dot(Δ, abs.(gw)))
+	return sinc(dot(Δ, abs.(gw)))   # TODO: check this expression
 end
 
 """
