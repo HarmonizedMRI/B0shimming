@@ -28,7 +28,7 @@ for ii = 1:nShim
 end
 
 % specify shim amplitudes (differences) used to obtain F (hardware units)
-S = diag([20*ones(1,3) 100*ones(1,5)]);  % do not include DC term
+S = diag([20*ones(1,3) 1000*ones(1,5)]);  % do not include DC term
 
 % Get spherical harmonic basis evaluated at the same N spatial locations as F
 [X,Y,Z] = shim.getgrid(nx,ny,nz,FOV);
