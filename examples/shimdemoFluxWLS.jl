@@ -23,7 +23,8 @@ function ls_adam(
 	s = copy(s0)
 
 	function	loss(HA, f0)
-		return 1/2 * norm(f0 + HA*s)^2 # LS cost function (no "s" arg!)
+		1/2 * norm(f0 + HA*s)^2 # LS cost function (no "s" arg!)
+		#norm(f0 + HA*s,1)    # infinity norm cost
 	end
 
 	out = Array{Any}(undef, niter+1)
@@ -57,7 +58,7 @@ if false
 	fun = (s,iter) -> cost(s) #, time()]
 
 	s0 = zeros(9)
-	niter = 500
+	niter = 50
 	fun = (x,iter) -> [cost(x)]  # time(), x]
 	opt = ADAM(0.2)
 	(shat, out) = ls_adam(HA,f0; s0=s0, niter=niter, fun=fun, opt=opt)
