@@ -5,11 +5,12 @@ solve LS problem using ADAM and Nesterov from Flux
 
 using LinearAlgebra: norm, opnorm
 using Flux
+using MIRT: embed!
 using Random: seed!
 using LaTeXStrings
 using Plots; default(markerstrokecolor=:auto)
 
-function ls_adam(y, A ;
+function ls_adam(f0, HA ;
 	x0 = zeros(size(A,2)),
 	opt = ADAM(), # default optimizer
 	batchsize::Int = 1,
@@ -19,21 +20,18 @@ function ls_adam(y, A ;
 
 	x = copy(x0)
 
-	function shimmodel(A,x)
-		return A*x
+	function shimmodel(HA,s)
+		return HA*s
 	end
 
-	function	loss(y, A)
-		return  1/2 * norm(y - shimmodel(A,x))^2 # LS cost function (no "x" arg!)
-		# return 1/2 * norm(shimmodel(r,A,s) + f0)^2   
+	function	loss(f0, HA)
+		return  1/2 * norm(f0 + shimmodel(HA,x))^2 # LS cost function (no "x" arg!)
 	end
-
-	#loss = (y, A) -> 1/2 * norm(y - A*x)^2 # LS cost function (no "x" arg!)
 
 	out = Array{Any}(undef, niter+1)
 	out[1] = fun(x0, 0)
 	θ = params(x) # magic here using objectid()
-	data = [(y, A)] # passed as loss(data...) during optimization
+	data = [(f0, HA)] # passed as loss(data...) during optimization
 
 	for iter = 1:niter
 		Flux.train!(loss, θ, data, opt)
@@ -43,6 +41,8 @@ function ls_adam(y, A ;
 	return x, out
 end
 
+if true
+# toy example test
 include("loadexampledata.jl")
 # test
 # best s ~ s = [1.2,-1.1,0,0,0,0,0,0,0.]
@@ -50,6 +50,7 @@ r = [0. 0. 0.; 1. 0 0] #; 2. 1. 0; 3 0 1.]
 f0 = [-1, 0] #, 0.5, 2];
 
 (x,y,z) = (r[:,1], r[:,2], r[:,3])
+
 H = [ones(length(x)) x y z z.^2 x.*y z.*x x.^2-y.^2 z.*y]
 HA = H*A
 
@@ -61,6 +62,7 @@ niter = 500
 fun = (x,iter) -> [cost(x)]  # time(), x]
 opt = ADAM(0.2)
 (shat, out) = ls_adam(f0, HA; x0=s0, niter=niter, fun=fun, opt=opt)
+end
 
 if false # test
 	seed!(0)
