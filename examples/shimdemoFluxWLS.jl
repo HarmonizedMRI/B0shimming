@@ -75,11 +75,10 @@ if true
 	HA = H*A
 
 	s0 = zeros(9)
-	niter = 200
 	cost = s -> 1/2 * norm(HA*s .+ f0)^2 
 	fun = (s,iter) -> cost(s) #, time()]
 	opt = ADAM(0.2)
-	@time (shat, out) = ls_adam(HA,f0; s0=s0, niter=niter, fun=fun, opt=opt)
+	@time (shat, out) = ls_adam(HA,f0; s0=s0, niter=200, fun=fun, opt=opt)
 
 	matwrite("results.mat", Dict([("shat", shat), ("H", H), ("A", A), ("mask", mask), ("f0", f0)]))
 end
