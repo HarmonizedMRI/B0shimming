@@ -2,9 +2,10 @@
 %
 % Output:
 %   example.mat, containing:
-%   A   9x9     calibration matrix
-%   f0  [N 1]   noisy fieldmap
-%   X
+%   A     9x9            calibration matrix
+%   f0    [nx ny nz]     noisy fieldmap (3D matrix)
+%   fov   [3 1]          field of view (cm)
+%   mask  [nx ny nz]     spherical mask 
 %   
 
 addpath ..   % path to +shim package
@@ -16,13 +17,13 @@ addpath ..   % path to +shim package
 % load calibration data
 load Ffull                             % [nx ny nz 8]  (does not include DC offset term)
 [nx, ny, nz, nShim] = size(Ffull);
-FOV = 19.8*[1 1 1];   % cm
+fov = 19.8*[1 1 1];   % cm
 
-% generate mask
+% generate mask (only for purpose of calculating A)
 mask = sum(abs(Ffull),4) > 10;         % [nx ny nz]     
 N = sum(mask(:));
 
-% create F by applying mask 
+% create F = [N 8] by applying mask 
 F = zeros(N, nShim);
 for ii = 1:nShim
 	tmp = Ffull(:,:,:,ii);
@@ -30,44 +31,35 @@ for ii = 1:nShim
 end
 
 % specify shim amplitudes (differences) used to obtain F (hardware units)
-S = diag([20*ones(1,3) 100*ones(1,5)]);  % do not include DC term. 2nd order amp units = 10 mA
+S = diag([20*ones(1,3) 100*ones(1,5)]);  % Do not include DC term. Hardware units (2nd order unit = 10 mA)
 
 % Get spherical harmonic basis evaluated at the same N spatial locations as F
-[X,Y,Z] = shim.getgrid(nx,ny,nz,FOV);
+[X,Y,Z] = shim.getgrid(nx,ny,nz,fov);
 H = shim.getSHbasis(X(mask),Y(mask),Z(mask));   % [N 9]
 
 % Calculate calibration matrix A
 % F and S do NOT include the DC term, i.e., F: [N 8], S: [8 8]
-A = shim.getcalmatrix(F, H, S)
+A = shim.getcalmatrix(F, H, S);
 
-%% synthesize noisy fieldmap f0 = [N 1]
+%% synthesize noisy fieldmap f0 
 nx = 60; ny = 60; nz = 20;
-FOV = [20 20 8];   % cm
+fov = [20 20 20];   % cm
 
-[X,Y,Z] = shim.getgrid(nx,ny,nz,FOV);
+[X,Y,Z] = shim.getgrid(nx,ny,nz,fov);
 R = sqrt(X.^2 + Y.^2 + Z.^2);
-m = ones(size(X));
-m(R < 0.8*FOV/2
-H = shim.getSHbasis(X(:),Y(:),Z(:));   % [N 9]
+mask = ones(size(X));
+mask(R > 0.8*fov(1)/2) = 0;
+mask = logical(mask);
+H = shim.getSHbasis(X(mask),Y(mask),Z(mask));   % [N 9]
 s(1:4) = 10*randn([1 4]);
 s(5:9) = 20*randn([1 5]);
-R = sqrt(X(:).^2+Y(:).^1.5);
+R = sqrt(X(mask).^2+Y(mask).^1.5);
 f0 = 10*H*A*s(:)./(10+R.^1.5);
 f0 = f0 + randn(size(f0))*max(f0(:))/10;
+f0 = embed(f0, mask);
 
-%% Save A and f0 to file
-% get shim amplitudes 'shat' that minimize RMS fieldmap
-N = size(f0,1);
-W = diag_sp(ones(N,1));
-shat = -(W*H*A)\(W*f0(:));    % [9 1]. NB! May need to be rounded before applying settings on scanner.
-
-% compare baseline and predicted fieldmaps
-f = f0 + H*A*shat;
-f = reshape(f, [nx ny nz]);
-f0 = reshape(f0, [nx ny nz]);
-im(cat(1, f0, f)); 
-title(sprintf('fieldmaps: original (left in each panel),\nand after 2nd order shimming (right)'));
-h = colorbar; h.TickLabels{end} = 'Hz'; % h.Label.String = 'B0 field (Hz)';
+%% Save to file
+save exampledata A f0 fov mask
 
 
 
