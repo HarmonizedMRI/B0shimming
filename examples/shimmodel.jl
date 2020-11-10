@@ -3,7 +3,8 @@ using LinearAlgebra
 """
    shimmodel(r, A, s)
 
-Implements f = HAs at spatial location `r`.
+Implements f = HAs at spatial location `r`, i.e., 
+calculates the fieldmap (Hz) at `r` produced by shim settings `s`.
 
 This function is overloaded and also accepts a vector of spatial location vectors.
 
