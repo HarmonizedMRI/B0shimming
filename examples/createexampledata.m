@@ -2,14 +2,15 @@
 %
 % Output:
 %   example.mat, containing:
-%   A     9x9            calibration matrix
-%   f0    [nx ny nz]     noisy fieldmap (3D matrix)
-%   fov   [3 1]          field of view (cm)
-%   mask  [nx ny nz]     spherical mask 
+%   A     9x9            calibration matrix (scanner-specific units)
+%   f0    [nx ny nz]     noisy fieldmap (Hz)
+%   X     [nx ny nz]     Voxel x coordinate (cm)
+%   Y     [nx ny nz]     Voxel y coordinate (cm)
+%   Z     [nx ny nz]     Voxel z coordinate (cm)
+%   mask  [nx ny nz]     spherical mask (bool)
 %   
 
 addpath ..   % path to +shim package
-
 
 %% Calculate calibration matrix A
 % This only needs to be done once per scanner
@@ -59,7 +60,7 @@ f0 = f0 + randn(size(f0))*max(f0(:))/10;
 f0 = embed(f0, mask);
 
 %% Save to file
-save exampledata A f0 fov mask
+save exampledata A f0 X Y Z mask
 
 
 
