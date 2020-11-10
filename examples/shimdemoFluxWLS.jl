@@ -68,26 +68,20 @@ if true
 
 	include("loadexampledata.jl")     # A, f0, X/Y/Z, mask
 
-	if false
-		r = [0. 0. 0.; 1. 2 0; 2. 1. 0; 3 0 1.]
-		f0 = [-1, 0, 0.5, 8];
-		(x,y,z) = (r[:,1], r[:,2], r[:,3])
-	else
-		f0 = f0[mask]
-		(x,y,z) = (X[mask], Y[mask], Z[mask])
-	end
+	f0 = f0[mask]
+	(x,y,z) = (X[mask], Y[mask], Z[mask])
 
 	H = [ones(length(x)) x y z z.^2 x.*y z.*x x.^2-y.^2 z.*y]
-	@show size(H)
 	HA = H*A
-	@show size(HA)
 
 	s0 = zeros(9)
 	niter = 200
 	cost = s -> 1/2 * norm(HA*s .+ f0)^2 
 	fun = (s,iter) -> cost(s) #, time()]
 	opt = ADAM(0.2)
-	(shat, out) = ls_adam(HA,f0; s0=s0, niter=niter, fun=fun, opt=opt)
+	@time (shat, out) = ls_adam(HA,f0; s0=s0, niter=niter, fun=fun, opt=opt)
+
+	matwrite("results.mat", Dict([("shat", shat), ("H", H), ("A", A), ("mask", mask), ("f0", f0)]))
 end
 
 if false # test
