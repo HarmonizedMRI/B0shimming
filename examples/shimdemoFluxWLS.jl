@@ -10,58 +10,78 @@ using Random: seed!
 using LaTeXStrings
 using Plots; default(markerstrokecolor=:auto)
 
-function ls_adam(f0, HA ;
-	x0 = zeros(size(A,2)),
+function ls_adam(
+	HA::Array{<:Real,2},
+	f0::Vector{<:Real}; 
+	s0 = zeros(size(A,2)),
 	opt = ADAM(), # default optimizer
 	batchsize::Int = 1,
 	niter::Int = 100,
-	fun::Function = (x,iter) -> undef, # archiving function
+	fun::Function = (s,iter) -> undef, # archiving function
 )
 
-	x = copy(x0)
+	s = copy(s0)
 
-	function shimmodel(HA,s)
-		return HA*s
-	end
-
-	function	loss(f0, HA)
-		return  1/2 * norm(f0 + shimmodel(HA,x))^2 # LS cost function (no "x" arg!)
+	function	loss(HA, f0)
+		return 1/2 * norm(f0 + HA*s)^2 # LS cost function (no "s" arg!)
 	end
 
 	out = Array{Any}(undef, niter+1)
-	out[1] = fun(x0, 0)
-	θ = params(x) # magic here using objectid()
-	data = [(f0, HA)] # passed as loss(data...) during optimization
+	out[1] = fun(s0, 0)
+	θ = params(s) # magic here using objectid()
+	data = [(HA,f0)] # passed as loss(data...) during optimization
 
 	for iter = 1:niter
 		Flux.train!(loss, θ, data, opt)
-		out[iter+1] = fun(x, iter)
+		out[iter+1] = fun(s, iter)
 	end
 
-	return x, out
+	return s, out
 end
 
 if true
-# toy example test
-include("loadexampledata.jl")
-# test
-# best s ~ s = [1.2,-1.1,0,0,0,0,0,0,0.]
-r = [0. 0. 0.; 1. 0 0] #; 2. 1. 0; 3 0 1.]
-f0 = [-1, 0] #, 0.5, 2];
+	# toy example 
 
-(x,y,z) = (r[:,1], r[:,2], r[:,3])
+	# get A
+	include("loadexampledata.jl")
 
-H = [ones(length(x)) x y z z.^2 x.*y z.*x x.^2-y.^2 z.*y]
-HA = H*A
+	r = [0. 0. 0.; 1. 0 0] #; 2. 1. 0; 3 0 1.]
+	f0 = [-1, 0] #, 0.5, 2];
 
-cost = s -> 1/2 * norm(HA*s .+ f0)^2 
-fun = (s,iter) -> cost(s) #, time()]
+	(x,y,z) = (r[:,1], r[:,2], r[:,3])
 
-s0 = zeros(9)
-niter = 500
-fun = (x,iter) -> [cost(x)]  # time(), x]
-opt = ADAM(0.2)
-(shat, out) = ls_adam(f0, HA; x0=s0, niter=niter, fun=fun, opt=opt)
+	H = [ones(length(x)) x y z z.^2 x.*y z.*x x.^2-y.^2 z.*y]
+	HA = H*A
+
+	cost = s -> 1/2 * norm(HA*s .+ f0)^2 
+	fun = (s,iter) -> cost(s) #, time()]
+
+	s0 = zeros(9)
+	niter = 100
+	fun = (x,iter) -> [cost(x)]  # time(), x]
+	opt = ADAM(0.2)
+	(shat, out) = ls_adam(HA,f0; s0=s0, niter=niter, fun=fun, opt=opt)
+end
+
+if false
+	# full 3d example (full synthesized data)
+
+	include("loadexampledata.jl")     # A, f0, X/Y/Z, mask
+
+	f0 = fo[mask]
+	(x,y,z) = (X[mask], Y[mask], Z[mask])
+
+	H = [ones(length(x)) x y z z.^2 x.*y z.*x x.^2-y.^2 z.*y]
+	HA = H*A
+
+	cost = s -> 1/2 * norm(HA*s .+ f0)^2 
+	fun = (s,iter) -> cost(s) #, time()]
+
+	s0 = zeros(9)
+	niter = 100
+	fun = (x,iter) -> [cost(x)]  # time(), x]
+	opt = ADAM(0.2)
+	(shat, out) = ls_adam(HA,f0; s0=s0, niter=niter, fun=fun, opt=opt)
 end
 
 if false # test
