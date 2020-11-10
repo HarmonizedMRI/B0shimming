@@ -39,14 +39,14 @@ function ls_adam(
 	return s, out
 end
 
-if true
+if false
 	# toy example 
 
 	# get A
 	include("loadexampledata.jl")
 
-	r = [0. 0. 0.; 1. 0 0] #; 2. 1. 0; 3 0 1.]
-	f0 = [-1, 0] #, 0.5, 2];
+	r = [0. 0. 0.; 1. 2 0; 2. 1. 0; 3 0 1.]
+	f0 = [-1, 0, 0.5, 8];
 
 	(x,y,z) = (r[:,1], r[:,2], r[:,3])
 
@@ -57,29 +57,35 @@ if true
 	fun = (s,iter) -> cost(s) #, time()]
 
 	s0 = zeros(9)
-	niter = 100
+	niter = 500
 	fun = (x,iter) -> [cost(x)]  # time(), x]
 	opt = ADAM(0.2)
 	(shat, out) = ls_adam(HA,f0; s0=s0, niter=niter, fun=fun, opt=opt)
 end
 
-if false
+if true
 	# full 3d example (full synthesized data)
 
 	include("loadexampledata.jl")     # A, f0, X/Y/Z, mask
 
-	f0 = fo[mask]
-	(x,y,z) = (X[mask], Y[mask], Z[mask])
+	if false
+		r = [0. 0. 0.; 1. 2 0; 2. 1. 0; 3 0 1.]
+		f0 = [-1, 0, 0.5, 8];
+		(x,y,z) = (r[:,1], r[:,2], r[:,3])
+	else
+		f0 = f0[mask]
+		(x,y,z) = (X[mask], Y[mask], Z[mask])
+	end
 
 	H = [ones(length(x)) x y z z.^2 x.*y z.*x x.^2-y.^2 z.*y]
+	@show size(H)
 	HA = H*A
-
-	cost = s -> 1/2 * norm(HA*s .+ f0)^2 
-	fun = (s,iter) -> cost(s) #, time()]
+	@show size(HA)
 
 	s0 = zeros(9)
-	niter = 100
-	fun = (x,iter) -> [cost(x)]  # time(), x]
+	niter = 200
+	cost = s -> 1/2 * norm(HA*s .+ f0)^2 
+	fun = (s,iter) -> cost(s) #, time()]
 	opt = ADAM(0.2)
 	(shat, out) = ls_adam(HA,f0; s0=s0, niter=niter, fun=fun, opt=opt)
 end
