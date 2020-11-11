@@ -22,9 +22,9 @@ function ls_adam(
 
 	s = copy(s0)
 
-	function	loss(HA, f0)
-		1/2 * norm(f0 + HA*s)^2 # LS cost function (no "s" arg!)
-		#norm(f0 + HA*s,1)    # infinity norm cost
+	function	loss(HA, f0)   # LS cost function (no "s" arg!)
+		norm(f0 + HA*s,8)^4
+		1/2 * norm(f0 + HA*s)^2       
 	end
 
 	out = Array{Any}(undef, niter+1)
@@ -58,18 +58,19 @@ if false
 	fun = (s,iter) -> cost(s) #, time()]
 
 	s0 = zeros(9)
-	niter = 50
+	niter = 500
 	fun = (x,iter) -> [cost(x)]  # time(), x]
 	opt = ADAM(0.2)
 	(shat, out) = ls_adam(HA,f0; s0=s0, niter=niter, fun=fun, opt=opt)
 end
 
 if true
-	# full 3d example (full synthesized data)
+	# full 3d example (synthesized data)
 
 	include("loadexampledata.jl")     # A, f0, X/Y/Z, mask
 
 	f0 = f0[mask]
+
 	(x,y,z) = (X[mask], Y[mask], Z[mask])
 
 	H = [ones(length(x)) x y z z.^2 x.*y z.*x x.^2-y.^2 z.*y]
@@ -79,7 +80,7 @@ if true
 	cost = s -> 1/2 * norm(HA*s .+ f0)^2 
 	fun = (s,iter) -> cost(s) #, time()]
 	opt = ADAM(0.2)
-	@time (shat, out) = ls_adam(HA,f0; s0=s0, niter=200, fun=fun, opt=opt)
+	@time (shat, out) = ls_adam(HA,f0; s0=s0, niter=1000, fun=fun, opt=opt)
 
 	matwrite("results.mat", Dict([("shat", shat), ("H", H), ("A", A), ("mask", mask), ("f0", f0)]))
 end
