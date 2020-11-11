@@ -23,8 +23,8 @@ function ls_adam(
 	s = copy(s0)
 
 	function	loss(HA, f0)   # LS cost function (no "s" arg!)
-		norm(f0 + HA*s,8)^4
 		1/2 * norm(f0 + HA*s)^2       
+		norm(f0 + HA*s,6)^6
 	end
 
 	out = Array{Any}(undef, niter+1)
