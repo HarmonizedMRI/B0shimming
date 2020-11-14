@@ -18,7 +18,6 @@ end
 
 % Spherical coordinate system as defined in https://en.wikipedia.org/wiki/Spherical_harmonics
 % and Romeo and Hoult MRM 1984
-r = norm([x y z]);   % radius
 [ph,el,r] = cart2sph(x,y,z);  % ph = azimuth, el = elevation, r = radius
 th = pi/2 - el; % polar angle
 
@@ -40,7 +39,7 @@ mask = R < 1;
 
 f = 0*X;
 
-lmax = 2;  % degree
+lmax = 6;  % degree
 nr = lmax+1;
 nc = nr;
 ii = 1;
@@ -49,7 +48,7 @@ for l = 0:lmax
 		fm = evalspharm(X(mask), Y(mask), Z(mask), l, m);
 		f(mask) = fm;
 		figure(1); subplot(nr,nc,l*nc+m+1); im(real(f)); title(sprintf('l,m = %d,%d', l, m'));
-		figure(2); subplot(nr,nc,l*nc+m+1); im(imag(f)); title(sprintf('l,m = %d,%d', l, m'));
+		%figure(2); subplot(nr,nc,l*nc+m+1); im(imag(f)); title(sprintf('l,m = %d,%d', l, m'));
 		%figure(1); subplot(nr,nc,l*nc+m+1); im(cat(1,f(:,:,end/2), squeeze(f(:,end/2,:)), squeeze(f(end/2,:,:)))); 
 		title(sprintf('l,m = %d,%d', l, m'));
 		%figure(2); subplot(nr,nc,l*nc+m+1); im(imag(f)); title(sprintf('l,m = %d,%d', l, m'));
