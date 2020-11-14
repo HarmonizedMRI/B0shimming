@@ -4,11 +4,11 @@ function H = getSHbasis(X,Y,Z,l)
 % Evaluate spherical harmonic basis up to degree 'l'
 %
 % Inputs:
-%  X/Y/Z    [N 1]    x/y/z coordinates at which to evaluate (discretize) the basis (cm)
-%  l        int      SH degree. Default: 4.
+%  X/Y/Z    [N 1]     x/y/z coordinates at which to evaluate (discretize) the basis (cm)
+%  l        int       SH degree. Default: 4.
 %
 % Output:
-%   H       [N 2l+1]    SH basis, including dc (B0 offset) term
+%   H       [N ...]    SH basis, including dc (B0 offset) term
 
 if ~isvector(X) | ~isvector(Y) | ~isvector(Z)
 	error('X, Y, Z must be vectors');
@@ -30,13 +30,12 @@ end
 th = pi/2 - el; % polar angle
 
 % construct basis matrix H
-H = zeros(size(X,1), 2*l+1);
-H(:,1) = 1;   % DC term
-ic = 2;
-for l1 = 1:l
+H = zeros(size(X,1), sum(2*(0:l)+1));
+ic = 1;
+for l1 = 0:l
 	lp = legendre(l1, cos(th));   % [l1+1 N]
 	for m = 0:l1
-		f = r.^l .* exp(1i*m*ph) .* lp(m+1,:)';
+		f = r.^l1 .* exp(1i*m*ph) .* lp(m+1,:)';
 		H(:,ic) = real(f);
 		ic = ic+1;
 		if m > 0
