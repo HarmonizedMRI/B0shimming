@@ -23,14 +23,15 @@ function ls_adam(
 	s = copy(s0)
 
 	function	loss(HA, f0)   # LS cost function (no "s" arg!)
+		# norm(f0 + HA*s,6)^6
 		1/2 * norm(f0 + HA*s)^2       
-		norm(f0 + HA*s,6)^6
 	end
+
+	θ = params(s) # magic here using objectid()
+	data = [(HA,f0)] # passed as loss(data...) during optimization
 
 	out = Array{Any}(undef, niter+1)
 	out[1] = fun(s0, 0)
-	θ = params(s) # magic here using objectid()
-	data = [(HA,f0)] # passed as loss(data...) during optimization
 
 	for iter = 1:niter
 		Flux.train!(loss, θ, data, opt)
