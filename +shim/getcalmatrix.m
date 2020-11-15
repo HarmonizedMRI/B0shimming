@@ -8,7 +8,7 @@ function A = getcalmatrix(F, H, S)
 % Inputs:
 %   F    [N 8]      (Hz) Phase-unwrapped fieldmaps obtained by turning on/off each of the 8 (3 linear + 5 2nd order) shims.
 %                   N = number of voxels ('control points')
-%   H    [N 9]      SH basis matrix, evaluated at the same spatial locations (control points) as F.
+%   H    [N ...]    SH basis matrix, evaluated at the same spatial locations (control points) as F.
 %                   Unlike F and S, H also contains the DC term (1st column in H). See getSHshims.m.
 %   S    [8 8]      (Pairwise difference in) shim currents used to obtain F (hardware units)
 %   
