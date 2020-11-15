@@ -6,7 +6,7 @@
 % Provided here as an example; other loss functions may be more useful depending on the application.
 
 % spherical harmonic basis degree
-l = 6;
+l = 3;
 
 %% Calculate calibration matrix A
 % This only needs to be done once per scanner
@@ -42,10 +42,12 @@ A = shim.getcalmatrix(F, H, S);
 %% get shim amplitudes 'shat' that minimize RMS fieldmap
 %shimNum = 5;
 f0 = Ffull(:,:,:,shimNum);  % see how well one shim field fits basis
+f0 = Ffull(:,:,:,4) + 0.5*Ffull(:,:,:,5);  % see how well one shim field fits basis
 mask = sum(abs(Ffull),4) > 10;         % [nx ny nz]
 f0 = f0(mask);   % [N 1]
+f0 = f0 + 0*randn(size(f0));
 W = diag_sp(ones(N,1));
-shat = -(W*H*A)\(W*f0);    % [9 1]. NB! May need to be rounded before applying settings on scanner.
+shat = -(W*H*A)\(W*f0)    % [9 1]. NB! May need to be rounded before applying settings on scanner.
 
 f = f0 + H*A*shat;  % predicted fieldmap after applying shims
 
@@ -59,7 +61,7 @@ im(f0);
 title(sprintf('before shimming'));
 h = colorbar; h.TickLabels{end} = 'Hz'; % h.Label.String = 'B0 field (Hz)';
 subplot(122)
-im(f,[-5 5]); 
+im(f,10*[-1 1]); 
 title(sprintf('Residual (shim term %d)', shimNum));
 h = colorbar; h.TickLabels{end} = 'Hz';
 
