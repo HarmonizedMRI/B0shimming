@@ -21,7 +21,7 @@ if nargin < 4
 	l = 4;
 end
 if rem(l, 1) | l < 0
-	error('Order must be non-negative integer');
+	error('Degree must be non-negative integer');
 end
 
 % Spherical coordinate system as defined in https://en.wikipedia.org/wiki/Spherical_harmonics
