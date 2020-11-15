@@ -45,4 +45,7 @@ for l1 = 0:l
  	end
 end
 
+%x = X(:); y = Y(:); z = Z(:);
+%H = [ones(length(x),1) x y z z.^2-1/2*(x.^2+y.^2) x.*y z.*x x.^2-y.^2 z.*y]; % Cartesian expressions for l=2
+
 
