@@ -1,14 +1,14 @@
-function H = getSHbasis(X,Y,Z,ord)
-% function H = getSHbasis(X,Y,Z,ord=2)
+function H = getSHbasis(X,Y,Z,l)
+% function H = getSHbasis(X,Y,Z,l)
 %
-% Get spherical harmonic basis of order 'ord'
+% Evaluate spherical harmonic basis up to degree 'l'
 %
 % Inputs:
-%  X/Y/Z    [N 1]    x/y/z coordinates at which to evaluate (discretize) the basis (cm)
-%  ord      int      SH order (0, 1, or 2). Default: 2.
+%  X/Y/Z    [N 1]     x/y/z coordinates at which to evaluate (discretize) the basis (cm)
+%  l        int       SH degree. Default: 4.
 %
 % Output:
-%   H       [N 9]    SH basis, including dc (B0 offset) term
+%   H       [N ...]    SH basis, including dc (B0 offset) term
 
 if ~isvector(X) | ~isvector(Y) | ~isvector(Z)
 	error('X, Y, Z must be vectors');
@@ -18,20 +18,35 @@ if numel(Y) ~= N | numel(Z) ~= N
 	error('X, Y, Z must be the same length');
 end
 if nargin < 4
-	ord = 2;
+	l = 4;
 end
-if rem(ord, 1) | ord < 0
+if rem(l, 1) | l < 0
 	error('Order must be non-negative integer');
 end
 
-switch ord
-	case 0
-		H = [ones(N,1)];
-	case 1
-		H = [ones(N,1) X Y Z ];
-	case 2
-		H = [ones(N,1) X Y Z Z.^2 X.*Y Z.*X X.^2-Y.^2 Z.*Y];
-	otherwise
-		error(('Order > 2 not supported'));
+% Spherical coordinate system as defined in https://en.wikipedia.org/wiki/Spherical_harmonics
+% and Romeo and Hoult MRM 1984
+[ph,el,r] = cart2sph(X,Y,Z);  % ph = azimuth, el = elevation, r = radius
+th = pi/2 - el; % polar angle
+
+% construct basis matrix H
+H = zeros(size(X,1), sum(2*(0:l)+1));
+ic = 1;
+for l1 = 0:l
+	lp = legendre(l1, cos(th));   % [l1+1 N]
+	for m = 0:l1
+		f = r.^l1 .* exp(1i*m*ph) .* lp(m+1,:)';
+		H(:,ic) = real(f);
+		ic = ic+1;
+		if m > 0
+			H(:,ic) = imag(f);
+			ic = ic+1;
+ 		end
+ 	end
 end
+
+% Equivalent Cartesian expressions for l=2
+%x = X(:); y = Y(:); z = Z(:);
+%H = [ones(length(x),1) x y z z.^2-1/2*(x.^2+y.^2) x.*y z.*x x.^2-y.^2 z.*y]; 
+
 
