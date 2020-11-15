@@ -15,17 +15,10 @@ To do this we define the system shim model
 f(s) = H*A*s + f0         
 f:  [N 1]              fieldmap (Hz), where N = number of voxels
 f0: [N 1]              observed 'baseline' field map, e.g., after setting all shim currents to zero
-H:  [N nShim]          spherical harmonic basis (see getSHbasis.m)
-A:  [nShim nShim]      calibration matrix
+H:  [N nb]             spherical harmonic basis (see getSHbasis.m) evaluated at the N voxel locations
+A:  [n nShim]          calibration matrix, where nb depends on SH degree
 s:  [nShim 1]          change in shim current amplitudes from baseline (hardware units)
 ```
-For 2nd order shim systems (e.g., GE MR750), we have
-```
-nShim = 9
-H = [1 x y z z2 xy zx x2-y2 zy]
-```
-where each term in `H` is an `[N 1]` vector, evaluated at the same `N` spatial locations as `f`. 
-The first column corresponds to the DC (spatially invariant) offset.
 
 The goal here is to set the shim current vector `s` to make `f(s)` as homogeneous
 as possible -- or more generally, to choose `s` according to some desired property of `f`
@@ -43,7 +36,7 @@ We then obtain `A` as follows:
 F = HAS
 F: [N nShim]                          fieldmaps (Hz) obtained by turning on/off individual shim coils
 S: [nShim nShim]                      applied shim currents (pairwise differences) used to obtain F
-A = inv(H'*H)*H'*F*inv(S);            [nShim nShim] 
+A = inv(H'*H)*H'*F*inv(S);            [nb nShim] 
 ```
 
 Example:
@@ -59,13 +52,8 @@ Example:
 >> A = getcalmatrix(F, H, S);
 ```
 
-As an example, here is the calibration matrix obtained on a GE 3T scanner:
-<img src="doc/A.png" alt="Example calibration matrix" width="400"/>
-
 
 ## How to perform 2nd order shimming
-
-See also ./examples/demoWLS.m.
 
 1. Acquire a baseline fieldmap `f0`. This does not need to use the same matrix size or FOV as the calibration scan.
 2. Define a binary `mask` (control points), and reshape `f0` to `[N 1]` where `N = numel(X(mask))`
@@ -88,8 +76,4 @@ where `W` is a diagonal spatial weighting matrix.
 
 ## Demo the code
 
-```
->> cd examples;
->> demoWLS;
-```
-
+TODO
