@@ -1,5 +1,6 @@
 # An open toolbox for B0 shimming 
 
+WIP
 
 ##  Goal
 
