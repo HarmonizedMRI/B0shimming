@@ -28,11 +28,15 @@ Set Matlab paths:
 ```
 
 
-## GET THE CODE
+## GET THE CODE AND CREATE SCAN FILES
 
 ```
 $ cd ~/github/
-$ git clone git@github.com:harmonizedMRI/SMS-EPI.git
+$ git clone git@github.com:HarmonizedMRI/B0shimming.git
+```
+
+```
+>> makescanfiles;
 ```
 
 
