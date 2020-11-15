@@ -74,7 +74,7 @@ if true
 
 	(x,y,z) = (X[mask], Y[mask], Z[mask])
 
-	H = [ones(length(x)) x y z z.^2 x.*y z.*x x.^2-y.^2 z.*y]
+	H = [ones(length(x)) x y z z.^2-1/2*(x.^2+y.^2) x.*y z.*x x.^2-y.^2 z.*y]
 	HA = H*A
 
 	s0 = zeros(9)

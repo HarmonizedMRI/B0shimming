@@ -13,7 +13,7 @@
 addpath ..   % path to +shim package
 
 % spherical harmonic basis degree
-l = 4;
+l = 2;
 
 %% Calculate calibration matrix A
 % This only needs to be done once per scanner
@@ -58,13 +58,14 @@ mask = logical(mask);
 H = shim.getSHbasis(X(mask),Y(mask),Z(mask),l);   % [N 2l+1]
 s(1:4) = 10*randn([1 4]);
 s(5:9) = 20*randn([1 5]);
+s = [0 0 0 0 20 300 0 0 0];
 R = sqrt(abs(X(mask).^2+Y(mask).^1.5)); 
-f0 = 10*H*A*s(:)./(10+R.^1.5);
-f0 = f0 + randn(size(f0))*max(f0(:))/10;
+f0 = 10*H*A*s(:); %./(10+R.^1.5);
+f0 = f0 + randn(size(f0))*max(f0(:))/50;
 f0 = embed(f0, mask);
 
 %% Save to file
-save exampledata A f0 X Y Z mask
+save exampledata A f0 X Y Z mask l
 
 
 
