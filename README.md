@@ -17,7 +17,7 @@ f(s) = H*A*s + f0
 f:  [N 1]              fieldmap (Hz), where N = number of voxels
 f0: [N 1]              observed 'baseline' field map, e.g., after setting all shim currents to zero
 H:  [N nb]             spherical harmonic basis (see getSHbasis.m) evaluated at the N voxel locations
-A:  [n nShim]          calibration matrix, where nb depends on SH degree
+A:  [nb nShim]          calibration matrix, where nb depends on SH degree
 s:  [nShim 1]          change in shim current amplitudes from baseline (hardware units)
 ```
 
