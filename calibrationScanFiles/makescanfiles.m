@@ -224,7 +224,7 @@ fprintf('\n');
 % parsemr('B0scan.seq');
 
 % Write TOPPE files to a tar file
-system('tar czf B0scan.tgz modules.txt scanloop.txt tipdown.mod readout.mod');
+system('tar czf B0scan.tgz toppe0.meta modules.txt scanloop.txt tipdown.mod readout.mod');
 
 % Display (part of) sequences
 fprintf('Displaying sequences...');
