@@ -22,6 +22,9 @@ function getSHbasis(
 )
 
 	# convert to spherical coordinates
+	a = cart2sph(x, y, z)
+	r = a[1]
+
 	N = length(x)
 	p = Vector{Vector{Float64}}(Float64, N)
 	for ii = 1:N
@@ -29,7 +32,6 @@ function getSHbasis(
 	end
 
 	a = map((r,g) -> signalloss(r,g,Δ,A,Δs,te), r, g)
-	a = map( (x,y,z) -> cart2sph([x,y,z])
 	
 	%r = SMatrix{N,3}([x y z])
 
@@ -40,9 +42,10 @@ function getSHbasis(
 		r = a.r          # radius
 		ϕ = a.θ          # azimuth
 		θ = π/2 - a.ϕ    # polar angle 
-		[r ϕ θ]
+		[r, ϕ, θ]
 	end
 
+	sc = map( (x,y,z) -> cart2sph([x,y,z])
 		
 		
 	end
