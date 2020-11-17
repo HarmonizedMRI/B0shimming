@@ -1,6 +1,6 @@
 
-using StaticArrays: SVector
 using CoordinateTransformations: SphericalFromCartesian
+using Jacobi: legendre
 
 """
 	function getSHbasis(x,y,z,l)
@@ -18,65 +18,33 @@ function getSHbasis(
 	x::Vector{<:Real},
 	y::Vector{<:Real},
 	z::Vector{<:Real},
-	l::Int = 4
+	L::Int = 4
 )
 
-	# convert to spherical coordinates
-	a = cart2sph(x, y, z)
-	r = a[1]
-
-	N = length(x)
-	p = Vector{Vector{Float64}}(Float64, N)
-	for ii = 1:N
-		p[ii] = [x(ii], y(jj), z(jj)]
-	end
-
-	a = map((r,g) -> signalloss(r,g,Δ,A,Δs,te), r, g)
-	
-	%r = SMatrix{N,3}([x y z])
-
+	# Function evaluates spherical harmonic of (degree,order) = (l,m) at position (x,y,z)
 	c2s = SphericalFromCartesian()
-
-	function cart2sph(x,y,z)
-		a = c2s(p);      # a = (radius, azimuth, elevation)
-		r = a.r          # radius
-		ϕ = a.θ          # azimuth
-		θ = π/2 - a.ϕ    # polar angle 
-		[r, ϕ, θ]
+	function sh(x,y,z)              # l,m defined outside function
+		a = c2s([x,y,z]);
+		r = a.r                      # radius
+		ϕ = a.θ                      # azimuth
+		θ = π/2-a.ϕ                  # polar angle
+		r^l * exp(im*m*ϕ) * legendre(cos(θ),l)
 	end
-
-	sc = map( (x,y,z) -> cart2sph([x,y,z])
-		
-		
-	end
-	f(x,y,z)
-
-	# Spherical coordinate system as defined in https://en.wikipedia.org/wiki/Spherical_harmonics
-	# and Romeo and Hoult MRM 1984
 
 	# construct basis matrix H
-	H = zeros(size(x,1), sum(2*(0:l)+1));
+	H = zeros(size(x,1), sum(2*(0:L)+1));
 	ic = 1;
-	for l1 = 0:l
-		lp = legendre(l1, cos(θ));   % [l1+1 N]
-		for m = 0:l1
-			f = r.^l1 .* exp(1i*m*ϕ) .* lp(m+1,:)';
-			H(:,ic) = real(f);
-			ic = ic+1;
-			if m > 0
-				H(:,ic) = imag(f);
-				ic = ic+1;
- 			end
+	for l = 0:L
+		for m = -l:l
+			@show f = map(sh, x, y, z)
+			#H(:,ic) = real(f);
+			#ic = ic+1;
+			#if m > 0
+			#	H(:,ic) = imag(f);
+			#	ic = ic+1;
+ 			#end
  		end
 	end
 
 end
 
-# test function
-function getSHbasis(str::String)
-	x = [1,0,0]
-	y = [0,1.,0]
-	z = [0,0,1.]
-)
-
-end

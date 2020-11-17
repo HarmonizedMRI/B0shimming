@@ -7,6 +7,14 @@ end
 @show map(f, [1 2], [2 3], [3 4])
 @show a = map(f, [1, 2], [2, 3], [3, 4])
 
+	function sh(x,y,z,l,m)
+		a = c2s([x,y,z]);
+		r = a.r                      # radius
+		ϕ = a.θ                      # azimuth
+		θ = π/2-a.ϕ                  # polar angle
+		r^l * exp(im*m*ϕ) * legendre(cos(θ),l)
+	end
+
 using CoordinateTransformations: SphericalFromCartesian
 
 	c2s = SphericalFromCartesian()

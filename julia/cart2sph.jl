@@ -6,6 +6,10 @@ using CoordinateTransformations: SphericalFromCartesian
 Concvert vectors x/y/z of cartesian coordinates to
 vectors r/ϕ/θ of spherical coordinates (radius, azimuth, polar angle)
 
+Spherical coordinate system as defined in 
+https://en.wikipedia.org/wiki/Spherical_harmonics
+and Romeo and Hoult MRM 1984
+
 
 """
 function cart2sph(
