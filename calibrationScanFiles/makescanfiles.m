@@ -66,7 +66,7 @@ fclose(fid);
 ex.nCycleSpoil = nCycleSpoil * ex.thick/(fov(3)/nz);
 [ex.rf, ex.g] = toppe.utils.rf.makeslr(ex.flip, ex.thick, ex.tbw, ex.dur, ex.nCycleSpoil, ...
 	'type', 'st', ...        % 'st' = small-tip. 'ex' = 90 degree design
-	'ftype', 'min', ...      % minimum-phase SLR design is well suited for 3D slab excitation (can tolerate mild quadratic phase along z)
+	'ftype', 'ls', ...      % 'min' minimum-phase SLR design is well suited for 3D slab excitation (can tolerate mild quadratic phase along z)
 	'system', limits.design, ...
 	'writeModFile', false);
 ex.rf = toppe.utils.makeGElength(ex.rf);
