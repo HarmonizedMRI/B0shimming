@@ -27,17 +27,29 @@ function getSHbasis(
 	for ii = 1:N
 		p[ii] = [x(ii], y(jj), z(jj)]
 	end
+
+	a = map((r,g) -> signalloss(r,g,Δ,A,Δs,te), r, g)
+	a = map( (x,y,z) -> cart2sph([x,y,z])
 	
 	%r = SMatrix{N,3}([x y z])
 
-	cart2sph = SphericalFromCartesian()
+	c2s = SphericalFromCartesian()
+
+	function cart2sph(x,y,z)
+		a = c2s(p);      # a = (radius, azimuth, elevation)
+		r = a.r          # radius
+		ϕ = a.θ          # azimuth
+		θ = π/2 - a.ϕ    # polar angle 
+		[r ϕ θ]
+	end
+
+		
+		
+	end
+	f(x,y,z)
 
 	# Spherical coordinate system as defined in https://en.wikipedia.org/wiki/Spherical_harmonics
 	# and Romeo and Hoult MRM 1984
-	a = cart2sph.(p);     # a = (radius, azimuth, elevation)
-	r = a.r          # radius
-	θ = π/2 - a.ϕ    # polar angle 
-	ϕ = a.θ          # azimuth
 
 	# construct basis matrix H
 	H = zeros(size(x,1), sum(2*(0:l)+1));
@@ -57,11 +69,11 @@ function getSHbasis(
 
 end
 
-function getSHbasis(
-	x::Real,
-	y::Real,
-	z::Real,
-	l::Int = 4
+# test function
+function getSHbasis(str::String)
+	x = [1,0,0]
+	y = [0,1.,0]
+	z = [0,0,1.]
 )
 
 end
