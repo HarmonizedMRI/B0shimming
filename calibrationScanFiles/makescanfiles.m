@@ -230,7 +230,7 @@ system('tar czf B0scan.tgz modules.txt scanloop.txt tipdown.mod readout.mod');
 fprintf('Displaying sequences...');
 nModsPerTR = 2;    % number of TOPPE modules per TR
 nTR = ny/2;        % number of TRs to display
-nStart = nModsPerTR * floor(nDisdaq+ny/2-nTR/2);
+nStart = nModsPerTR * floor(ny*length(deltaTE)+ny/2-nTR/2);
 toppe.plotseq(nStart, nStart + nTR*nModsPerTR);
 tStart = nStart/nModsPerTR*TR*1e-3;    % sec
 tStop = tStart + nTR*TR*1e-3;          % sec
