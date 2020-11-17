@@ -63,6 +63,8 @@ fprintf(fid, modFileText);
 fclose(fid);
 
 % Design rf waveform and write to .mod file
+% To simulate the slice profile, do, e.g.:
+% >> m = toppe.utils.rf.slicesim([0 0 1], ex.rf, ex.g, 4e-3, linspace(-ex.thick,ex.thick,200), 1000, 100);
 ex.nCycleSpoil = nCycleSpoil * ex.thick/(fov(3)/nz);
 [ex.rf, ex.g] = toppe.utils.rf.makeslr(ex.flip, ex.thick, ex.tbw, ex.dur, ex.nCycleSpoil, ...
 	'type', 'st', ...        % 'st' = small-tip. 'ex' = 90 degree design
