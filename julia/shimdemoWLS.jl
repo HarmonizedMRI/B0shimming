@@ -1,5 +1,5 @@
 using JLD2
-using MIRT: embed!, jim
+using MIRT: embed!, jim, ndgrid
 using Random
 using LinearAlgebra
 
@@ -8,6 +8,9 @@ include("getcalmatrix.jl")
 
 # load calibration data
 @load "CalibrationData.jld2" F S fov meta 
+
+# reduce matrix size to save memory
+F = F[1:3:end,1:3:end,1:3:end,:]
 
 (nx,ny,nz,nShim) = size(F)
 
@@ -36,27 +39,23 @@ H = getSHbasis(x[mask], y[mask], z[mask], l)   # size is [N sum(2*(0:l) .+ 1)]
 # Get calibration matrix A
 A = getcalmatrix(Fm, H, S);
 
+# Now that A it determined we can use it to optimize shims for a given acquired 'baseline' fieldmap.
 # Synthesize an example B0 map and optimize shims (minimized RMS residual) for that fieldmap.
 shimNum = 5;
-f0 = F[:,:,:,4] + 0.5*F[:,:,:,5];
-mask = abs.(f0) .> 0 
+f0 = F[:,:,:,4] + 0.5*F[:,:,:,5];   # ok this is cheating
+mask = abs.(f0) .> 0                # note the dots
 fm = f0[mask]
-fm = fm + randn(size(fm))/20
-W = Diagonal(ones(N))
-shat = -(W*H*A)\(W*f0)    % [9 1]. NB! May need to be rounded before applying settings on scanner.
+fm = fm + randn(size(fm))/20        # add some noise
+W = collect(Diagonal(ones(N)))      # 'collect' converts to Array
+shat = -(W*H*A)\(W*fm)    # Vector of length 9. NB! May need to be rounded before applying settings on scanner.
 
-f = f0 + H*A*shat;  % predicted fieldmap after applying shims
+fpm = fm + H*A*shat;      # predicted fieldmap after applying shims
 
-f0 = embed(f0, mask);
-f = embed(f, mask);
+# reshape and display field map before and after applying shims
+fp = zeros(size(f0))
+embed!(fp, fpm, mask)   
+jim(cat(f0,fp;dims=1))
+p = jim(fp; clim=(-10,10))
+display(p)
 
-% compare baseline and predicted fieldmaps
-subplot(121)
-im(f0); 
-%title(sprintf('fieldmaps: original (left in each panel),\nand after 2nd order shimming (right)'));
-title(sprintf('before shimming'));
-h = colorbar; h.TickLabels{end} = 'Hz'; % h.Label.String = 'B0 field (Hz)';
-subplot(122)
-im(f,10*[-1 1]); 
-title(sprintf('Residual (shim term %d)', shimNum));
-h = colorbar; h.TickLabels{end} = 'Hz';
+
