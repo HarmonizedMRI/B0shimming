@@ -2,15 +2,13 @@ using JLD2
 using MIRT: embed!, jim, ndgrid
 using Random
 using LinearAlgebra
+using SparseArrays
 
 include("getSHbasis.jl")
 include("getcalmatrix.jl")
 
 # load calibration data
 @load "CalibrationData.jld2" F S fov meta 
-
-# reduce matrix size to save memory
-F = F[1:3:end,1:3:end,1:3:end,:]
 
 (nx,ny,nz,nShim) = size(F)
 
@@ -33,28 +31,29 @@ for ii = 1:nShim
 end
 
 # Get spherical harmonic basis of degree l
-l = 2     
+l = 4     
 H = getSHbasis(x[mask], y[mask], z[mask], l)   # size is [N sum(2*(0:l) .+ 1)]
 
 # Get calibration matrix A
 A = getcalmatrix(Fm, H, S);
 
 # Now that A it determined we can use it to optimize shims for a given acquired 'baseline' fieldmap.
-# Synthesize an example B0 map and optimize shims (minimized RMS residual) for that fieldmap.
-shimNum = 5;
-f0 = F[:,:,:,4] + 0.5*F[:,:,:,5];   # ok this is cheating
+# Example: Synthesize an example fieldmap 'f0' and optimize shims (minimize RMS residual) for that fieldmap.
+f0 = F[:,:,:,2] + sqrt.(abs.(F[:,:,:,5]));  
+f0 = sum(F[:,:,:,[2,5,8]], dims=4)[:,:,:,1]
 mask = abs.(f0) .> 0                # note the dots
 fm = f0[mask]
-fm = fm + randn(size(fm))/20        # add some noise
-W = collect(Diagonal(ones(N)))      # 'collect' converts to Array
+N = sum(mask[:])
+fm = fm + 0*randn(size(fm))/20        # add some noise
+W = sparse(collect(1:N), collect(1:N), ones(N))
 shat = -(W*H*A)\(W*fm)    # Vector of length 9. NB! May need to be rounded before applying settings on scanner.
 
 fpm = fm + H*A*shat;      # predicted fieldmap after applying shims
 
-# reshape and display field map before and after applying shims
+# display predicted fieldmap
 fp = zeros(size(f0))
 embed!(fp, fpm, mask)   
-jim(cat(f0,fp;dims=1))
+p = jim(cat(f0,fp;dims=1))    # compare before and after shimming
 p = jim(fp; clim=(-10,10))
 display(p)
 
