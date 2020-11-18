@@ -15,10 +15,9 @@ function A = getcalmatrix(F, H, S)
 % Output:
 %   A    [9 9]      calibration matrix (includes DC term), expressed in hardware units
 
-N = size(F,1);
-
 % Add DC offset term (column) to F and S
 % We do it here so the user doesn't have to remember to do it.
+N = size(F,1);
 F = [ones(N,1) F]; 
 Sin = S;
 S = zeros(9);
