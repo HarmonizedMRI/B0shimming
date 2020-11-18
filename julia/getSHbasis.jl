@@ -1,7 +1,7 @@
 
 using CoordinateTransformations: SphericalFromCartesian
 using SphericalHarmonics: computeYlm
-using MIRT: jim
+using MIRT: jim, ndgrid
 
 """
 	function getSHbasis(x,y,z,l)
@@ -35,12 +35,19 @@ function getSHbasis(
 	H = zeros(size(x,1), sum(2*(0:L) .+ 1));
 	ic = 1;
 	for l = 0:L
-		for m = -l:l
+		for m = 0:l
 			f = map((x,y,z) -> sh(x,y,z,l,m), x, y, z)
 			H[:,ic] = real(f);
 			ic = ic+1;
+			if m > 0
+				H[:,ic] = imag(f);
+				ic = ic+1;
+			end
  		end
 	end
+
+	# normalize DC column
+	H[:,1] .= 1.
 
 	H
 end
@@ -70,5 +77,9 @@ function getSHbasis(str::String)
 		Hc[:,:,:,ii] = reshape(H[:,ii], nx, ny, nz)
 	end
 	display(jim(Hc[:,:,:,2]))
-	Hc
+
+	# save to .mat file for comparison with getSHbasis.m
+	# matwrite("tmp.mat", Dict([("Hc", Hc), ("x", x), ("y", y), ("z", z)]))
+
+	Hc    # return value
 end
