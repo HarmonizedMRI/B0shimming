@@ -6,7 +6,7 @@ using MIRT: jim
 """
 	function getSHbasis(x,y,z,l)
 
-Evaluate spherical harmonic basis functions up to degree 'l' at locations [x y z]
+Get spherical harmonic basis up to degree 'l' evaluated at [x y z]
 
 Inputs:
   x/y/z    length-N vector     x/y/z coordinates at which to evaluate (discretize) the basis (cm)
