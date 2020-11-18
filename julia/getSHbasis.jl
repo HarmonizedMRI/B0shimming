@@ -1,6 +1,7 @@
 
 using CoordinateTransformations: SphericalFromCartesian
 using SphericalHarmonics: computeYlm
+using MIRT: jim
 
 """
 	function getSHbasis(x,y,z,l)
@@ -12,7 +13,7 @@ Inputs:
   l        int                 SH degree. Default: 2.
 
 Output:
-  H       [N ...]    SH basis, including dc (B0 offset) term
+  H       [N ...]    SH basis
 """
 function getSHbasis(
 	x::Vector{<:Real},
@@ -21,14 +22,12 @@ function getSHbasis(
 	L::Int = 2
 )
 
+	# Function to evaluate spherical harmonic of (degree,order) = (l,m) at position (x,y,z)
 	c2s = SphericalFromCartesian()
 	function sh(x,y,z,l,m)
-		# Evaluate spherical harmonic of (degree,order) = (l,m) at position (x,y,z)
 		a = c2s([x,y,z]);
 		(r,ϕ,θ) = (a.r, a.θ, π/2-a.ϕ)    # (radius, azimuth, colatitude)
 		ylm = computeYlm(θ, ϕ, lmax = l)
-		# plm = computePlmcostheta(θ,lmax = l)
-		#r^l * exp(-im*m*ϕ) * plm[(l,m)]
 		r^l * ylm[(l,m)]
 	end
 
@@ -44,7 +43,6 @@ function getSHbasis(
 	end
 
 	H
-
 end
 
 function meshgrid(x, y, z)
@@ -56,7 +54,21 @@ end
 
 # test function
 function getSHbasis(str::String)
-	(x, y, z) = meshgrid(
-	x = [(i-nx/2)/(nx/2) for i = 1:nx, j = 1:ny, z = 1:nz]
 
+	# define spatial locations
+	r = range(-10,10,length=40)
+	(x, y, z) = ndgrid(r, r, range(-10,10,length=20))
+
+	# get spherical harmonic basis
+	H = getSHbasis(x[:], y[:], z[:], 2)
+
+	# reshape so each basis vector can be view with jim
+	nb = size(H,2)
+	(nx, ny, nz) = size(x)
+	Hc = zeros(nx, ny, nz, nb)
+	for ii = 1:nb
+		Hc[:,:,:,ii] = reshape(H[:,ii], nx, ny, nz)
+	end
+	display(jim(Hc[:,:,:,2]))
+	Hc
 end
