@@ -31,16 +31,16 @@ for ii = 1:nShim
 end
 
 # Get spherical harmonic basis of degree l
-l = 4     
+l = 2     
 H = getSHbasis(x[mask], y[mask], z[mask], l)   # size is [N sum(2*(0:l) .+ 1)]
 
 # Get calibration matrix A
-A = getcalmatrix(Fm, H, S);
+A = getcalmatrix(Fm, H, S)
 
 # Now that A it determined we can use it to optimize shims for a given acquired 'baseline' fieldmap.
 # Example: Synthesize an example fieldmap 'f0' and optimize shims (minimize RMS residual) for that fieldmap.
 f0 = F[:,:,:,2] + sqrt.(abs.(F[:,:,:,5]));  
-f0 = sum(F[:,:,:,[2,5,8]], dims=4)[:,:,:,1]
+f0 = sum(F[:,:,:,[2,3,8]], dims=4)[:,:,:,1]
 mask = abs.(f0) .> 0                # note the dots
 fm = f0[mask]
 N = sum(mask[:])
@@ -54,7 +54,7 @@ fpm = fm + H*A*shat;      # predicted fieldmap after applying shims
 fp = zeros(size(f0))
 embed!(fp, fpm, mask)   
 p = jim(cat(f0,fp;dims=1))    # compare before and after shimming
-p = jim(fp; clim=(-10,10))
+p = jim(fp; clim=(-20,20))
 display(p)
 
 
