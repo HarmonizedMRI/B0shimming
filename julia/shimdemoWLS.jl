@@ -22,6 +22,7 @@ include("ls_adam.jl")
 # create mask
 fm = sum(abs.(F), dims=4)[:,:,:,1]
 mask = fm .> 200    # note the '.' (broadcasting)
+mask[1:2:end, 1:2:end, 1:2:end] .= false
 N = sum(mask[:])
 
 # mask and reshape to [N 8] 
@@ -32,7 +33,7 @@ for ii = 1:nShim
 end
 
 # Get spherical harmonic basis of degree l
-l = 2     
+l = 4
 H = getSHbasis(x[mask], y[mask], z[mask], l)   # size is [N sum(2*(0:l) .+ 1)]
 
 # Get calibration matrix A
@@ -43,22 +44,24 @@ A = getcalmatrix(Fm, H, S)
 f0 = sum(F[:,:,:,[2,3,8]], dims=4)[:,:,:,1]
 f0 = F[:,:,:,2] + sqrt.(abs.(F[:,:,:,5]))
 mask = abs.(f0) .> 0                # note the dots
-fm = f0[mask]
+mask[1:2:end, 1:2:end, 1:2:end] .= false
+f0m = f0[mask]
 N = sum(mask[:])
-fm = fm + 0*randn(size(fm))/20        # add some noise
+f0m = f0m + 1*randn(size(f0m))/20        # add some noise
+H = getSHbasis(x[mask], y[mask], z[mask], l)  
 W = sparse(collect(1:N), collect(1:N), ones(N))
 W = Diagonal(ones(N,))
 
 # solve using \
-@time shat = -(W*H*A)\(W*fm)    # Vector of length 9. NB! May need to be rounded before applying settings on scanner.
+@time shat = -(W*H*A)\(W*f0m)    # Vector of length 9. NB! May need to be rounded before applying settings on scanner.
 
 # solve using Flux
 s0 = zeros(9)
-opt = ADAM(0.2)
+opt = ADAM(0.4)
 niter = 300
-@time (shat, out) = ls_adam(W*H*A, W*fm; s0=s0, opt=opt, niter=niter)
+#@time (shat, out) = ls_adam(W*H*A, W*f0m; s0=s0, opt=opt, niter=niter)
 
-fpm = fm + H*A*shat;      # predicted fieldmap after applying shims
+fpm = f0m + H*A*shat;      # predicted fieldmap after applying shims
 
 # display predicted fieldmap
 fp = zeros(size(f0))
