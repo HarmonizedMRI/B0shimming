@@ -41,13 +41,13 @@ A = getcalmatrix(Fm, H, S)
 
 # Now that A is determined we can use it to optimize shims for a given acquired fieldmap.
 # Example: Synthesize an example fieldmap 'f0' and optimize shims (minimize RMS residual) for that fieldmap.
-f0 = sum(F[:,:,:,[2,3,8]], dims=4)[:,:,:,1]
-f0 = F[:,:,:,2] + sqrt.(abs.(F[:,:,:,5]))
+f0 = sum(F[:,:,:,[2,6,7,8]], dims=4)[:,:,:,1]
+f0 = F[:,:,:,2] + sqrt.(abs.(F[:,:,:,5])) + 3*F[:,:,:,6]
 mask = abs.(f0) .> 0                # note the dots
 mask[1:2:end, 1:2:end, 1:2:end] .= false
 f0m = f0[mask]
 N = sum(mask[:])
-f0m = f0m + 1*randn(size(f0m))/20        # add some noise
+f0m = f0m + 2*randn(size(f0m))        # add some noise
 H = getSHbasis(x[mask], y[mask], z[mask], l)  
 W = sparse(collect(1:N), collect(1:N), ones(N))
 W = Diagonal(ones(N,))
@@ -56,10 +56,10 @@ W = Diagonal(ones(N,))
 @time shat = -(W*H*A)\(W*f0m)    # Vector of length 9. NB! May need to be rounded before applying settings on scanner.
 
 # solve using Flux
-s0 = zeros(9)
+# initialize with LS solution
 opt = ADAM(0.4)
-niter = 300
-#@time (shat, out) = ls_adam(W*H*A, W*f0m; s0=s0, opt=opt, niter=niter)
+niter = 100
+@time (shat, out) = ls_adam(W*H*A, W*f0m; s0=shat, opt=opt, niter=niter)
 
 fpm = f0m + H*A*shat;      # predicted fieldmap after applying shims
 
