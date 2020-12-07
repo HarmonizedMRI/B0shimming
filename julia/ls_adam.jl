@@ -8,7 +8,7 @@ using Plots; default(markerstrokecolor=:auto)
 function ls_adam(
 	HA::Array{<:Real,2},
 	f0::Vector{<:Real}; 
-	s0 = zeros(size(A,2)),
+	s0 = zeros(size(HA,2)),
 	opt = ADAM(), # default optimizer
 	batchsize::Int = 1,
 	niter::Int = 100,
