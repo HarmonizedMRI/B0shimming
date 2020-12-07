@@ -9,6 +9,7 @@ function getSHbasis(
 	L::Int64
 	)
 
+	# function evaluates spherical harmonic at one spatial location (x,y,z)
 	c2s = SphericalFromCartesian()
 	function sh(x, y, z, l, m)
 		a = c2s([x,y,z])

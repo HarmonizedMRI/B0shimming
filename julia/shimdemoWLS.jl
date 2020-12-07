@@ -20,7 +20,7 @@ include("getcalmatrix.jl")
 
 # create mask
 fm = sum(abs.(F), dims=4)[:,:,:,1]
-mask = fm .> 200    # as always in Julia, note the '.' (broadcasting)
+mask = fm .> 200    # note the '.' (broadcasting)
 N = sum(mask[:])
 
 # mask and reshape to [N 8] 
@@ -37,15 +37,16 @@ H = getSHbasis(x[mask], y[mask], z[mask], l)   # size is [N sum(2*(0:l) .+ 1)]
 # Get calibration matrix A
 A = getcalmatrix(Fm, H, S)
 
-# Now that A it determined we can use it to optimize shims for a given acquired 'baseline' fieldmap.
+# Now that A is determined we can use it to optimize shims for a given acquired fieldmap.
 # Example: Synthesize an example fieldmap 'f0' and optimize shims (minimize RMS residual) for that fieldmap.
-f0 = F[:,:,:,2] + sqrt.(abs.(F[:,:,:,5]));  
 f0 = sum(F[:,:,:,[2,3,8]], dims=4)[:,:,:,1]
+f0 = F[:,:,:,2] + sqrt.(abs.(F[:,:,:,5]))
 mask = abs.(f0) .> 0                # note the dots
 fm = f0[mask]
 N = sum(mask[:])
 fm = fm + 0*randn(size(fm))/20        # add some noise
 W = sparse(collect(1:N), collect(1:N), ones(N))
+W = Diagonal(ones(N,))
 shat = -(W*H*A)\(W*fm)    # Vector of length 9. NB! May need to be rounded before applying settings on scanner.
 
 fpm = fm + H*A*shat;      # predicted fieldmap after applying shims
