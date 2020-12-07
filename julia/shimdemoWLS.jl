@@ -6,6 +6,7 @@ using SparseArrays
 
 include("getSHbasis.jl")
 include("getcalmatrix.jl")
+include("ls_adam.jl")
 
 # load calibration data
 @load "CalibrationData.jld2" F S fov meta 
@@ -47,7 +48,15 @@ N = sum(mask[:])
 fm = fm + 0*randn(size(fm))/20        # add some noise
 W = sparse(collect(1:N), collect(1:N), ones(N))
 W = Diagonal(ones(N,))
-shat = -(W*H*A)\(W*fm)    # Vector of length 9. NB! May need to be rounded before applying settings on scanner.
+
+# solve using \
+@time shat = -(W*H*A)\(W*fm)    # Vector of length 9. NB! May need to be rounded before applying settings on scanner.
+
+# solve using Flux
+s0 = zeros(9)
+opt = ADAM(0.2)
+niter = 300
+@time (shat, out) = ls_adam(W*H*A, W*fm; s0=s0, opt=opt, niter=niter)
 
 fpm = fm + H*A*shat;      # predicted fieldmap after applying shims
 
