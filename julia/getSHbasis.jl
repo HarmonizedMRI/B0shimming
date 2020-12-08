@@ -13,6 +13,9 @@ function getSHbasis(
 	L::Int64
 	)
 
+	# vector of position vectors (needed to calculate gradient)
+	r = map( (x,y,z) -> [x, y, z], x, y, z)
+
 	# function evaluates spherical harmonic at one spatial location r = [x, y, z]
 	c2s = SphericalFromCartesian()
 	function sh(r, l, m)
@@ -22,12 +25,12 @@ function getSHbasis(
 		rho^l * Y[(l,m)]
 	end
 
-	# vector of position vectors (needed to calculate gradient)
-	r = map( (x,y,z) -> [x, y, z], x, y, z)
-
 	# SH basis
 	H = zeros(size(x,1), sum(2*(0:L) .+ 1))
+	#dH = Vector{Vector}(undef, (size(x,1), sum(2*(0:L) .+ 1))
 	Hx = zeros(size(x,1), sum(2*(0:L) .+ 1))
+	Hy = zeros(size(x,1), sum(2*(0:L) .+ 1))
+	Hz = zeros(size(x,1), sum(2*(0:L) .+ 1))
 	ic = 1
 	for l = 0:L
 		for m = 0:l
@@ -40,10 +43,20 @@ function getSHbasis(
 			g = r -> ForwardDiff.gradient(sh1, r)
 			df = map( r -> g(r), r)
 			Hx[:,ic] = map( r -> r[1], df)
+			Hy[:,ic] = map( r -> r[2], df)
+			Hz[:,ic] = map( r -> r[2], df)
 
 			ic = ic+1
 			if m > 0
 				H[:,ic] = imag(f)
+
+				sh1 =  r -> imag(sh(r, l, m))
+				g = r -> ForwardDiff.gradient(sh1, r)
+				df = map( r -> g(r), r)
+				Hx[:,ic] = map( r -> r[1], df)
+				Hy[:,ic] = map( r -> r[2], df)
+				Hz[:,ic] = map( r -> r[2], df)
+
 				ic = ic+1
  			end
  		end
