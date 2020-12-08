@@ -44,8 +44,7 @@ A = getcalmatrix(Fm, H, S)
 # Example: Synthesize an example fieldmap 'f0' and optimize shims (minimize RMS residual) for that fieldmap.
 f0 = sum(F[:,:,:,[2,6,7,8]], dims=4)[:,:,:,1]
 f0 = F[:,:,:,2] + sqrt.(abs.(F[:,:,:,5])) + 3*F[:,:,:,6]
-f0 = 2*F[:,:,:,2] + 10*sqrt.(abs.(F[:,:,:,5])) + 1*F[:,:,:,6]
-f0 = F[:,:,:,2] + 2*F[:,:,:,6]
+f0 = 2*F[:,:,:,2] + 10*sqrt.(abs.(F[:,:,:,5])) + 0.3*F[:,:,:,6]
 mask = abs.(f0) .> 0                # note the dots
 mask[1:2:end, 1:2:end, 1:2:end] .= false
 f0m = f0[mask]

@@ -15,12 +15,16 @@ function shimoptim(HA::Array, f0::Vector, shimlims::Tuple; s0::Vector=zeros(size
 	function loss(s::Vector, grad::Vector, HA, f0)
    	1/2 * norm(HA*s + f0)^2
 	end
+	function constraint(s::Vector, grad::Vector, hos_sum_max)
+		sum(abs.(s[5:9])) - hos_sum_max
+	end
 
 	opt = Opt(:LN_COBYLA, length(s0))
 	opt.lower_bounds = vcat(-Inf, -lin_max*ones(3,), -hos_max*ones(5,))
 	opt.upper_bounds = vcat( Inf,  lin_max*ones(3,),  hos_max*ones(5,))
 	opt.xtol_rel = 1e-4
 	opt.min_objective = (x, grad) -> loss(x, grad, HA, f0)
+	inequality_constraint!(opt, (x, grad) -> constraint(x, grad, hos_sum_max))
 
 	(minf,minx,ret) = optimize(opt, s0)
 
