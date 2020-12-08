@@ -5,7 +5,7 @@
 1. Start Julia
 2. Run demo script
    ```
-   julia> include("shimdemoWLS.jl");
+   julia> include("shimdemo.jl");
 	julia> shat                          # optimized shim currents
    ```
 
