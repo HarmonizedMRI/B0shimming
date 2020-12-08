@@ -23,7 +23,7 @@ function ls_adam(
 		# norm(f0 + HA*s,6)^6
 		shos = ahos_max * atan.(s[5:9]) * 2/pi
 		sa = vcat(s[1:4], shos)
-		1/2 * norm(f0 + HA*sa)^2       
+		1/2 * norm(HA*sa + f0)^2       
 	end
 
 	θ = params(s) # magic here using objectid()

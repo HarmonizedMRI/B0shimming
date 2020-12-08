@@ -62,6 +62,13 @@ opt = ADAM(0.4)
 niter = 300
 ahos_max = 4000
 shat[5:9] .= tan.(pi/2 * shat[5:9]/ahos_max)   # initial guess
+
+function cost(HA, s, f0)
+	shos = ahos_max * atan.(s[5:9]) * 2/pi
+	sa = vcat(s[1:4], shos)
+	1/2 * norm(HA*sa + f0)^2       
+end
+
 #@time (shat, out) = ls_adam(W*H*A, W*f0m; s0=shat, opt=opt, niter=niter)
 @time (shat, out) = ls_adam(W*H*A, W*f0m; opt=opt, niter=niter)
 
