@@ -12,7 +12,7 @@ function shimoptim(HA::Array, f0::Vector, shimlims::Tuple; s0::Vector=zeros(size
 
 	(lin_max, hos_max, hos_sum_max) = shimlims
 
-	function myfunc(s::Vector, grad::Vector, HA, f0)
+	function loss(s::Vector, grad::Vector, HA, f0)
    	1/2 * norm(HA*s + f0)^2
 	end
 
@@ -20,15 +20,12 @@ function shimoptim(HA::Array, f0::Vector, shimlims::Tuple; s0::Vector=zeros(size
 	opt.lower_bounds = vcat(-Inf, -lin_max*ones(3,), -hos_max*ones(5,))
 	opt.upper_bounds = vcat( Inf,  lin_max*ones(3,),  hos_max*ones(5,))
 	opt.xtol_rel = 1e-4
-	opt.min_objective = (x, grad) -> myfunc(x, grad, HA, f0)
+	opt.min_objective = (x, grad) -> loss(x, grad, HA, f0)
 
 	(minf,minx,ret) = optimize(opt, s0)
 
-	println("$ret")
-
 	numevals = opt.numevals # the number of function evaluations
-	#println("got $minf at $minx after $numevals iterations (returned $ret)")
-	println("Got minf=$minf after $numevals iterations (returned $ret)")
+	println("got $minf at $minx after $numevals iterations (returned $ret)")
 
 	s = minx
 end
