@@ -55,7 +55,7 @@ W = sparse(collect(1:N), collect(1:N), ones(N))
 W = Diagonal(ones(N,))
 
 # Initial guess (unconstrained LS solution)
-@time shat = -(W*H*A)\(W*f0m)    # Vector of length 9. NB! May need to be rounded before applying settings on scanner.
+shat = -(W*H*A)\(W*f0m)    # Vector of length 9. NB! May need to be rounded before applying settings on scanner.
 
 # shim limits 
 shimlims = (100, 4000, 12000)
@@ -77,6 +77,6 @@ fp = zeros(size(f0))
 embed!(fp, fpm, mask)   
 p = jim(cat(f0,fp;dims=1))    # compare before and after shimming
 p = jim(fp; clim=(-40,40))
-display(p)
+#display(p)
 
 
