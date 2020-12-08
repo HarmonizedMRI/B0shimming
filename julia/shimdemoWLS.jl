@@ -43,7 +43,7 @@ A = getcalmatrix(Fm, H, S)
 # Example: Synthesize an example fieldmap 'f0' and optimize shims (minimize RMS residual) for that fieldmap.
 f0 = sum(F[:,:,:,[2,6,7,8]], dims=4)[:,:,:,1]
 f0 = F[:,:,:,2] + sqrt.(abs.(F[:,:,:,5])) + 3*F[:,:,:,6]
-f0 = F[:,:,:,2] + 4.5*F[:,:,:,6]
+f0 = F[:,:,:,2] + 3.2*F[:,:,:,6]
 mask = abs.(f0) .> 0                # note the dots
 mask[1:2:end, 1:2:end, 1:2:end] .= false
 f0m = f0[mask]
@@ -63,14 +63,10 @@ niter = 300
 ahos_max = 4000
 shat[5:9] .= tan.(pi/2 * shat[5:9]/ahos_max)   # initial guess
 
-function cost(HA, s, f0)
-	shos = ahos_max * atan.(s[5:9]) * 2/pi
-	sa = vcat(s[1:4], shos)
-	1/2 * norm(HA*sa + f0)^2       
-end
-
 #@time (shat, out) = ls_adam(W*H*A, W*f0m; s0=shat, opt=opt, niter=niter)
-@time (shat, out) = ls_adam(W*H*A, W*f0m; opt=opt, niter=niter)
+#@time (shat, out) = ls_adam(W*H*A, W*f0m; opt=opt, niter=niter)
+include("shimoptim.jl")
+@time shat = shimoptim(shat, W*H*A, W*f0m)
 
 fpm = f0m + H*A*shat;      # predicted fieldmap after applying shims
 
