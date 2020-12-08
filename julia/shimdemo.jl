@@ -41,9 +41,8 @@ A = getcalmatrix(Fm, H, S)
 
 # Now that A is determined we can use it to optimize shims for a given acquired fieldmap.
 # Example: Synthesize an example fieldmap 'f0' and optimize shims (minimize RMS residual) for that fieldmap.
-f0 = sum(F[:,:,:,[2,6,7,8]], dims=4)[:,:,:,1]
-f0 = F[:,:,:,2] + sqrt.(abs.(F[:,:,:,5])) + 3*F[:,:,:,6]
 f0 = 2*F[:,:,:,2] + 10*sqrt.(abs.(F[:,:,:,5])) + 0.3*F[:,:,:,6]
+f0 = 2*F[:,:,:,2] + 1*F[:,:,:,6]
 mask = abs.(f0) .> 0                # note the dots
 mask[1:2:end, 1:2:end, 1:2:end] .= false
 f0m = f0[mask]
@@ -64,9 +63,12 @@ shimlims = (100, 4000, 12000)   # (max linear shim current, max hos shim current
 loss = (s, HA, f0) -> norm(HA*s + f0)^2
 @time shat = shimoptim(W*H*A, W*f0m, shimlims; loss=loss) #;  s0=s0)
 
-println("Optimized shims: $shat")
+# return integer values
+s = Int.(round.(shat))
+println("Optimized shims: $s")
 
-fpm = f0m + H*A*shat;      # predicted fieldmap after applying shims
+# predicted fieldmap after applying shims
+fpm = H*A*s + f0m;      
 
 # display predicted fieldmap
 fp = zeros(size(f0))

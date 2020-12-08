@@ -36,8 +36,8 @@ function shimoptim(HA::Array, f0::Vector, shimlims::Tuple;
 
 	(minf,mins,ret) = optimize(opt, s0)
 
-	numevals = opt.numevals # the number of function evaluations
-	println("got $minf after $numevals iterations (returned $ret)")
+	#numevals = opt.numevals # the number of function evaluations
+	#println("Loss=$minf after $numevals iterations (returned $ret)")
 
 	mins
 end
