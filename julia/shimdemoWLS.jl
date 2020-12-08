@@ -43,7 +43,7 @@ A = getcalmatrix(Fm, H, S)
 # Example: Synthesize an example fieldmap 'f0' and optimize shims (minimize RMS residual) for that fieldmap.
 f0 = sum(F[:,:,:,[2,6,7,8]], dims=4)[:,:,:,1]
 f0 = F[:,:,:,2] + sqrt.(abs.(F[:,:,:,5])) + 3*F[:,:,:,6]
-f0 = F[:,:,:,2] + 5*F[:,:,:,6]
+f0 = F[:,:,:,2] + 4.5*F[:,:,:,6]
 mask = abs.(f0) .> 0                # note the dots
 mask[1:2:end, 1:2:end, 1:2:end] .= false
 f0m = f0[mask]
@@ -53,7 +53,7 @@ H = getSHbasis(x[mask], y[mask], z[mask], l)
 W = sparse(collect(1:N), collect(1:N), ones(N))
 W = Diagonal(ones(N,))
 
-# solve using \
+# Initial guess (unconstrained LS solution)
 @time shat = -(W*H*A)\(W*f0m)    # Vector of length 9. NB! May need to be rounded before applying settings on scanner.
 
 # solve using Flux
