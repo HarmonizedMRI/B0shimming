@@ -50,32 +50,28 @@ mask[1:2:end, 1:2:end, 1:2:end] .= false
 f0m = f0[mask]
 N = sum(mask[:])
 f0m = f0m + 0*randn(size(f0m))        # add some noise
+
 H = getSHbasis(x[mask], y[mask], z[mask], l)  
 W = sparse(collect(1:N), collect(1:N), ones(N))
 W = Diagonal(ones(N,))
 
-# Initial guess (unconstrained LS solution)
-s0 = -(W*H*A)\(W*f0m)    # Vector of length 9. NB! May need to be rounded before applying settings on scanner.
+# Unconstrained LS solution
+# s0 = -(W*H*A)\(W*f0m)    # Vector of length 9. NB! May need to be rounded before applying settings on scanner.
 
 # shim limits 
-shimlims = (100, 2000, 12000)
+shimlims = (100, 4000, 12000)   # (max linear shim current, max hos shim current, max total hos shim current)
 
-# solve using Flux
-# initialize with LS solution
-(lin_max, hos_max, hos_sum_max) = shimlims
-#shat[5:9] .= tan.(pi/2 * shat[5:9]/hos_max)   # initial guess
-#@time (shat, out) = ls_adam(W*H*A, W*f0m; s0=s0, opt=opt, niter=niter)
-
-# solve using NLopt
-@time shat = shimoptim(W*H*A, W*f0m, shimlims) # ; s0=s0)
+# define loss and solve for shims 
+loss = (s, HA, f0) -> norm(HA*s + f0)^2
+@time shat = shimoptim(W*H*A, W*f0m, shimlims; loss=loss) #;  s0=s0)
 
 fpm = f0m + H*A*shat;      # predicted fieldmap after applying shims
 
 # display predicted fieldmap
 fp = zeros(size(f0))
 embed!(fp, fpm, mask)   
-p = jim(cat(f0,fp;dims=1))    # compare before and after shimming
 p = jim(fp; clim=(-40,40))
-#display(p)
+p = jim(cat(f0,fp;dims=1))    # compare before and after shimming
+display(p)
 
 
