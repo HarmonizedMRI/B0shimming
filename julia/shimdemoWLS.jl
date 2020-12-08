@@ -43,11 +43,12 @@ A = getcalmatrix(Fm, H, S)
 # Example: Synthesize an example fieldmap 'f0' and optimize shims (minimize RMS residual) for that fieldmap.
 f0 = sum(F[:,:,:,[2,6,7,8]], dims=4)[:,:,:,1]
 f0 = F[:,:,:,2] + sqrt.(abs.(F[:,:,:,5])) + 3*F[:,:,:,6]
+f0 = F[:,:,:,2] + 5*F[:,:,:,6]
 mask = abs.(f0) .> 0                # note the dots
 mask[1:2:end, 1:2:end, 1:2:end] .= false
 f0m = f0[mask]
 N = sum(mask[:])
-f0m = f0m + 2*randn(size(f0m))        # add some noise
+f0m = f0m + 0*randn(size(f0m))        # add some noise
 H = getSHbasis(x[mask], y[mask], z[mask], l)  
 W = sparse(collect(1:N), collect(1:N), ones(N))
 W = Diagonal(ones(N,))
@@ -58,8 +59,11 @@ W = Diagonal(ones(N,))
 # solve using Flux
 # initialize with LS solution
 opt = ADAM(0.4)
-niter = 100
-@time (shat, out) = ls_adam(W*H*A, W*f0m; s0=shat, opt=opt, niter=niter)
+niter = 300
+ahos_max = 4000
+shat[5:9] .= tan.(pi/2 * shat[5:9]/ahos_max)   # initial guess
+#@time (shat, out) = ls_adam(W*H*A, W*f0m; s0=shat, opt=opt, niter=niter)
+@time (shat, out) = ls_adam(W*H*A, W*f0m; opt=opt, niter=niter)
 
 fpm = f0m + H*A*shat;      # predicted fieldmap after applying shims
 
@@ -67,7 +71,7 @@ fpm = f0m + H*A*shat;      # predicted fieldmap after applying shims
 fp = zeros(size(f0))
 embed!(fp, fpm, mask)   
 p = jim(cat(f0,fp;dims=1))    # compare before and after shimming
-p = jim(fp; clim=(-20,20))
+p = jim(fp; clim=(-40,40))
 display(p)
 
 

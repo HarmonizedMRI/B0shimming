@@ -17,9 +17,13 @@ function ls_adam(
 
 	s = copy(s0)
 
+	ahos_max = 4000
+
 	function	loss(HA, f0)   # LS cost function (no "s" arg!)
 		# norm(f0 + HA*s,6)^6
-		1/2 * norm(f0 + HA*s)^2       
+		shos = ahos_max * atan.(s[5:9]) * 2/pi
+		sa = vcat(s[1:4], shos)
+		1/2 * norm(f0 + HA*sa)^2       
 	end
 
 	θ = params(s) # magic here using objectid()
@@ -32,6 +36,8 @@ function ls_adam(
 		Flux.train!(loss, θ, data, opt)
 		out[iter+1] = fun(s, iter)
 	end
+
+	s[5:9] .= ahos_max * atan.(s[5:9]) * 2/pi
 
 	return s, out
 end
