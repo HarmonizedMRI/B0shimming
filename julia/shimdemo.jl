@@ -6,7 +6,6 @@ using SparseArrays
 
 include("getSHbasis.jl")
 include("getcalmatrix.jl")
-#include("ls_adam.jl")
 include("shimoptim.jl")
 
 # load calibration data
@@ -26,7 +25,7 @@ mask = fm .> 200    # note the '.' (broadcasting)
 mask[1:2:end, 1:2:end, 1:2:end] .= false
 N = sum(mask[:])
 
-# mask and reshape to [N 8] 
+# mask F and reshape to [N 8] 
 Fm = zeros(N, nShim)    # m for 'masked'
 for ii = 1:nShim
 	f1 = F[:,:,:,ii]
@@ -49,14 +48,14 @@ mask = abs.(f0) .> 0                # note the dots
 mask[1:2:end, 1:2:end, 1:2:end] .= false
 f0m = f0[mask]
 N = sum(mask[:])
-f0m = f0m + 0*randn(size(f0m))        # add some noise
+#f0m = f0m + 0*randn(size(f0m))        # add some noise
 
 H = getSHbasis(x[mask], y[mask], z[mask], l)  
 W = sparse(collect(1:N), collect(1:N), ones(N))
 W = Diagonal(ones(N,))
 
 # Unconstrained LS solution
-# s0 = -(W*H*A)\(W*f0m)    # Vector of length 9. NB! May need to be rounded before applying settings on scanner.
+# s0 = -(W*H*A)\(W*f0m)
 
 # shim limits 
 shimlims = (100, 4000, 12000)   # (max linear shim current, max hos shim current, max total hos shim current)
