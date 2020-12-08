@@ -15,8 +15,7 @@ function getSHbasis(
 		a = c2s([x,y,z])
 		(r, ϕ, θ) = (a.r, a.θ, π/2 - a.ϕ)    # (radius, aziumuth, colatitude)
 		Y = computeYlm(θ, ϕ; lmax=l)
-		f = r^l * Y[(l,m)]
-		return f
+		r^l * Y[(l,m)]
 	end
 
 	H = zeros(size(x,1), sum(2*(0:L) .+ 1))
