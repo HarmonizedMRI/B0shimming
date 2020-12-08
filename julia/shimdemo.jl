@@ -64,6 +64,8 @@ shimlims = (100, 4000, 12000)   # (max linear shim current, max hos shim current
 loss = (s, HA, f0) -> norm(HA*s + f0)^2
 @time shat = shimoptim(W*H*A, W*f0m, shimlims; loss=loss) #;  s0=s0)
 
+println("Optimized shims: $shat")
+
 fpm = f0m + H*A*shat;      # predicted fieldmap after applying shims
 
 # display predicted fieldmap

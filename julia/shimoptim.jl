@@ -5,12 +5,18 @@ using NLopt
 
 function shimoptim(HA::Array, f0::Vector, shimlims::Tuple; s0::Vector, loss::Function)
 
-HA: Spherical harmonic basis H times calibration matrix A
-f0: Acquired field map
-shimlims[1]: max shim current on each linear shim coil
-shimlims[2]: max shim current on each high-order shim coil
-shimlims[3]: max combined high-order shim current
-s0: initial guess
+# Inputs
+- `HA`: Spherical harmonic basis H times calibration matrix A  
+- `f0`: Acquired field map
+- `shimlims`
+  - shimlims[1]: max shim current on each linear shim coil
+  - shimlims[2]: max shim current on each high-order shim coil
+  - shimlims[3]: max combined high-order shim current
+- `s0`: initial guess
+- `loss`: loss function
+
+# Output
+- `s`: optimized shim currents (including DC offset)
 """
 function shimoptim(HA::Array, f0::Vector, shimlims::Tuple; 
 	s0::Vector = zeros(size(HA,2),),
