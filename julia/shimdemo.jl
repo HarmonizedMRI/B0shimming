@@ -34,7 +34,7 @@ end
 
 # Get spherical harmonic basis of degree l
 l = 4
-H = getSHbasis(x[mask], y[mask], z[mask], l)   # size is [N sum(2*(0:l) .+ 1)]
+@time H = getSHbasis(x[mask], y[mask], z[mask], l)   # size is [N sum(2*(0:l) .+ 1)]
 
 # Get calibration matrix A
 A = getcalmatrix(Fm, H, S)
