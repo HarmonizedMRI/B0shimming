@@ -1,7 +1,11 @@
 using SphericalHarmonics
 using CoordinateTransformations: SphericalFromCartesian
 using MIRT: ndgrid
+using ForwardDiff
 
+"""
+	Get spherical harmonic basis of order L, and its gradient, evaluated at spatial locations x, y, z
+"""
 function getSHbasis(
 	x::Vector{<:Real}, 
 	y::Vector{<:Real}, 
@@ -9,21 +13,34 @@ function getSHbasis(
 	L::Int64
 	)
 
-	# function evaluates spherical harmonic at one spatial location (x,y,z)
+	# function evaluates spherical harmonic at one spatial location r = [x, y, z]
 	c2s = SphericalFromCartesian()
-	function sh(x, y, z, l, m)
-		a = c2s([x,y,z])
-		(r, ϕ, θ) = (a.r, a.θ, π/2 - a.ϕ)    # (radius, aziumuth, colatitude)
+	function sh(r, l, m)
+		a = c2s(r)
+		(rho, ϕ, θ) = (a.r, a.θ, π/2 - a.ϕ)    # (radius, azimuth, colatitude)
 		Y = computeYlm(θ, ϕ; lmax=l)
-		r^l * Y[(l,m)]
+		rho^l * Y[(l,m)]
 	end
 
+	# vector of position vectors (needed to calculate gradient)
+	r = map( (x,y,z) -> [x, y, z], x, y, z)
+
+	# SH basis
 	H = zeros(size(x,1), sum(2*(0:L) .+ 1))
+	Hx = zeros(size(x,1), sum(2*(0:L) .+ 1))
 	ic = 1
 	for l = 0:L
 		for m = 0:l
-			f = map( (x,y,z) -> sh(x, y, z, l, m), x, y, z)
-			H[:,ic] = real(f)
+			# SH evaluated at r
+			f = map( r -> sh(r, l, m), r)
+			H[:,ic] = real(f)    
+
+			# gradient evaluated at r
+			sh1 =  r -> real(sh(r, l, m))
+			g = r -> ForwardDiff.gradient(sh1, r)
+			df = map( r -> g(r), r)
+			Hx[:,ic] = map( r -> r[1], df)
+
 			ic = ic+1
 			if m > 0
 				H[:,ic] = imag(f)
@@ -48,3 +65,4 @@ function getSHbasis(str::String)
 
 	H = reshape(H, nx, ny, nz, size(H,2))
 end
+
