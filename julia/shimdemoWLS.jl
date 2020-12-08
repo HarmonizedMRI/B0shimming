@@ -6,7 +6,8 @@ using SparseArrays
 
 include("getSHbasis.jl")
 include("getcalmatrix.jl")
-include("ls_adam.jl")
+#include("ls_adam.jl")
+include("shimoptim.jl")
 
 # load calibration data
 @load "CalibrationData.jld2" F S fov meta 
@@ -56,17 +57,18 @@ W = Diagonal(ones(N,))
 # Initial guess (unconstrained LS solution)
 @time shat = -(W*H*A)\(W*f0m)    # Vector of length 9. NB! May need to be rounded before applying settings on scanner.
 
+# shim limits 
+shimlims = (100, 4000, 12000)
+
 # solve using Flux
 # initialize with LS solution
-opt = ADAM(0.4)
-niter = 300
-ahos_max = 4000
-shat[5:9] .= tan.(pi/2 * shat[5:9]/ahos_max)   # initial guess
-
+(lin_max, hos_max, hos_sum_max) = shimlims
+#shat[5:9] .= tan.(pi/2 * shat[5:9]/hos_max)   # initial guess
 #@time (shat, out) = ls_adam(W*H*A, W*f0m; s0=shat, opt=opt, niter=niter)
-#@time (shat, out) = ls_adam(W*H*A, W*f0m; opt=opt, niter=niter)
-include("shimoptim.jl")
-@time shat = shimoptim(shat, W*H*A, W*f0m)
+#shat = 0*shat
+
+# solve using NLopt
+@time shat = shimoptim(W*H*A, W*f0m, shimlims; s0=shat/2)
 
 fpm = f0m + H*A*shat;      # predicted fieldmap after applying shims
 
