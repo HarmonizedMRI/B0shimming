@@ -1,7 +1,8 @@
 using SphericalHarmonics
 using CoordinateTransformations: SphericalFromCartesian
-using MIRT: ndgrid
+using MIRT: ndgrid, jim
 using ForwardDiff
+using Plots
 
 """
 	Get spherical harmonic basis of order L, and its gradient, evaluated at spatial locations x, y, z
@@ -34,7 +35,7 @@ function getSHbasis(
 	=#
 	ic = 1
 	for l = 0:L
-		for m = 0:l
+		for m = -0:l
 			# SH evaluated at r
 			f = map( r -> sh(r, l, m), r)
 			H[:,ic] = real(f)    
@@ -49,7 +50,7 @@ function getSHbasis(
 			=#
 
 			ic = ic+1
-			if m > 0
+			if m != 0
 				H[:,ic] = imag(f)
 
 				#=
@@ -65,6 +66,13 @@ function getSHbasis(
  			end
  		end
  	end
+
+	if false
+	x = x[:]
+	y = y[:]
+	z = z[:]
+	H = [ones(length(x),) x y z z.^2-1/2*(x.^2+y.^2) x.*y z.*x x.^2-y.^2 z.*y]
+	end
 
 	H
 end
@@ -82,5 +90,17 @@ function getSHbasis(str::String)
 	H = getSHbasis(x[:], y[:], z[:], l)
 
 	H = reshape(H, nx, ny, nz, size(H,2))
+
+	# compare with cartesian expressions
+	x = x[:]
+	y = y[:]
+	z = z[:]
+	Hcart = [z.^2-1/2*(x.^2+y.^2) x.*y z.*x x.^2-y.^2 z.*y]
+	Hcart = reshape(Hcart, nx, ny, nz, size(Hcart,2))
+	#p1 = jim(cat(H[:,:,:,5:9],Hcart;dims=1))
+	p1 = jim(H[:,:,:,5:9])
+	p2 = jim(Hcart)
+	p = plot(p1, p2)
+	display(p)
 end
 

@@ -39,7 +39,7 @@ mask = R < 1;
 
 f = 0*X;
 
-lmax = 6;  % degree
+lmax = 2;  % degree
 nr = lmax+1;
 nc = nr;
 ii = 1;
@@ -48,7 +48,8 @@ for l = 0:lmax
 		fm = evalspharm(X(mask), Y(mask), Z(mask), l, m);
 		f(mask) = fm;
 		figure(1); subplot(nr,nc,l*nc+m+1); im(real(f)); title(sprintf('l,m = %d,%d', l, m'));
-		%figure(2); subplot(nr,nc,l*nc+m+1); im(imag(f)); title(sprintf('l,m = %d,%d', l, m'));
+		title(sprintf('l,m = %d,%d', l, m'));
+		figure(2); subplot(nr,nc,l*nc+m+1); im(imag(f)); title(sprintf('l,m = %d,%d', l, m'));
 		%figure(1); subplot(nr,nc,l*nc+m+1); im(cat(1,f(:,:,end/2), squeeze(f(:,end/2,:)), squeeze(f(end/2,:,:)))); 
 		title(sprintf('l,m = %d,%d', l, m'));
 		%figure(2); subplot(nr,nc,l*nc+m+1); im(imag(f)); title(sprintf('l,m = %d,%d', l, m'));
