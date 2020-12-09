@@ -1,8 +1,7 @@
 function out = poly_harmonic(n, m, pos_x, pos_y, pos_z)
 % returns harmonic field for the required solid harmonic addressed by
 % n, m. Positive m values correspond to cosine component and negative
-to
-% sine
+% to sine
 % pos_... can be both value and vector/matrix
 
 r2=pos_x.^2+pos_y.^2; %pos_z.^2 is out!
@@ -68,32 +67,32 @@ else if n==2,
                             if m==1,
                                 out=-pos_z.*pos_x.*(pos_z.^2-0.75*r2);
                             else
-                                out=-pos_z.*pos_y.*(pos_z.^2-
-0.75*r2);%m==-1
+                                out=-pos_z.*pos_y.*(pos_z.^2-0.75*r2);%m==-1
+
                             end
                         else if abs(m)==2,
                                 if m==2,
-                                    out=(pos_x.^2-pos_y.^2).*(pos_z.^2-
-1/6*r2);
+                                    out=(pos_x.^2-pos_y.^2).*(pos_z.^2-1/6*r2);
+
                                 else
-                                    out=2*pos_x.*pos_y.*(pos_z.^2-
-1/6*r2);%m==-2
+                                    out=2*pos_x.*pos_y.*(pos_z.^2-1/6*r2);%m==-2
+
                                 end
                             else if abs(m)==3,
                                     if m==3,
-                                        out=-pos_z.*pos_x.*(pos_x.^2-
-3*pos_y.^2);
+                                        out=-pos_z.*pos_x.*(pos_x.^2-3*pos_y.^2);
+
                                     else
-                                        out=-pos_z.*pos_y.*(3*pos_x.^2-
-pos_y.^2);%m==-3
+                                        out=-pos_z.*pos_y.*(3*pos_x.^2-pos_y.^2);%m==-3
+
                                     end
                                 else
                                     if m==4,
-                                        out=pos_x.^4-
-6*pos_x.^2.*pos_y.^2+pos_y.^4;
+                                        out=pos_x.^4-6*pos_x.^2.*pos_y.^2+pos_y.^4;
+
                                     else
-                                        out=4*pos_x.*pos_y.*(pos_x.^2-
-pos_y.^2);%m==-4
+                                        out=4*pos_x.*pos_y.*(pos_x.^2-pos_y.^2);%m==-4
+
                                     end
                                 end
                             end
