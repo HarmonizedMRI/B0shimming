@@ -32,7 +32,7 @@ function sub_test
 
 % define spatial locations 
 n = 36;
-r = linspace(-1,1,n);
+r = linspace(-10,10,n);
 [X,Y,Z] = meshgrid(r,r,r);
 R = sqrt([X.^2 + Y.^2 + Z.^2]);
 mask = R > 0;

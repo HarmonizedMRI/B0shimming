@@ -67,13 +67,6 @@ function getSHbasis(
  		end
  	end
 
-	if false
-	x = x[:]
-	y = y[:]
-	z = z[:]
-	H = [ones(length(x),) x y z z.^2-1/2*(x.^2+y.^2) x.*y z.*x x.^2-y.^2 z.*y]
-	end
-
 	H
 end
 
@@ -91,5 +84,7 @@ function getSHbasis(str::String)
 	nb = size(H,2)
 
 	H = reshape(H, nx, ny, nz, nb)
+
+	# jim(H[:,:,:,7], color=:jet)   # compare with >> evalspharm("test")
 end
 
