@@ -27,10 +27,11 @@ function getSHbasis(
 
 	# SH basis
 	H = zeros(size(x,1), sum(2*(0:L) .+ 1))
-	#dH = Vector{Vector}(undef, (size(x,1), sum(2*(0:L) .+ 1))
+	#=
 	Hx = zeros(size(x,1), sum(2*(0:L) .+ 1))
 	Hy = zeros(size(x,1), sum(2*(0:L) .+ 1))
 	Hz = zeros(size(x,1), sum(2*(0:L) .+ 1))
+	=#
 	ic = 1
 	for l = 0:L
 		for m = 0:l
@@ -38,24 +39,27 @@ function getSHbasis(
 			f = map( r -> sh(r, l, m), r)
 			H[:,ic] = real(f)    
 
-			# gradient evaluated at r
+			#= gradient evaluated at r
 			sh1 =  r -> real(sh(r, l, m))
 			g = r -> ForwardDiff.gradient(sh1, r)
 			df = map( r -> g(r), r)
 			Hx[:,ic] = map( r -> r[1], df)
 			Hy[:,ic] = map( r -> r[2], df)
 			Hz[:,ic] = map( r -> r[2], df)
+			=#
 
 			ic = ic+1
 			if m > 0
 				H[:,ic] = imag(f)
 
+				#=
 				sh1 =  r -> imag(sh(r, l, m))
 				g = r -> ForwardDiff.gradient(sh1, r)
 				df = map( r -> g(r), r)
 				Hx[:,ic] = map( r -> r[1], df)
 				Hy[:,ic] = map( r -> r[2], df)
 				Hz[:,ic] = map( r -> r[2], df)
+				=#
 
 				ic = ic+1
  			end
@@ -65,6 +69,7 @@ function getSHbasis(
 	H
 end
 
+# test function
 function getSHbasis(str::String)
 
 	(nx,ny,nz) = (40,40,20)

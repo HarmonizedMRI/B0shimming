@@ -8,6 +8,9 @@ include("getSHbasis.jl")
 include("getcalmatrix.jl")
 include("shimoptim.jl")
 
+"""
+Load calibration data and get calibration matrix A
+"""
 # load calibration data
 @load "CalibrationData.jld2" F S fov meta 
 
@@ -39,8 +42,11 @@ l = 4
 # Get calibration matrix A
 A = getcalmatrix(Fm, H, S)
 
-# Now that A is determined we can use it to optimize shims for a given acquired fieldmap.
-# Example: Synthesize an example fieldmap 'f0' and optimize shims (minimize RMS residual) for that fieldmap.
+
+"""
+Now that A is determined we can use it to optimize shims for a given acquired fieldmap.
+Example: Synthesize an example fieldmap 'f0' and optimize shims (minimize RMS residual) for that fieldmap.
+"""
 f0 = 2*F[:,:,:,2] + 10*sqrt.(abs.(F[:,:,:,5])) + 0.3*F[:,:,:,6]
 f0 = 2*F[:,:,:,2] + 1*F[:,:,:,6]
 mask = abs.(f0) .> 0                # note the dots
@@ -50,11 +56,9 @@ N = sum(mask[:])
 #f0m = f0m + 0*randn(size(f0m))        # add some noise
 
 H = getSHbasis(x[mask], y[mask], z[mask], l)  
-W = sparse(collect(1:N), collect(1:N), ones(N))
-W = Diagonal(ones(N,))
+W = Diagonal(ones(N,))   # optional spatial weighting
 
-# Unconstrained LS solution
-# s0 = -(W*H*A)\(W*f0m)
+# s0 = -(W*H*A)\(W*f0m)    # Unconstrained least-squares solution
 
 # shim limits 
 shimlims = (100, 4000, 12000)   # (max linear shim current, max hos shim current, max total hos shim current)
@@ -73,7 +77,7 @@ fpm = H*A*s + f0m;
 # display predicted fieldmap
 fp = zeros(size(f0))
 embed!(fp, fpm, mask)   
-p = jim(fp; clim=(-40,40))
+#p = jim(fp; clim=(-40,40))
 p = jim(cat(f0,fp;dims=1))    # compare before and after shimming
 display(p)
 
