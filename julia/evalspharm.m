@@ -35,7 +35,7 @@ n = 36;
 r = linspace(-1,1,n);
 [X,Y,Z] = meshgrid(r,r,r);
 R = sqrt([X.^2 + Y.^2 + Z.^2]);
-mask = R < 1;
+mask = R > 0;
 
 f = 0*X;
 f_mz = f;
@@ -49,22 +49,20 @@ for l = 0:lmax
 		fm = evalspharm(X(mask), Y(mask), Z(mask), l, m);
 		f(mask) = fm;
 		figure(1); subplot(nr,nc,l*nc+m+1); im(real(f)); title(sprintf('l,m = %d,%d', l, m'));
-		colorbar;
-		title(sprintf('l,m = %d,%d', l, m'));
+		colorbar; colormap jet;
 		figure(2); subplot(nr,nc,l*nc+m+1); im(imag(f)); title(sprintf('l,m = %d,%d', l, -m'));
-		colorbar;
+		colorbar; colormap jet;
 		%figure(1); subplot(nr,nc,l*nc+m+1); im(cat(1,f(:,:,end/2), squeeze(f(:,end/2,:)), squeeze(f(end/2,:,:)))); 
-		title(sprintf('l,m = %d,%d', l, m'));
 
 		% compare with Maxim's Cartesian expressions
 		fm_mz = poly_harmonic(l, m, X(mask), Y(mask), Z(mask));
 		f_mz(mask) = fm_mz;
 		figure(3); subplot(nr,nc,l*nc+m+1); im(f_mz); title(sprintf('mz, l,m = %d,%d', l, m'));
-		colorbar;
+		colorbar; colormap jet;
 		fm_mz = poly_harmonic(l, -m, X(mask), Y(mask), Z(mask));
 		f_mz(mask) = fm_mz;
 		figure(4); subplot(nr,nc,l*nc+m+1); im(f_mz); title(sprintf('mz, l,m = %d,%d', l, -m'));
-		colorbar;
+		colorbar; colormap jet;
 	end
 end
 

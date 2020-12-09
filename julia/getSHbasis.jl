@@ -88,19 +88,8 @@ function getSHbasis(str::String)
 
 	l = 2
 	H = getSHbasis(x[:], y[:], z[:], l)
+	nb = size(H,2)
 
-	H = reshape(H, nx, ny, nz, size(H,2))
-
-	# compare with cartesian expressions
-	x = x[:]
-	y = y[:]
-	z = z[:]
-	Hcart = [z.^2-1/2*(x.^2+y.^2) x.*y z.*x x.^2-y.^2 z.*y]
-	Hcart = reshape(Hcart, nx, ny, nz, size(Hcart,2))
-	#p1 = jim(cat(H[:,:,:,5:9],Hcart;dims=1))
-	p1 = jim(H[:,:,:,5:9])
-	p2 = jim(Hcart)
-	p = plot(p1, p2)
-	display(p)
+	H = reshape(H, nx, ny, nz, nb)
 end
 
