@@ -30,8 +30,8 @@ function shimoptim(HA::Array, f0::Vector, shimlims::Tuple;
 	opt.ftol_rel = ftol_rel
 	opt.min_objective = (s, grad) -> loss(s, HA, f0)
 
-	opt.lower_bounds = vcat(-Inf, -lin_max*ones(3,), -hos_max*ones(5,))
-	opt.upper_bounds = vcat( Inf,  lin_max*ones(3,),  hos_max*ones(5,))
+	opt.lower_bounds = [-Inf; -lin_max*ones(3,); -hos_max*ones(5,)]
+	opt.upper_bounds = [ Inf;  lin_max*ones(3,);  hos_max*ones(5,)]
 	opt.inequality_constraint = (s, grad) -> sum(abs.(s[5:9])) - hos_sum_max
 
 	(minf,mins,ret) = optimize(opt, s0)
