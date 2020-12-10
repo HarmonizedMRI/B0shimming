@@ -69,7 +69,7 @@ fclose(fid);
 ex.nCycleSpoil = nCycleSpoil * ex.thick/(fov(3)/nz);
 [ex.rf, ex.g] = toppe.utils.rf.makeslr(ex.flip, ex.thick, ex.tbw, ex.dur, ex.nCycleSpoil, ...
 	'type', 'st', ...        % 'st' = small-tip. 'ex' = 90 degree design
-	'ftype', 'min', ...      % minimum-phase SLR design is well suited for 3D slab excitation (can tolerate mild quadratic phase along z)
+	'ftype', 'ls', ...      % minimum-phase SLR design is well suited for 3D slab excitation (can tolerate mild quadratic phase along z)
 	'system', limits.design, ...
 	'writeModFile', false);
 ex.rf = toppe.utils.makeGElength(ex.rf);
@@ -226,8 +226,24 @@ seq.write('B0scan.seq');
 fprintf('\n');
 % parsemr('B0scan.seq');
 
+if false
+% Display (part of) sequences
+fprintf('Displaying sequences...');
+nModsPerTR = 2;    % number of TOPPE modules per TR
+nTR = ny/2;        % number of TRs to display
+nStart = nModsPerTR * floor(ny*length(deltaTE)+ny/2-nTR/2);
+toppe.plotseq(nStart, nStart + nTR*nModsPerTR);
+tStart = nStart/nModsPerTR*TR*1e-3;    % sec
+tStop = tStart + nTR*TR*1e-3;          % sec
+seq.plot('timeRange', [tStart tStop]);
+fprintf('\n');
+
+% Display TOPPE sequence in loop/movie mode
+%figure; toppe.playseq(nModsPerTR, 'drawpause', false);  
+end
+
 %% Create modules.txt and toppe0.meta and write TOPPE files to a tar file
-% Create modules.txt 
+% Create (new) modules.txt 
 modFileText = ['' ...
 'Total number of unique cores\n' ...
 '2\n' ...
@@ -247,18 +263,5 @@ GEfilePath 'readout.mod\n' ];
 fid = fopen('toppe0.meta', 'wt');
 fprintf(fid, metaFileText);
 fclose(fid);
-system('tar czf B0scan.tgz modules.txt scanloop.txt tipdown.mod readout.mod toppe0.meta');
 
-% Display (part of) sequences
-fprintf('Displaying sequences...');
-nModsPerTR = 2;    % number of TOPPE modules per TR
-nTR = ny/2;        % number of TRs to display
-nStart = nModsPerTR * floor(nDisdaq+ny/2-nTR/2);
-toppe.plotseq(nStart, nStart + nTR*nModsPerTR);
-tStart = nStart/nModsPerTR*TR*1e-3;    % sec
-tStop = tStart + nTR*TR*1e-3;          % sec
-seq.plot('timeRange', [tStart tStop]);
-fprintf('\n');
-
-% Display TOPPE sequence in loop/movie mode
-%figure; toppe.playseq(nModsPerTR, 'drawpause', false);  
+system('tar czf B0scan.tgz modules.txt scanloop.txt tipdown.mod readout.mod');
