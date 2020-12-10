@@ -16,10 +16,14 @@
 %addpath ~/pulseq_home/github/toppe/
 %addpath ~/pulseq_home/github/PulseGEq/
 
-% Acquisition parameters
+% Scan file path (GE only)
+GEfilePath = '/usr/g/research/rathi/';
+
+
+%% Acquisition parameters
 % Minimum TR will be calculated below
-nx = 60;
-ny = 60;
+nx = 20;
+ny = 20;
 fov = [24 24 20];                  % cm
 if fov(1) ~= fov(2)
 	error('In-plane fov must be square');
@@ -48,10 +52,9 @@ siemens.system = mr.opts('MaxGrad', 28, 'GradUnit', 'mT/m', ...
     'MaxSlew', 150, 'SlewUnit', 'T/m/s', ...
 	 'rfRingdownTime', 20e-6, 'rfDeadTime', 100e-6, 'adcDeadTime', 10e-6);
 
-
 %% Create waveforms for TOPPE and associated files (modules.txt, *.mod files). In TOPPE, only 'arbitrary' waveforms are used.
 
-% Create modules.txt (must do it here since this file is used for intermediate steps below)
+% Create temporary modules.txt (must do it here since this file is used for intermediate steps below)
 modFileText = ['' ...
 'Total number of unique cores\n' ...
 '2\n' ...
@@ -223,8 +226,28 @@ seq.write('B0scan.seq');
 fprintf('\n');
 % parsemr('B0scan.seq');
 
-% Write TOPPE files to a tar file
-system('tar czf B0scan.tgz modules.txt scanloop.txt tipdown.mod readout.mod');
+%% Create modules.txt and toppe0.meta and write TOPPE files to a tar file
+% Create modules.txt 
+modFileText = ['' ...
+'Total number of unique cores\n' ...
+'2\n' ...
+'fname	duration(us)	hasRF?	hasDAQ?\n' ...
+GEfilePath 'readout.mod	0	0	1\n' ...                        % Entries are tab-separated
+GEfilePath 'tipdown.mod	0	1	0' ];
+fid = fopen('modules.txt', 'wt');
+fprintf(fid, modFileText);
+fclose(fid);
+
+% Create toppe0.meta. This file is the main entry point for toppev3, and must be placed in /usr/g/bin/. 
+metaFileText = ['' ...
+GEfilePath 'modules.txt\n' ...
+GEfilePath 'scanloop.txt\n' ...
+GEfilePath 'tipdown.mod\n' ...
+GEfilePath 'readout.mod\n' ];
+fid = fopen('toppe0.meta', 'wt');
+fprintf(fid, metaFileText);
+fclose(fid);
+system('tar czf B0scan.tgz modules.txt scanloop.txt tipdown.mod readout.mod toppe0.meta');
 
 % Display (part of) sequences
 fprintf('Displaying sequences...');
