@@ -16,7 +16,11 @@
 %addpath ~/pulseq_home/github/toppe/
 %addpath ~/pulseq_home/github/PulseGEq/
 
-% Acquisition parameters
+% Scan file path (GE only)
+GEfilePath = '/usr/g/research/rathi/';
+
+
+%% Acquisition parameters
 % Minimum TR will be calculated below
 nx = 60;
 ny = 60;
@@ -48,10 +52,9 @@ siemens.system = mr.opts('MaxGrad', 28, 'GradUnit', 'mT/m', ...
     'MaxSlew', 150, 'SlewUnit', 'T/m/s', ...
 	 'rfRingdownTime', 20e-6, 'rfDeadTime', 100e-6, 'adcDeadTime', 10e-6);
 
-
 %% Create waveforms for TOPPE and associated files (modules.txt, *.mod files). In TOPPE, only 'arbitrary' waveforms are used.
 
-% Create modules.txt (must do it here since this file is used for intermediate steps below)
+% Create temporary modules.txt (must do it here since this file is used for intermediate steps below)
 modFileText = ['' ...
 'Total number of unique cores\n' ...
 '2\n' ...
@@ -63,12 +66,10 @@ fprintf(fid, modFileText);
 fclose(fid);
 
 % Design rf waveform and write to .mod file
-% To simulate the slice profile, do, e.g.:
-% >> m = toppe.utils.rf.slicesim([0 0 1], ex.rf, ex.g, 4e-3, linspace(-ex.thick,ex.thick,200), 1000, 100);
 ex.nCycleSpoil = nCycleSpoil * ex.thick/(fov(3)/nz);
 [ex.rf, ex.g] = toppe.utils.rf.makeslr(ex.flip, ex.thick, ex.tbw, ex.dur, ex.nCycleSpoil, ...
 	'type', 'st', ...        % 'st' = small-tip. 'ex' = 90 degree design
-	'ftype', 'ls', ...      % 'min' minimum-phase SLR design is well suited for 3D slab excitation (can tolerate mild quadratic phase along z)
+	'ftype', 'ls', ...      % minimum-phase SLR design is well suited for 3D slab excitation (can tolerate mild quadratic phase along z)
 	'system', limits.design, ...
 	'writeModFile', false);
 ex.rf = toppe.utils.makeGElength(ex.rf);
@@ -204,15 +205,18 @@ end
 toppe.write2loop('finish');
 fprintf('\n');
 
+
+%% Write Pulseq file
+
 % check whether the timing of the sequence is correct
 fprintf('Checking Pulseq timing...');
 [ok, error_report]=seq.checkTiming;
 fprintf('\n');
 
 if (ok)
-    fprintf('Timing check passed successfully\n');
+    fprintf('\tTiming check passed successfully\n');
 else
-    fprintf('Timing check failed! Error listing follows:\n');
+    fprintf('\tTiming check failed! Error listing follows:\n');
     fprintf([error_report{:}]);
     fprintf('\n');
 end
@@ -222,12 +226,10 @@ fprintf('Writing Pulseq file...');
 seq.setDefinition('FOV', fov*1e-2);   % m
 seq.setDefinition('Name', '3D B0 mapping');
 seq.write('B0scan.seq');
-fprintf('\n');
+fprintf('done\n');
 % parsemr('B0scan.seq');
 
-% Write TOPPE files to a tar file
-system('tar czf B0scan.tgz toppe0.meta modules.txt scanloop.txt tipdown.mod readout.mod');
-
+if false
 % Display (part of) sequences
 fprintf('Displaying sequences...');
 nModsPerTR = 2;    % number of TOPPE modules per TR
@@ -241,3 +243,34 @@ fprintf('\n');
 
 % Display TOPPE sequence in loop/movie mode
 %figure; toppe.playseq(nModsPerTR, 'drawpause', false);  
+end
+
+
+%% Create modules.txt and toppe0.meta and write TOPPE files to a tar file
+
+% Create (new) modules.txt 
+modFileText = ['' ...
+'Total number of unique cores\n' ...
+'2\n' ...
+'fname	duration(us)	hasRF?	hasDAQ?\n' ...
+GEfilePath 'readout.mod	0	0	1\n' ...                        % Entries are tab-separated
+GEfilePath 'tipdown.mod	0	1	0' ];
+fid = fopen('modules.txt', 'wt');
+fprintf(fid, modFileText);
+fclose(fid);
+
+% Create toppe0.meta. This file is the main entry point for toppev3, and must be placed in /usr/g/bin/. 
+metaFileText = ['' ...
+GEfilePath 'modules.txt\n' ...
+GEfilePath 'scanloop.txt\n' ...
+GEfilePath 'tipdown.mod\n' ...
+GEfilePath 'readout.mod\n' ];
+fid = fopen('toppe0.meta', 'wt');
+fprintf(fid, metaFileText);
+fclose(fid);
+
+system('tar czf B0scan.tgz modules.txt scanloop.txt tipdown.mod readout.mod');
+
+instr = ['\nPlace toppe0.meta in /usr/g/bin/ on scanner host\n' ...
+'Untar B0scan.tgz in ' GEfilePath ' on scanner host\n' ];
+fprintf(instr);
