@@ -4,7 +4,7 @@ function dat = loadScanArchive(fname)
 % Output:
 %  dat  [ndat ncoils nframes]
 
-% addpath /export/subjects/spelt/Orchestra/orchestra-sdk-1.9-1.matlab/   
+% addpath /mnt/storage/jfnielse/Orchestra/orchestra-sdk-1.9-1.matlab/   
 
 archive = GERecon('Archive.Load', fname);   %'ScanArchive_7347633TMRFIX_20201010_170753212.h5');
 
