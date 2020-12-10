@@ -13,8 +13,8 @@ nz = imSize(3);
 
 % crop out readout plateau
 [~,~,~,~,~,paramsint16] = toppe.readmod(readoutFile);
-daqStart = paramsint16(1) + 1
-daqStop = daqStart + paramsint16(2)-1
+daqStart = paramsint16(1) + 1;
+daqStop = daqStart + paramsint16(2)-1;
 dat = dat(daqStart:daqStop, :, :, :);
 
 ndat = size(dat, 1);
