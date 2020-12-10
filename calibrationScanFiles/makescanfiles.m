@@ -22,8 +22,8 @@ GEfilePath = '/usr/g/research/rathi/';
 
 %% Acquisition parameters
 % Minimum TR will be calculated below
-nx = 20;
-ny = 20;
+nx = 60;
+ny = 60;
 fov = [24 24 20];                  % cm
 if fov(1) ~= fov(2)
 	error('In-plane fov must be square');
@@ -205,15 +205,18 @@ end
 toppe.write2loop('finish');
 fprintf('\n');
 
+
+%% Write Pulseq file
+
 % check whether the timing of the sequence is correct
 fprintf('Checking Pulseq timing...');
 [ok, error_report]=seq.checkTiming;
 fprintf('\n');
 
 if (ok)
-    fprintf('Timing check passed successfully\n');
+    fprintf('\tTiming check passed successfully\n');
 else
-    fprintf('Timing check failed! Error listing follows:\n');
+    fprintf('\tTiming check failed! Error listing follows:\n');
     fprintf([error_report{:}]);
     fprintf('\n');
 end
@@ -223,7 +226,7 @@ fprintf('Writing Pulseq file...');
 seq.setDefinition('FOV', fov*1e-2);   % m
 seq.setDefinition('Name', '3D B0 mapping');
 seq.write('B0scan.seq');
-fprintf('\n');
+fprintf('done\n');
 % parsemr('B0scan.seq');
 
 if false
@@ -242,7 +245,9 @@ fprintf('\n');
 %figure; toppe.playseq(nModsPerTR, 'drawpause', false);  
 end
 
+
 %% Create modules.txt and toppe0.meta and write TOPPE files to a tar file
+
 % Create (new) modules.txt 
 modFileText = ['' ...
 'Total number of unique cores\n' ...
@@ -265,3 +270,7 @@ fprintf(fid, metaFileText);
 fclose(fid);
 
 system('tar czf B0scan.tgz modules.txt scanloop.txt tipdown.mod readout.mod');
+
+instr = ['\nPlace toppe0.meta in /usr/g/bin/ on scanner host\n' ...
+'Untar B0scan.tgz in ' GEfilePath ' on scanner host\n' ];
+fprintf(instr);
