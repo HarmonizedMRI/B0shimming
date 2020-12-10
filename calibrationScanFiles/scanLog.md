@@ -21,11 +21,11 @@ xy 500
 xy -500  
 zx 500  
 zx -500  
-
 x2y2 500  
 x2y2 -500  
 zy 500  
 zy -500  
+
 x      (manual prescan)  
 x 
 y 
