@@ -7,6 +7,7 @@
 
 8ch head array  
 FBIRN phantom  
+toppev3  
 Exam 12775, Series 4
 
 Auto prescan: x = -1, y = 2, z = 1, cf = 127788922
@@ -25,13 +26,12 @@ x2y2 500
 x2y2 -500  
 zy 500  
 zy -500  
-
-x      (manual prescan)  
-x 
-y 
-y 
-z 
-z 
+x 9     (manual prescan)  
+x -11  
+y 12  
+y -8  
+z 11  
+z -9  
 system shims
 
 
