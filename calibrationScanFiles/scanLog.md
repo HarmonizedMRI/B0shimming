@@ -2,6 +2,7 @@
 
 ## UM MR750 3T (inside scanner)
 
+
 ### Calibration
 
 8ch head array  
@@ -24,7 +25,13 @@ x2y2 500
 x2y2 -500  
 zy 500  
 zy -500  
-x 9     (manual prescan)
+x 9     (manual prescan)  
+x -11  
+y 13  
+y -7  
+z 11  
+z -9  
+system shims
 
 
 ## Move scanArchive files from scanner to quickstep:
