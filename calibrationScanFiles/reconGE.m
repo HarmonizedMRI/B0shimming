@@ -1,4 +1,4 @@
-function F = reconGE(dat, readoutFile, imSize, deltaTE)
+function [F, mask] = reconGE(dat, readoutFile, imSize, deltaTE)
 %
 % Example usage:
 % >> dat = loadScanArchive('ScanArchive_7347633TMRFIX_20201210_120317865.h5');
@@ -6,6 +6,9 @@ function F = reconGE(dat, readoutFile, imSize, deltaTE)
 % >> imSize = [60 60 50];
 % >> deltaTE = [0 0.5 1.0 2.0];    % ms
 
+if isstring(dat)
+	dat = loadScanArchive(dat);
+end
 
 nx = imSize(1);
 ny = imSize(2);
@@ -45,3 +48,6 @@ for ie = 1:nechoes
 end
 
 F = ims;
+
+imsos = sqrt(sum(abs(ims(:,:,:,:,1)).^2, 4));
+mask = imsos > 0.1*max(imsos(:));
