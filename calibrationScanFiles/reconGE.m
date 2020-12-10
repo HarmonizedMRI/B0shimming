@@ -51,3 +51,4 @@ F = ims;
 
 imsos = sqrt(sum(abs(ims(:,:,:,:,1)).^2, 4));
 mask = imsos > 0.1*max(imsos(:));
+
