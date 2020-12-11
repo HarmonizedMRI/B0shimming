@@ -16,6 +16,7 @@ include("shimoptim.jl")
 @load "CalibrationDataUM10Dec2020.jld2" F S fov mask
 mask = BitArray(mask)
 
+if false
 # 0th-2nd order terms in getSHbasis.jl are in order [dc z x y z2 zx zy x2y2 xy],
 # so need to reorder F to match that.
 # No need to reorder S
@@ -25,6 +26,7 @@ for ii = 1:size(F,4)
 	Fr[:,:,:,ii] = F[:,:,:,inds[ii]]
 end
 F = Fr
+end
 
 N = sum(mask[:])
 
@@ -58,10 +60,12 @@ A = getcalmatrix(Fm, H, S)
 
 @load "f0.jld2" f0 fov mask
 
+f0 = f0
+
 # f0 = F[:,:,:,2] + F[:,:,:,8]
 mask = BitArray(mask)
 
-f0m = 0 .+ f0[mask]
+f0m = 17 .+ f0[mask]
 
 N = sum(mask[:])
 
@@ -80,15 +84,22 @@ shimlims = (100, 4000, 12000)   # (max linear shim current, max hos shim current
 # define loss and 
 loss = (s, HA, f0) -> norm(HA*s + f0)^2
 
-s0 = zeros(9,)
+s0 = -(W*H*A)\(W*f0m)    # Unconstrained least-squares solution
+@show Int.(round.(s0))
+@time shat = shimoptim(W*H*A, W*f0m, shimlims; loss=loss, s0=[s0[1]; zeros(8,)])
+
+@show loss(zeros(9,), W*H*A, W*f0m)
 @show loss(s0, W*H*A, W*f0m)
-@time shat = shimoptim(W*H*A, W*f0m, shimlims; loss=loss,  s0=s0)
 @show loss(shat, W*H*A, W*f0m)
 
 shat = Int.(round.(shat))
-println("Recommended shim changes:") 
+println("cf, x, y, z, z2, xy, zx, x2y2, zy")
+println("$shat")
+
+if false
+println("\nRecommended shim changes:") 
 println(string(
-	"\tcf, x, y, z = ", 
+	"\tcf, z, x, y = ", 
 	shat[1], ", ", 
 	shat[2],  ", ", 
 	shat[3],  ", ", 
@@ -101,9 +112,11 @@ println(string(
 	" xy ", shat[9]
 	) 
 )
+end
+
 # predicted fieldmap after applying shims
 fp = zeros(size(f0))
-fpm = H*A*s + f0m;      
+fpm = H*A*shat + f0m;      
 embed!(fp, fpm, mask)   
 
 # display predicted fieldmap
