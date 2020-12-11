@@ -1,8 +1,7 @@
-using JLD2
+using MAT, JLD2
 using MIRT: embed!, jim, ndgrid
-using Random
-using LinearAlgebra
-using SparseArrays
+#using LinearAlgebra
+#using SparseArrays
 
 include("getSHbasis.jl")
 include("getcalmatrix.jl")
@@ -11,7 +10,7 @@ include("shimoptim.jl")
 """
 Load calibration data and calculate calibration matrix A
 """
-# load calibration data
+
 @load "CalibrationDataUM10Dec2020.jld2" F S fov mask
 
 mask = BitArray(mask)
@@ -33,7 +32,7 @@ for ii = 1:nShim
 end
 
 # Get spherical harmonic basis of degree l
-l = 2
+l = 4
 @time H = getSHbasis(x[mask], y[mask], z[mask], l)   # size is [N sum(2*(0:l) .+ 1)]
 
 # Get calibration matrix A
@@ -51,6 +50,7 @@ Now that A is determined we can use it to optimize shims for a given acquired fi
 mask = BitArray(mask)
 
 f0m = f0[mask]
+
 N = sum(mask[:])
 
 (x,y,z) = ndgrid(
@@ -62,27 +62,31 @@ N = sum(mask[:])
 H = getSHbasis(x[mask], y[mask], z[mask], l)  
 W = Diagonal(ones(N,))   # optional spatial weighting
 
-# s0 = -(W*H*A)\(W*f0m)    # Unconstrained least-squares solution
-
 # shim limits 
 shimlims = (100, 4000, 12000)   # (max linear shim current, max hos shim current, max total hos shim current)
 
-# define loss and solve for shims 
+# define loss and 
 loss = (s, HA, f0) -> norm(HA*s + f0)^2
-@time shat = shimoptim(W*H*A, W*f0m, shimlims; loss=loss) #;  s0=s0)
+
+s0 = zeros(9,)
+@show loss(s0, W*H*A, W*f0m)
+@time shat = shimoptim(W*H*A, W*f0m, shimlims; loss=loss,  s0=s0)
 @show loss(shat, W*H*A, W*f0m)
 
-# return integer values
 s = Int.(round.(shat))
 println("Optimized shims: $s")
 
 # predicted fieldmap after applying shims
+fp = zeros(size(f0))
 fpm = H*A*s + f0m;      
+embed!(fp, fpm, mask)   
 
 # display predicted fieldmap
-fp = zeros(size(f0))
-embed!(fp, fpm, mask)   
-#p = jim(fp; clim=(-40,40))
 p = jim(cat(f0,fp;dims=1); clim=(-50,50), color=:jet)    # compare before and after shimming
 display(p)
 
+# write to .mat file for viewing
+matwrite("result.mat", Dict(
+	"f0" => f0,
+	"fp" => fp
+))
