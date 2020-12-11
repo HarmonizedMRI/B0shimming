@@ -54,8 +54,6 @@ l = 2
 A = getcalmatrix(Fm, H, S)
 #@show size(A)
 
-p = jim(log.(abs.(A[:,:]')); color=:jet)
-display(p)
 
 
 ############################################################################################
@@ -127,6 +125,7 @@ embed!(fp, fpm, mask)
 p = jim(log.(abs.(A[:,:]')); color=:jet)
 p = jim(cat(f0,fp;dims=1); clim=(-50,50), color=:jet)    # compare before and after shimming
 display(p)
+
 
 # write to .mat file for viewing
 matwrite("result.mat", Dict(
