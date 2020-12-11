@@ -15,5 +15,6 @@ function getcalmatrix(
 	S[2:end,2:end] = Sin
 
 	# return calibration matrix
-	inv(H'*H)*H'*F*inv(S)
+	lam = 1e3;
+	inv(H'*H + lam*I(size(H,2)))*H'*F*inv(S)
 end
