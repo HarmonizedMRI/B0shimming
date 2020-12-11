@@ -9,10 +9,13 @@ include("getcalmatrix.jl")
 include("shimoptim.jl")
 
 """
-Load calibration data and get calibration matrix A
+Load calibration data and calculate calibration matrix A
 """
 # load calibration data
-@load "CalibrationData.jld2" F S fov meta 
+@load "CalibrationDataUM10Dec2020.jld2" F S fov mask
+
+mask = BitArray(mask)
+N = sum(mask[:])
 
 (nx,ny,nz,nShim) = size(F)
 
@@ -22,21 +25,15 @@ Load calibration data and get calibration matrix A
 	range(-fov[3], fov[3], length=nz) 
 	)
 
-# create mask
-fm = sum(abs.(F), dims=4)[:,:,:,1]
-mask = fm .> 200    # note the '.' (broadcasting)
-mask[1:2:end, 1:2:end, 1:2:end] .= false
-N = sum(mask[:])
-
 # mask F and reshape to [N 8] 
-Fm = zeros(N, nShim)    # m for 'masked'
+Fm = zeros(N, nShim)
 for ii = 1:nShim
 	f1 = F[:,:,:,ii]
 	Fm[:,ii] = f1[mask]
 end
 
 # Get spherical harmonic basis of degree l
-l = 4
+l = 2
 @time H = getSHbasis(x[mask], y[mask], z[mask], l)   # size is [N sum(2*(0:l) .+ 1)]
 
 # Get calibration matrix A
@@ -45,16 +42,22 @@ A = getcalmatrix(Fm, H, S)
 
 
 """
-Now that A is determined we can use it to optimize shims for a given acquired fieldmap.
-Example: Synthesize an example fieldmap 'f0' and optimize shims (minimize RMS residual) for that fieldmap.
+Now that A is determined we can use it to optimize shims for a given acquired fieldmap f0.
 """
-f0 = 2*F[:,:,:,2] + 10*sqrt.(abs.(F[:,:,:,5])) + 0.3*F[:,:,:,6]
-f0 = 2*F[:,:,:,2] + 1*F[:,:,:,6]
-mask = abs.(f0) .> 0                # note the dots
-mask[1:2:end, 1:2:end, 1:2:end] .= false
+
+@load "f0.jld2" f0 fov mask
+
+# f0 = F[:,:,:,2] + F[:,:,:,8]
+mask = BitArray(mask)
+
 f0m = f0[mask]
 N = sum(mask[:])
-#f0m = f0m + 0*randn(size(f0m))        # add some noise
+
+(x,y,z) = ndgrid(
+	range(-fov[1], fov[1], length=nx), 
+	range(-fov[2], fov[2], length=ny), 
+	range(-fov[3], fov[3], length=nz) 
+	)
 
 H = getSHbasis(x[mask], y[mask], z[mask], l)  
 W = Diagonal(ones(N,))   # optional spatial weighting
@@ -67,6 +70,7 @@ shimlims = (100, 4000, 12000)   # (max linear shim current, max hos shim current
 # define loss and solve for shims 
 loss = (s, HA, f0) -> norm(HA*s + f0)^2
 @time shat = shimoptim(W*H*A, W*f0m, shimlims; loss=loss) #;  s0=s0)
+@show loss(shat, W*H*A, W*f0m)
 
 # return integer values
 s = Int.(round.(shat))
@@ -79,7 +83,6 @@ fpm = H*A*s + f0m;
 fp = zeros(size(f0))
 embed!(fp, fpm, mask)   
 #p = jim(fp; clim=(-40,40))
-p = jim(cat(f0,fp;dims=1))    # compare before and after shimming
+p = jim(cat(f0,fp;dims=1); clim=(-50,50), color=:jet)    # compare before and after shimming
 display(p)
-
 
