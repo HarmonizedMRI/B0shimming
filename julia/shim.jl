@@ -46,12 +46,16 @@ for ii = 1:nShim
 end
 
 # Get spherical harmonic basis of degree l
-l = 4
+l = 2
 @time H = getSHbasis(x[mask], y[mask], z[mask], l)   # size is [N sum(2*(0:l) .+ 1)]
 
 # Get calibration matrix A
 #S = collect(Diagonal(ones(8,)))
 A = getcalmatrix(Fm, H, S)
+#@show size(A)
+
+p = jim(log.(abs.(A[:,:]')); color=:jet)
+display(p)
 
 
 ############################################################################################
@@ -59,8 +63,6 @@ A = getcalmatrix(Fm, H, S)
 ############################################################################################
 
 @load "f0.jld2" f0 fov mask
-
-f0 = f0
 
 # f0 = F[:,:,:,2] + F[:,:,:,8]
 mask = BitArray(mask)
@@ -81,12 +83,14 @@ W = Diagonal(ones(N,))   # optional spatial weighting
 # shim limits 
 shimlims = (100, 4000, 12000)   # (max linear shim current, max hos shim current, max total hos shim current)
 
-# define loss and 
+# define loss 
 loss = (s, HA, f0) -> norm(HA*s + f0)^2
 
 s0 = -(W*H*A)\(W*f0m)    # Unconstrained least-squares solution
 @show Int.(round.(s0))
-@time shat = shimoptim(W*H*A, W*f0m, shimlims; loss=loss, s0=[s0[1]; zeros(8,)])
+
+#@time shat = shimoptim(W*H*A, W*f0m, shimlims; loss=loss, s0=[s0[1]; zeros(8,)])
+shat = s0
 
 @show loss(zeros(9,), W*H*A, W*f0m)
 @show loss(s0, W*H*A, W*f0m)
@@ -120,6 +124,7 @@ fpm = H*A*shat + f0m;
 embed!(fp, fpm, mask)   
 
 # display predicted fieldmap
+p = jim(log.(abs.(A[:,:]')); color=:jet)
 p = jim(cat(f0,fp;dims=1); clim=(-50,50), color=:jet)    # compare before and after shimming
 display(p)
 
