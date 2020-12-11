@@ -7,13 +7,25 @@ include("getSHbasis.jl")
 include("getcalmatrix.jl")
 include("shimoptim.jl")
 
-"""
-Load calibration data and calculate calibration matrix A
-"""
+############################################################################################
+# Load calibration data and calculate calibration matrix A
+############################################################################################
 
+# F = [nx ny nz 8] (Hz), in order 'x', 'y', 'z', 'z2', 'xy', 'zx', 'x2y2', 'zy'
+# S = [8 8], shim amplitudes used to obtain F (hardware units)
 @load "CalibrationDataUM10Dec2020.jld2" F S fov mask
-
 mask = BitArray(mask)
+
+# 0th-2nd order terms in getSHbasis.jl are in order [dc z x y z2 zx zy x2y2 xy],
+# so need to reorder F to match that.
+# No need to reorder S
+inds = [3, 1, 2, 4, 6, 8, 7, 5] 
+Fr = copy(F)
+for ii = 1:size(F,4)
+	Fr[:,:,:,ii] = F[:,:,:,inds[ii]]
+end
+F = Fr
+
 N = sum(mask[:])
 
 (nx,ny,nz,nShim) = size(F)
@@ -27,7 +39,7 @@ N = sum(mask[:])
 # mask F and reshape to [N 8] 
 Fm = zeros(N, nShim)
 for ii = 1:nShim
-	f1 = F[:,:,:,ii]
+	f1 = Fr[:,:,:,ii]
 	Fm[:,ii] = f1[mask]
 end
 
@@ -40,16 +52,16 @@ l = 4
 A = getcalmatrix(Fm, H, S)
 
 
-"""
-Now that A is determined we can use it to optimize shims for a given acquired fieldmap f0.
-"""
+############################################################################################
+# Now that A is determined we can use it to optimize shims for a given acquired fieldmap f0.
+############################################################################################
 
 @load "f0.jld2" f0 fov mask
 
 # f0 = F[:,:,:,2] + F[:,:,:,8]
 mask = BitArray(mask)
 
-f0m = f0[mask]
+f0m = 0 .+ f0[mask]
 
 N = sum(mask[:])
 
@@ -73,9 +85,22 @@ s0 = zeros(9,)
 @time shat = shimoptim(W*H*A, W*f0m, shimlims; loss=loss,  s0=s0)
 @show loss(shat, W*H*A, W*f0m)
 
-s = Int.(round.(shat))
-println("Optimized shims: $s")
-
+shat = Int.(round.(shat))
+println("Recommended shim changes:") 
+println(string(
+	"\tcf, x, y, z = ", 
+	shat[1], ", ", 
+	shat[2],  ", ", 
+	shat[3],  ", ", 
+	shat[4],  " (set in Manual Prescan)")) 
+println(string(
+	"\tsetNavShimCurrent z2 ", shat[5],
+	" zx ", shat[6], 
+	" zy ", shat[7], 
+	" x2y2 ", shat[8], 
+	" xy ", shat[9]
+	) 
+)
 # predicted fieldmap after applying shims
 fp = zeros(size(f0))
 fpm = H*A*s + f0m;      

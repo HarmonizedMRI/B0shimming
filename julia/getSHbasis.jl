@@ -6,6 +6,16 @@ using Plots
 
 """
 	Get spherical harmonic basis of order L, and its gradient, evaluated at spatial locations x, y, z
+	Order of 0th-2nd order terms: 
+	H[:,1]   cf (center frequency, Hz)
+	H[:,2]   z
+	H[:,3]   x
+	H[:,4]   y
+	H[:,5]   z2
+	H[:,6]   zx
+	H[:,7]   zy
+	H[:,8]   x2y2
+	H[:,9]   xy
 """
 function getSHbasis(
 	x::Vector{<:Real}, 
@@ -66,6 +76,8 @@ function getSHbasis(
  			end
  		end
  	end
+
+	H[:,1] .= 1.0
 
 	H
 end

@@ -12,7 +12,7 @@ function getcalmatrix(
 	Sin = S;
 	S = zeros(9,9);
 	S[1,1] = 1;
-	S[2:end,2:end] = Sin;
+	S[2:end,2:end] = Sin
 
 	# return calibration matrix
 	inv(H'*H)*H'*F*inv(S)
