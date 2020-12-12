@@ -84,7 +84,7 @@ loss = (s, HA, f0) -> norm(HA*s + f0)^2
 s0 = -(W*H*A)\(W*f0m)    # Unconstrained least-squares solution
 @show Int.(round.(s0))
 
-shat = shimoptim(W*H*A, W*f0m, shimlims; loss=loss) #, s0=[s0[1]; zeros(8,)])
+@time shat = shimoptim(W*H*A, W*f0m, shimlims; loss=loss) #, s0=[s0[1]; zeros(8,)])
 @show Int.(round.(shat))
 #shat = s0
 
