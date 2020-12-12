@@ -97,7 +97,7 @@ shat = Int.(round.(shat))
 println("\nRecommended shim changes:") 
 println(string(
 	"\tcf, z, x, y = ", 
-	shat[1], ", ", 
+	-shat[1], ", ",    # whether the minus sign is needed here is likely scanner-specific
 	shat[2],  ", ", 
 	shat[3],  ", ", 
 	shat[4],  " (set in Manual Prescan)")) 
@@ -118,6 +118,7 @@ embed!(fp, fpm, mask)
 # display predicted fieldmap
 p = jim(log.(abs.(A[:,:]')); color=:jet)
 p = jim(cat(f0,fp;dims=1); clim=(-50,50), color=:jet)    # compare before and after shimming
+p = jim(fp; clim=(-50,50), color=:jet)
 display(p)
 
 
