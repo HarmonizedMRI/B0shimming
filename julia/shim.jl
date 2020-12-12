@@ -117,13 +117,12 @@ embed!(fp, fpm, mask)
 
 # display predicted fieldmap
 p = jim(log.(abs.(A[:,:]')); color=:jet)
-p = jim(cat(f0,fp;dims=1); clim=(-50,50), color=:jet)    # compare before and after shimming
+p = jim(cat(f0,fp;dims=1); clim=(-80,80), color=:jet)    # compare before and after shimming
 p = jim(fp; clim=(-50,50), color=:jet)
 display(p)
 
 
 # write to .mat file for viewing
 matwrite("result.mat", Dict(
-	"f0" => f0,
 	"fp" => fp
 ))
