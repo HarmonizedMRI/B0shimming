@@ -17,7 +17,7 @@ include("shimoptim.jl")
 mask = BitArray(mask)
 
 # 0th-2nd order terms in getSHbasis.jl are in order [dc z x y z2 zx zy x2y2 xy],
-# so need to reorder F to match that.
+# so reorder F to match that.
 # No need to reorder S
 inds = [3, 1, 2, 4, 6, 8, 7, 5] 
 Fr = copy(F)
@@ -60,11 +60,9 @@ A = getcalmatrix(Fm, H, S)
 
 @load "f0.jld2" f0 fov mask
 
-# f0 = F[:,:,:,2] + F[:,:,:,8]
-
 mask = BitArray(mask)
 
-f0m = 17 .+ f0[mask]
+f0m = f0[mask]
 
 N = sum(mask[:])
 
