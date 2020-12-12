@@ -124,5 +124,6 @@ display(p)
 
 # write to .mat file for viewing
 matwrite("result.mat", Dict(
+	"f0" => f0,
 	"fp" => fp
 ))
