@@ -11,7 +11,7 @@ function getcalmatrix(
 
 	A = zeros(nb, ns+1)
 
-	# center frequency column (unity by definition)
+	# center frequency (identity by definition)
 	A[1,1] = 1.0
 
 	# fit each acquired fieldmap to basis
