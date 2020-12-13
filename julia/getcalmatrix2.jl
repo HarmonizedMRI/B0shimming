@@ -19,8 +19,8 @@ function getcalmatrix2(
 	A = inv(H'*H + lam*I(size(H,2)))*H'*F*inv(S)
 
 	# center frequency offset basis is 1 by definition
-	A[1,1] = 1.0;
-	A[2:end,1] .= 0;
+	#A[1,1] = 1.0;
+	#A[2:end,1] .= 0;
 
 	return A
 end

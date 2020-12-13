@@ -8,10 +8,12 @@ include("getcalmatrix.jl")
 include("shimoptim.jl")
 
 ## EDIT this section
-calFile = "CalibrationDataUM10Dec2020.jld2"
-shimlims = (100, 4000, 12000)   # (max linear shim current, max hos shim current, max total hos shim current)
+
+# Shim calibration data
 calFile = "CalibrationDataSiemensMGH12Dec2020.jld2"
 shimlims = (100, 1000, 4000)
+calFile = "CalibrationDataUM10Dec2020.jld2"
+shimlims = (100, 4000, 12000)   # (max linear shim current, max hos shim current, max total hos shim current)
 
 # baseline field map (and fov, mask). See mat2jld2.jl.
 f0File = "f0.jld2"   
@@ -108,34 +110,35 @@ shat = shimoptim(W*H*A, W*f0m, shimlims; loss=loss) #, s0=[s0[1]; zeros(8,)])
 @show loss(s0, W*H*A, W*f0m)          # loss after unconstrained optimization
 @show loss(shat, W*H*A, W*f0m)        # loss after constrained optimization
 
-shat = Int.(round.(shat))
+shat_ge = Int.(round.(shat))
+shat_siemens = round.(shat; digits=1)
 
 println("\nRecommended shim changes:") 
 println(string(
-	"\tcf, x, y, z = ", 
-	shat[1], ", ",
-	shat[3], ", ", 
-	shat[4], ", ", 
-	shat[2], " (GE: set in Manual Prescan)")) 
+	"\tGE: cf, x, y, z = ", 
+	shat_ge[1], ", ",
+	shat_ge[3], ", ", 
+	shat_ge[4], ", ", 
+	shat_ge[2], " (set in Manual Prescan)")) 
 println(string(
-	"\tGE command: setNavShimCurrent",
-	" z2 ", shat[5],
-	" zx ", shat[6], 
-	" zy ", shat[7], 
-	" x2y2 ", shat[8], 
-	" xy ", shat[9]
+	"\tGE: setNavShimCurrent",
+	" z2 ", shat_ge[5],
+	" zx ", shat_ge[6], 
+	" zy ", shat_ge[7], 
+	" x2y2 ", shat_ge[8], 
+	" xy ", shat_ge[9]
 	) 
 )
 println(string(
-	"\tSiemens command: adjvalidate -shim -set -mp -delta ",
-	shat[3], " ",
-	shat[4], " ",
-	shat[2], " ",
-	shat[5], " ",
-	shat[6], " ",
-	shat[7], " ",
-	shat[8], " ",
-	shat[9]
+	"\tSiemens: adjvalidate -shim -set -mp -delta ",
+	shat_siemens[3], " ",
+	shat_siemens[4], " ",
+	shat_siemens[2], " ",
+	shat_siemens[5], " ",
+	shat_siemens[6], " ",
+	shat_siemens[7], " ",
+	shat_siemens[8], " ",
+	shat_siemens[9]
 	)
 )
 
