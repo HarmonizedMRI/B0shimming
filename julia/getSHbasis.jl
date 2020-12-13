@@ -77,7 +77,7 @@ function getSHbasis(
  		end
  	end
 
-	H[:,1] .= 1.0
+	H[:,1] .= 1.0    # center frequency offset
 
 	H
 end

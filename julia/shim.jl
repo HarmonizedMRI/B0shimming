@@ -14,6 +14,7 @@ include("shimoptim.jl")
 # F = [nx ny nz 8] (Hz), in order 'x', 'y', 'z', 'z2', 'xy', 'zx', 'x2y2', 'zy'
 # S = [8 8], shim amplitudes used to obtain F (hardware units)
 @load "CalibrationDataUM10Dec2020.jld2" F S fov mask
+@load "CalibrationDataSiemensMGH12Dec2020.jld2" F S fov mask
 mask = BitArray(mask)
 
 # 0th-2nd order terms in getSHbasis.jl are in order [dc z x y z2 zx zy x2y2 xy],
@@ -31,9 +32,9 @@ N = sum(mask[:])
 (nx,ny,nz,nShim) = size(F)
 
 (x,y,z) = ndgrid(
-	range(-fov[1], fov[1], length=nx), 
-	range(-fov[2], fov[2], length=ny), 
-	range(-fov[3], fov[3], length=nz) 
+	range(-fov[1]/2, fov[1]/2, length=nx), 
+	range(-fov[2]/2, fov[2]/2, length=ny), 
+	range(-fov[3]/2, fov[3]/2, length=nz) 
 	)
 
 # mask F and reshape to [N 8] 
@@ -60,6 +61,8 @@ A = getcalmatrix(Fm, H, S)
 
 @load "f0.jld2" f0 fov mask
 
+(nx,ny,nz) = size(f0)
+
 mask = BitArray(mask)
 
 f0m = f0[mask]
@@ -67,9 +70,9 @@ f0m = f0[mask]
 N = sum(mask[:])
 
 (x,y,z) = ndgrid(
-	range(-fov[1], fov[1], length=nx), 
-	range(-fov[2], fov[2], length=ny), 
-	range(-fov[3], fov[3], length=nz) 
+	range(-fov[1]/2, fov[1]/2, length=nx), 
+	range(-fov[2]/2, fov[2]/2, length=ny), 
+	range(-fov[3]/2, fov[3]/2, length=nz) 
 	)
 
 H = getSHbasis(x[mask], y[mask], z[mask], l)  
@@ -117,8 +120,8 @@ embed!(fp, fpm, mask)
 
 # display predicted fieldmap
 p = jim(log.(abs.(A[:,:]')); color=:jet)
-p = jim(cat(f0,fp;dims=1); clim=(-80,80), color=:jet)    # compare before and after shimming
 p = jim(fp; clim=(-50,50), color=:jet)
+p = jim(cat(f0,fp;dims=1); clim=(-40,40), color=:jet)    # compare before and after shimming
 display(p)
 
 
