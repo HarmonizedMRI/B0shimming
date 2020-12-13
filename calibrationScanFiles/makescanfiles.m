@@ -17,14 +17,14 @@
 %addpath ~/pulseq_home/github/PulseGEq/
 
 % Scan file path (GE only)
-% GEfilePath = '/usr/g/research/rathi/';
-GEfilePath = '';
+GEfilePath = '/usr/g/research/rathi/';
+%GEfilePath = '';
 
 
 %% Acquisition parameters
 % Minimum TR will be calculated below
-nx = 60;
-ny = 60;
+nx = 20;
+ny = 20;
 fov = [24 24 20];                  % cm
 if fov(1) ~= fov(2)
 	error('In-plane fov must be square');
@@ -46,7 +46,7 @@ limits.design = toppe.systemspecs('maxSlew', 10, 'slewUnit', 'Gauss/cm/ms', ...
 % Define the PHYSICAL limits for each scanner
 % NB! When creating .mod files with toppe.writemod, 'maxGrad' MUST match the PHYSICAL system limit since gradients are scaled relative to this.
 ge.system = toppe.systemspecs('maxSlew', 20, 'slewUnit', 'Gauss/cm/ms', ...
-	'maxGrad', 5, 'gradUnit', 'Gauss/cm', ...
+	'maxGrad', 8, 'gradUnit', 'Gauss/cm', ...
 	'maxRf', 0.25, 'rfUnit', 'Gauss');
 
 siemens.system = mr.opts('MaxGrad', 28, 'GradUnit', 'mT/m', ...
