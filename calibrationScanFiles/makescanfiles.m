@@ -23,8 +23,8 @@ GEfilePath = '/usr/g/research/rathi/';
 
 %% Acquisition parameters
 % Minimum TR will be calculated below
-nx = 20;
-ny = 20;
+nx = 60;
+ny = 60;
 fov = [24 24 20];                  % cm
 if fov(1) ~= fov(2)
 	error('In-plane fov must be square');
@@ -260,7 +260,8 @@ fid = fopen('modules.txt', 'wt');
 fprintf(fid, modFileText);
 fclose(fid);
 
-% Create toppe0.meta. This file is the main entry point for toppev3, and must be placed in /usr/g/bin/. 
+% Create toppe0.meta. This file is the main entry point for toppev3, 
+% and must be placed in /usr/g/bin/ (or another hardcoded path). 
 metaFileText = ['' ...
 GEfilePath 'modules.txt\n' ...
 GEfilePath 'scanloop.txt\n' ...
@@ -270,7 +271,7 @@ fid = fopen('toppe0.meta', 'wt');
 fprintf(fid, metaFileText);
 fclose(fid);
 
-system('tar czf B0scan.tgz modules.txt scanloop.txt tipdown.mod readout.mod');
+system('tar czf B0scan.tgz modules.txt scanloop.txt tipdown.mod readout.mod toppe0.meta');
 
 instr = ['\nPlace toppe0.meta in /usr/g/bin/ on scanner host\n' ...
 'Untar B0scan.tgz in ' GEfilePath ' on scanner host\n' ];
