@@ -35,11 +35,6 @@ loss = (s, HA, f0) -> norm(HA*s + f0)^2
 
 ############################################################################################
 
-if l < 2
-	F = F[:,:,:,1:3]
-	s = diag(S)
-	S = Diagonal(s[1:3])
-end
 
 
 ############################################################################################
@@ -51,6 +46,13 @@ end
 @load "$calFile" F S fov mask
 
 mask = BitArray(mask)
+
+if l < 2
+	F = F[:,:,:,1:3]
+	s = diag(S)
+	S = Diagonal(s[1:3])
+end
+
 
 # 0th-2nd order terms in getSHbasis.jl are in order [dc z x y z2 zx zy x2y2 xy],
 # so reorder F to match that.

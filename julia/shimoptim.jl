@@ -31,9 +31,16 @@ function shimoptim(HA::Array, f0::Vector, shimlims::Tuple;
 	opt.ftol_rel = ftol_rel
 	opt.min_objective = (s, grad) -> loss(s, HA, f0)
 
-	opt.lower_bounds = [-cflim; -lin_max*ones(3,); -hos_max*ones(5,)]
-	opt.upper_bounds = [ cflim;  lin_max*ones(3,);  hos_max*ones(5,)]
-	opt.inequality_constraint = (s, grad) -> sum(abs.(s[5:9])) - hos_sum_max
+	if size(HA,2) > 4
+		# 2nd order shimming
+		opt.lower_bounds = [-cflim; -lin_max*ones(3,); -hos_max*ones(5,)]
+		opt.upper_bounds = [ cflim;  lin_max*ones(3,);  hos_max*ones(5,)]
+		opt.inequality_constraint = (s, grad) -> sum(abs.(s[5:9])) - hos_sum_max
+	else
+		# linear shimming
+		opt.lower_bounds = [-cflim; -lin_max*ones(3,)]
+		opt.upper_bounds = [ cflim;  lin_max*ones(3,)]
+	end
 
 	(minf,mins,ret) = optimize(opt, s0)
 
