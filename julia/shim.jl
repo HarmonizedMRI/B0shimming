@@ -7,6 +7,8 @@ include("getSHbasis.jl")
 include("getcalmatrix.jl")
 include("shimoptim.jl")
 
+
+############################################################################################
 ## EDIT this section
 
 # Shim calibration data
@@ -16,10 +18,12 @@ calFile = "CalibrationDataUM10Dec2020.jld2"
 shimlims = (100, 4000, 12000)   # (max linear shim current, max hos shim current, max total hos shim current)
 
 # baseline field map (and fov, mask). See mat2jld2.jl.
+f0File = "f0_jar.jld2"   
+f0File = "f0_redhead_localmask.jld2"   
 f0File = "f0.jld2"   
 
 # order of spherical harmonic basis
-l = 2     
+l = 2
 
 # Loss (objective) function for optimization.
 # The field map model is f = HA*s + f0, where
@@ -29,7 +33,13 @@ l = 2
 
 loss = (s, HA, f0) -> norm(HA*s + f0)^2
 
-##
+############################################################################################
+
+if l < 2
+	F = F[:,:,:,1:3]
+	s = diag(S)
+	S = Diagonal(s[1:3])
+end
 
 
 ############################################################################################
@@ -149,8 +159,8 @@ embed!(fp, fpm, mask)
 
 # display predicted fieldmap
 p = jim(log.(abs.(A[:,:]')); color=:jet)
-p = jim(fp; clim=(-50,50), color=:jet)
-p = jim(cat(f0,fp;dims=1); clim=(-40,40), color=:jet)    # compare before and after shimming
+p = jim(fp; clim=(-200,200), color=:jet)
+p = jim(cat(f0,fp;dims=1); clim=(-200,200), color=:jet)    # compare before and after shimming
 display(p)
 
 
