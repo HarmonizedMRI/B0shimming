@@ -13,8 +13,13 @@ include("shimoptim.jl")
 
 # F = [nx ny nz 8] (Hz), in order 'x', 'y', 'z', 'z2', 'xy', 'zx', 'x2y2', 'zy'
 # S = [8 8], shim amplitudes used to obtain F (hardware units)
+
 @load "CalibrationDataUM10Dec2020.jld2" F S fov mask
+shimlims = (100, 4000, 12000)   # (max linear shim current, max hos shim current, max total hos shim current)
+
 @load "CalibrationDataSiemensMGH12Dec2020.jld2" F S fov mask
+#shimlims = (100, 
+
 mask = BitArray(mask)
 
 # 0th-2nd order terms in getSHbasis.jl are in order [dc z x y z2 zx zy x2y2 xy],
@@ -45,13 +50,11 @@ for ii = 1:nShim
 end
 
 # Get spherical harmonic basis of degree l
-l = 2
+l = 4
 H = getSHbasis(x[mask], y[mask], z[mask], l)   # size is [N sum(2*(0:l) .+ 1)]
 
 # Get calibration matrix A
-#S = collect(Diagonal(ones(8,)))
-A = getcalmatrix(Fm, H, S)
-#@show size(A)
+A = getcalmatrix(Fm, H, diag(S))
 
 
 
@@ -78,18 +81,14 @@ N = sum(mask[:])
 H = getSHbasis(x[mask], y[mask], z[mask], l)  
 W = Diagonal(ones(N,))   # optional spatial weighting
 
-# shim limits 
-shimlims = (100, 4000, 12000)   # (max linear shim current, max hos shim current, max total hos shim current)
-
 # define loss 
 loss = (s, HA, f0) -> norm(HA*s + f0)^2
 
 s0 = -(W*H*A)\(W*f0m)    # Unconstrained least-squares solution
-@show Int.(round.(s0))
+#@show Int.(round.(s0))
 
 @time shat = shimoptim(W*H*A, W*f0m, shimlims; loss=loss) #, s0=[s0[1]; zeros(8,)])
 @show Int.(round.(shat))
-#shat = s0
 
 @show loss(zeros(9,), W*H*A, W*f0m)
 @show loss(s0, W*H*A, W*f0m)
@@ -100,12 +99,12 @@ shat = Int.(round.(shat))
 println("\nRecommended shim changes:") 
 println(string(
 	"\tcf, z, x, y = ", 
-	-shat[1], ", ",    # whether the minus sign is needed here is likely scanner-specific
+	shat[1], ", ",
 	shat[2],  ", ", 
 	shat[3],  ", ", 
 	shat[4],  " (set in Manual Prescan)")) 
 println(string(
-	"\tsetNavShimCurrent z2 ", shat[5],
+	"\tGE command: setNavShimCurrent z2 ", shat[5],
 	" zx ", shat[6], 
 	" zy ", shat[7], 
 	" x2y2 ", shat[8], 

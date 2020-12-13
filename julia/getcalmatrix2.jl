@@ -1,6 +1,6 @@
 using LinearAlgebra
 
-function getcalmatrix(
+function getcalmatrix2(
 	F::Array{<:Real,2},
 	H::Array{<:Real,2},
 	S::Array{<:Real,2}
