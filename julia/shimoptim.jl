@@ -22,7 +22,7 @@ function shimoptim(HA::Array, f0::Vector, shimlims::Tuple;
 	s0::Vector = zeros(size(HA,2),),
 	loss::Function = (s, HA, f0) -> 1/2 * norm(HA*s + f0)^2,
 	ftol_rel = 1e-3,
-	cflim = 2000    # empirical observation: needs to be finite for numerical stability
+	cflim = 1000    # empirical observation: needs to be finite for numerical stability
 	)
 
 	(lin_max, hos_max, hos_sum_max) = shimlims

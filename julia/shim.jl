@@ -13,15 +13,18 @@ include("shimoptim.jl")
 
 # Shim calibration data
 calFile = "CalibrationDataSiemensMGH12Dec2020.jld2"
-calFile = "CalibrationDataUM10Dec2020.jld2"
+
+calFile = "CalibrationDataUM10Dec2020.jld2"; 
+
 
 # shim system current limits
 shimlims = (100*ones(3,), 4000*ones(5,), 12000)   # (lin max, hos max, sum hos max)
 
 # baseline field map (and fov, mask). See mat2jld2.jl.
-f0File = "f0_jar.jld2"   
 f0File = "f0_redhead_localmask.jld2"   
 f0File = "f0.jld2"   
+f0File = "f0_jar.jld2"   
+f0File = "f0_redhead.jld2"   
 
 # order of spherical harmonic basis
 # for linear shimming only, set l = 1
@@ -114,6 +117,7 @@ H = getSHbasis(x[mask], y[mask], z[mask], l)
 W = Diagonal(ones(N,))   # optional spatial weighting
 
 s0 = -(W*H*A)\(W*f0m)    # Unconstrained least-squares solution (for comparison)
+@show Int.(round.(s0))
 
 shat = shimoptim(W*H*A, W*f0m, shimlims; loss=loss) #, s0=[s0[1]; zeros(8,)])
 @show Int.(round.(shat))
@@ -140,7 +144,7 @@ if length(shat) > 4
 		" zx ", shat_ge[6], 
 		" zy ", shat_ge[7], 
 		" x2y2 ", shat_ge[8], 
-		" xy", shat_ge[9]))
+		" xy ", shat_ge[9]))
 
 println(" ")
 println(string(
@@ -180,7 +184,7 @@ embed!(fp, fpm, mask)
 # display predicted fieldmap
 p = jim(log.(abs.(A[:,:]')); color=:jet)
 p = jim(fp; clim=(-200,200), color=:jet)
-p = jim(cat(f0,fp;dims=1); clim=(-200,200), color=:jet)    # compare before and after shimming
+p = jim(cat(f0,fp;dims=1); clim=(-100,100), color=:jet)    # compare before and after shimming
 display(p)
 
 # write to .mat file for viewing

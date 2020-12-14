@@ -13,9 +13,10 @@ desc = matf["desc"];
 end
 
 # fieldmap we wish to shim
-matf = matread("f0_redhead_localmask.mat");
+# matf = matread("f0_redhead_localmask.mat");
+matf = matread("f0.mat");
 f0 = matf["f0"];
 fov = matf["fov"];
 mask = matf["mask"];
-@save "f0_redhead_localmask.jld2" f0 fov mask
+@save "f0_redhead.jld2" f0 fov mask
 
