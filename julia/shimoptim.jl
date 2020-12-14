@@ -9,14 +9,14 @@ function shimoptim(HA::Array, f0::Vector, shimlims::Tuple; s0::Vector, loss::Fun
 - `HA`: Spherical harmonic basis H times calibration matrix A  
 - `f0`: Acquired field map
 - `shimlims`
-  - shimlims[1]: max shim current on each linear shim coil
-  - shimlims[2]: max shim current on each high-order shim coil
-  - shimlims[3]: max combined high-order shim current
+  - shimlims[1]: (vector) max shim current on each linear shim coil
+  - shimlims[2]: (vector) max shim current on high-order shim coils
+  - shimlims[3]: (scalar) max combined high-order shim current
 - `s0`: initial guess
 - `loss`: loss function
 
 # Output
-- `s`: optimized shim currents (including DC offset)
+- `s`: optimized shim currents (including center frequency offset)
 """
 function shimoptim(HA::Array, f0::Vector, shimlims::Tuple; 
 	s0::Vector = zeros(size(HA,2),),
@@ -31,15 +31,18 @@ function shimoptim(HA::Array, f0::Vector, shimlims::Tuple;
 	opt.ftol_rel = ftol_rel
 	opt.min_objective = (s, grad) -> loss(s, HA, f0)
 
-	if size(HA,2) > 4
-		# 2nd order shimming
-		opt.lower_bounds = [-cflim; -lin_max*ones(3,); -hos_max*ones(5,)]
-		opt.upper_bounds = [ cflim;  lin_max*ones(3,);  hos_max*ones(5,)]
-		opt.inequality_constraint = (s, grad) -> sum(abs.(s[5:9])) - hos_sum_max
+	# shim current limits
+	if length(s0) > 4
+		opt.lower_bounds = [-cflim; -lin_max; -hos_max]
+		opt.upper_bounds = [ cflim;  lin_max;  hos_max]
 	else
-		# linear shimming
-		opt.lower_bounds = [-cflim; -lin_max*ones(3,)]
-		opt.upper_bounds = [ cflim;  lin_max*ones(3,)]
+		opt.lower_bounds = [-cflim; -lin_max]
+		opt.upper_bounds = [ cflim;  lin_max]
+	end
+
+	# limit on total HO shim current
+	if ~isempty(hos_sum_max) & length(s0) > 4
+		opt.inequality_constraint = (s, grad) -> sum(abs.(s[5:end])) - hos_sum_max
 	end
 
 	(minf,mins,ret) = optimize(opt, s0)
