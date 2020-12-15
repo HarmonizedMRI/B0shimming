@@ -73,21 +73,28 @@ fa(~mask) = -inf;
 fp(~mask) = -inf;
 
 [nx ny nz] = size(f0);
-z = 1:4:(nz-10);
+z = 1:3:(nz-15);
 f0 = f0(:,:,z);
 fa = fa(:,:,z);
 fp = fp(:,:,z);
 mask = mask(:,:,z);
 
 figure;
-im(cat(1,f0.*mask, fp.*mask, fa.*mask), [-20 20]); colormap jet; 
-h = colorbar;
-h.TickLabels{end} = 'Hz';
+im('row', 3, cat(1,f0.*mask, fa.*mask, fp.*mask)); colormap jet; 
+h = colorbar; h.TickLabels{end} = 'Hz';
 axis off
 title ''
 print -dpng mgh.png
-t = sprintf('FBIRN phantom\nBaseline -- optimized shims (predicted) -- after manual shimming');
+t = sprintf('FBIRN phantom\nBaseline -- after built-in shim -- predicted best shims');
 title(t)
-rmsfp = norm(fp(mask))
-rmsfa = norm(fa(mask))
+n = sum(mask(:));
+rmsfp = norm(fp(mask))/sqrt(n)
+rmsfa = norm(fa(mask))/sqrt(n)
+
+figure;
+im('row', 3, cat(1,fa.*mask, fp.*mask)); colormap jet; 
+h = colorbar; h.TickLabels{end} = 'Hz';
+axis off
+title ''
+print -dpng mgh_closeup.png
 
