@@ -7,6 +7,19 @@
 1. Calculate optimized shim settings
   julia> include("shim.jl")
 
+```
+julia> f0 = f0[mask]                                           # baseline B0 map before shimming
+julia> l = 2                                                   # spherical harmonic order
+julia> H = getSHbasis(x[mask], y[mask], z[mask], l)            # spherical harmonics evaluated at (x,y,z)
+julia> @load "A.jld2"                                          # calibration matrix (see getcalmatrix.jl)
+julia> max_lin = 100                                           # max linear shim current
+julia> max_hos = 4000                                          # max high order shim current
+julia> maxSumHOS = 12000                                       # max total HOS current
+julia> lims = (max_lin*ones(3,), max_hos*ones(5,), maxSumHOS)
+julia> lossfun = (s, HA, f0) -> 1/2*norm(HA*s + f0)^2          # loss function
+julia> s = shimoptim(H*A, f0, lims; loss=lossfun)             # returns optimized shims 
+```
+
 
 
 ## Check SH basis
