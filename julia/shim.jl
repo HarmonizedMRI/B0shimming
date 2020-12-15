@@ -13,7 +13,6 @@ include("shimoptim.jl")
 
 # Shim calibration data
 calFile = "CalibrationDataSiemensMGH12Dec2020.jld2"
-
 calFile = "CalibrationDataUM10Dec2020.jld2"; 
 
 
