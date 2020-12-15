@@ -1,4 +1,4 @@
-
+% UM data
 load f0_redhead.mat
 masklocal = mask;
 load ~/tmp/fa_redhead.mat
@@ -23,6 +23,7 @@ fa(:,:,end+1) = -inf;
 masklocal(:,:,end+1) = 0;
 maskglobal(:,:,end+1) = 0;
 
+figure;
 im(cat(1,f0.*maskglobal, fa.*masklocal), [-100 100]); colormap jet; 
 h = colorbar;
 h.TickLabels{end} = 'Hz';
@@ -35,7 +36,6 @@ title(t)
 
 
 clear all
-
 load f0_jar.mat
 load fa_jar.mat
 
@@ -52,6 +52,7 @@ fa(~mask) = -inf;
 %fa(:,:,end+1) = -inf;
 %mask(:,:,end+1) = 0;
 
+figure;
 im(cat(1,f0.*mask, fa.*mask), [-160 100]); colormap jet; 
 h = colorbar;
 h.TickLabels{end} = 'Hz';
@@ -60,3 +61,33 @@ title ''
 print -dpng jar.png
 t = sprintf('Agar jar\nafter built-in shimming -- after proposed shimming ');
 title(t)
+
+
+% MGH data
+clear all
+load f0_mgh     % f0, fov, mask
+load fa_mgh     % fa, fov, mask
+load result;    % fp
+f0(~mask) = -inf;
+fa(~mask) = -inf;
+fp(~mask) = -inf;
+
+[nx ny nz] = size(f0);
+z = 1:4:(nz-10);
+f0 = f0(:,:,z);
+fa = fa(:,:,z);
+fp = fp(:,:,z);
+mask = mask(:,:,z);
+
+figure;
+im(cat(1,f0.*mask, fp.*mask, fa.*mask), [-20 20]); colormap jet; 
+h = colorbar;
+h.TickLabels{end} = 'Hz';
+axis off
+title ''
+print -dpng mgh.png
+t = sprintf('FBIRN phantom\nBaseline -- optimized shims (predicted) -- after manual shimming');
+title(t)
+rmsfp = norm(fp(mask))
+rmsfa = norm(fa(mask))
+

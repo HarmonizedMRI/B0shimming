@@ -12,8 +12,8 @@ include("shimoptim.jl")
 ## EDIT this section
 
 # Shim calibration data
-calFile = "CalibrationDataSiemensMGH12Dec2020.jld2"
 calFile = "CalibrationDataUM10Dec2020.jld2"; 
+calFile = "CalibrationDataSiemensMGH12Dec2020.jld2"
 
 
 # shim system current limits
@@ -23,15 +23,17 @@ shimlims = (100*ones(3,), 4000*ones(5,), 12000)   # (lin max, hos max, sum hos m
 f0File = "f0.jld2"   
 f0File = "f0_redhead.jld2"   
 f0File = "f0_jar.jld2"   
+f0File = "f0_mgh.jld2"   
 
 # order of spherical harmonic basis
 # for linear shimming only, set l = 1
 l = 2
 
 # Loss (objective) function for optimization.
-#   The field map model is f = HA*s + f0, where
+#   The field map model is f = H*A*s + f0, where
 #   s = shim amplitudes (vector), 
-#   HA = a matrix with calibrated basis functions, 
+#   H = spherical harmonic basis functions
+#   A = matrix containing shim coil expansion coefficients for basis in H
 #   f0 = baseline field map
 loss = (s, HA, f0) -> norm(HA*s + f0)^2
 
