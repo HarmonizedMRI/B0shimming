@@ -17,7 +17,7 @@ julia> max_hos = 4000                                          # max high order 
 julia> maxSumHOS = 12000                                       # max total HOS current
 julia> lims = (max_lin*ones(3,), max_hos*ones(5,), maxSumHOS)
 julia> lossfun = (s, HA, f0) -> 1/2*norm(HA*s + f0)^2          # loss function
-julia> s = shimoptim(H*A, f0, lims; loss=lossfun)             # returns optimized shims 
+julia> s = shimoptim(H*A, f0, lims; loss=lossfun)              # returns optimized shims 
 ```
 
 
