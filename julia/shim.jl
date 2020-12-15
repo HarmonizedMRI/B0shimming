@@ -21,10 +21,9 @@ calFile = "CalibrationDataUM10Dec2020.jld2";
 shimlims = (100*ones(3,), 4000*ones(5,), 12000)   # (lin max, hos max, sum hos max)
 
 # baseline field map (and fov, mask). See mat2jld2.jl.
-f0File = "f0_redhead_localmask.jld2"   
 f0File = "f0.jld2"   
-f0File = "f0_jar.jld2"   
 f0File = "f0_redhead.jld2"   
+f0File = "f0_jar.jld2"   
 
 # order of spherical harmonic basis
 # for linear shimming only, set l = 1
