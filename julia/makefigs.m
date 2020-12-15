@@ -26,36 +26,37 @@ maskglobal(:,:,end+1) = 0;
 im(cat(1,f0.*maskglobal, fa.*masklocal), [-100 100]); colormap jet; 
 h = colorbar;
 h.TickLabels{end} = 'Hz';
+axis off
+title ''
+print -dpng redhead.png
 t = sprintf('head phantom\nafter built-in shimming -- after localized shimming ');
 t = sprintf('%s\n nrms = %.2f, %.2f', t, 1.0, nrmsfa);
-disp(t)
-print -dpng redhead.png
+title(t)
 
 
-return;
+clear all
 
-mask = maskloc;
+load f0_jar.mat
+load fa_jar.mat
 
-x = 1:60;
-y = 1:60;
+x = 13:50;
+y = 13:50;
+z = 18:3:42;
+f0 = f0(x,y,z);
+fa = fa(x,y,z);
+mask = mask(x,y,z);
 
-lims = [-200 200];
+f0(~mask) = -inf;
+fa(~mask) = -inf;
+%f0(:,:,end+1) = -inf;
+%fa(:,:,end+1) = -inf;
+%mask(:,:,end+1) = 0;
 
-
-figure;
-im(cat(1,f0(x,y,z), fplin(x,y,z), fphos(x,y,z)), lims)
-colormap jet
+im(cat(1,f0.*mask, fa.*mask), [-160 100]); colormap jet; 
 h = colorbar;
 h.TickLabels{end} = 'Hz';
-t = sprintf('red head phantom\noriginal -- predicted (linear) -- predicted (hos) ');
-rmsf0 = norm(f0orig(mask));
-nrmslin = norm(fplin(mask))/rmsf0
-nrmshos = norm(fphos(mask))/rmsf0
-t = sprintf('%s\n nrms_{lin}, nrms_{hos} = %.2f, %.2f', t, nrmslin, nrmshos);
+axis off
+title ''
+print -dpng jar.png
+t = sprintf('Agar jar\nafter built-in shimming -- after proposed shimming ');
 title(t)
-print -dpng shimmed.png
-
-figure; im(mask);
-print -dpng mask.png
-
-
