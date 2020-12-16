@@ -17,7 +17,6 @@ nrmsfa = norm(fa(masklocal))/rmsf0;
 
 f0(~maskglobal) = -inf;
 fa(~maskglobal) = -inf;
-fa(~masklocal) = -inf;
 f0(:,:,end+1) = -inf;
 fa(:,:,end+1) = -inf;
 masklocal(:,:,end+1) = 0;
@@ -26,7 +25,12 @@ maskglobal(:,:,end+1) = 0;
 figure;
 r1 =  max(abs(f0(maskglobal)));
 r1 = 170;
-im(cat(1,f0.*maskglobal, fa.*masklocal), r1*[-1 1]); colormap jet; 
+load mask_readhead_local_continuous
+roi = mask_readhead_local_continuous;
+for iz = 1:size(roi,3)
+	roiedge(:,:,iz) = edge(roi(:,:,iz));
+end
+im(cat(1,f0.*maskglobal, fa.*maskglobal), r1*[-1 1]); colormap jet; 
 h = colorbar;
 h.TickLabels{end} = 'Hz';
 axis off
