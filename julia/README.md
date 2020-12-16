@@ -9,7 +9,7 @@
 
 ```
 julia> f0 = f0[mask]                                           # baseline B0 map before shimming
-julia> l = 2                                                   # spherical harmonic order
+julia> l = 6                                                   # spherical harmonic order
 julia> H = getSHbasis(x[mask], y[mask], z[mask], l)            # spherical harmonics evaluated at (x,y,z)
 julia> @load "A.jld2"                                          # calibration matrix (see getcalmatrix.jl)
 julia> max_lin = 100                                           # max linear shim current

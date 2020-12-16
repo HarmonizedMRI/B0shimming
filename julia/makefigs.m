@@ -24,7 +24,9 @@ masklocal(:,:,end+1) = 0;
 maskglobal(:,:,end+1) = 0;
 
 figure;
-im(cat(1,f0.*maskglobal, fa.*masklocal), [-100 100]); colormap jet; 
+r1 =  max(abs(f0(maskglobal)));
+r1 = 170;
+im(cat(1,f0.*maskglobal, fa.*masklocal), r1*[-1 1]); colormap jet; 
 h = colorbar;
 h.TickLabels{end} = 'Hz';
 axis off
@@ -53,7 +55,9 @@ fa(~mask) = -inf;
 %mask(:,:,end+1) = 0;
 
 figure;
-im(cat(1,f0.*mask, fa.*mask), [-160 100]); colormap jet; 
+r2 = max(abs(f0(mask)));
+r2 = 100;
+im(cat(1,f0.*mask, fa.*mask), r2*[-1 1]); colormap jet; 
 h = colorbar;
 h.TickLabels{end} = 'Hz';
 axis off
@@ -80,21 +84,21 @@ fp = fp(:,:,z);
 mask = mask(:,:,z);
 
 figure;
-im('row', 3, cat(1,f0.*mask, fa.*mask, fp.*mask)); colormap jet; 
-h = colorbar; h.TickLabels{end} = 'Hz';
-axis off
-title ''
-print -dpng mgh.png
+r3 = max(abs(f0(mask)));
+%im('row', 3, cat(1,f0.*mask, fa.*mask, fp.*mask), r*[-1 1]); colormap jet; 
+im('row', 3, cat(1,f0.*mask), r3*[-1 1]); colormap jet; 
+h = colorbar; h.TickLabels{end} = 'Hz'; axis off; title '';
+print -dpng mgh1.png
 t = sprintf('FBIRN phantom\nBaseline -- after built-in shim -- predicted best shims');
 title(t)
 n = sum(mask(:));
-rmsfp = norm(fp(mask))/sqrt(n)
-rmsfa = norm(fa(mask))/sqrt(n)
+[norm(fp(mask))/sqrt(n) norm(fa(mask))/sqrt(n)]
+
 
 figure;
-im('row', 3, cat(1,fa.*mask, fp.*mask)); colormap jet; 
-h = colorbar; h.TickLabels{end} = 'Hz';
-axis off
-title ''
-print -dpng mgh_closeup.png
+r4 = max(abs(fa(mask)));
+r4 = 15;
+im('row', 3, cat(1,fa.*mask, fp.*mask), r4*[-1 1]); colormap jet; 
+h = colorbar; h.TickLabels{end} = 'Hz'; axis off; title '';
+print -dpng mgh2.png
 
