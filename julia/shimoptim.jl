@@ -1,9 +1,10 @@
 using NLopt
 
 """
-	Optimize shims using constrained nonlinear optimization and arbitrary loss function
 
-function shimoptim(HA::Array, f0::Vector, shimlims::Tuple; s0::Vector, loss::Function)
+	shimoptim(HA::Array, f0::Vector, shimlims::Tuple; s0::Vector, loss::Function)
+
+Optimize shims using constrained nonlinear optimization and arbitrary loss function
 
 # Inputs
 - `HA`: Spherical harmonic basis H times calibration matrix A  

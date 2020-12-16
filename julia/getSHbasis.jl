@@ -5,9 +5,11 @@ using ForwardDiff
 using Plots
 
 """
-	Get spherical harmonic basis of order L, and its gradient, evaluated at spatial locations x, y, z
-	Order of 0th-2nd order terms: 
-	H[:,1]   cf (center frequency, Hz)
+	getSHbasis(x::Vector, y::Vector, z::Vector, L::Int64)
+
+Get spherical harmonic basis of order L, and its gradient, evaluated at spatial locations x, y, z
+Order of 0th-2nd order terms:  
+	H[:,1]   cf (center frequency, Hz)  
 	H[:,2]   z
 	H[:,3]   x
 	H[:,4]   y
