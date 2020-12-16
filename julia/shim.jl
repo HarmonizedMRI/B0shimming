@@ -27,7 +27,7 @@ f0File = "f0_mgh.jld2"
 
 # order of spherical harmonic basis
 # for linear shimming only, set l = 1
-l = 4
+l = 6
 
 # Loss (objective) function for optimization.
 #   The field map model is f = H*A*s + f0, where
