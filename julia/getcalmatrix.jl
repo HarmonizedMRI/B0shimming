@@ -1,9 +1,15 @@
 using LinearAlgebra
 
+"""
+	getcalmatrix(F::Array, H::Array, s::Vector)
+
+TODO: complete help text
+
+"""
 function getcalmatrix(
 	F::Array{<:Real,2},   # [nvoxels nshims] Acquired field maps
 	H::Array{<:Real,2},   # [nvoxels nbasis] Spatial basis functions
-	s::Vector             # applied shim currents (pairwise differences) used to acquire F
+	s::Vector             # applied shim currents (e.g., pairwise differences) used to acquire F
 	)
 
 	nb = size(H,2)      # number of basis functions
