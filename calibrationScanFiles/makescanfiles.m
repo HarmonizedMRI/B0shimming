@@ -16,9 +16,9 @@
 %addpath ~/pulseq_home/github/toppe/
 %addpath ~/pulseq_home/github/PulseGEq/
 
-% Scan file path (GE only)
-GEfilePath = '/usr/g/research/rathi/';
-%GEfilePath = '';
+% Settings for GE
+GEfilePath = '/usr/g/research/pulseq/';    % Scan file path (GE only)
+gmaxGE = 8;                                % Physical hardware spec (Gauss/cm)
 
 
 %% Acquisition parameters
@@ -30,6 +30,7 @@ if fov(1) ~= fov(2)
 	error('In-plane fov must be square');
 end
 nz = 2*round(nx*fov(3)/fov(1)/2);  % isotropic voxels
+deltaTE = [0 1.0];
 deltaTE = [0 0.5 1.0 2.0];       % Change in TE (from minimum) for each of the >= 2 scans needed to estimate B0 field (msec)
 oprbw = 125/4;           % Acquisition bandwidth (kHz) for TOPPE scan. Determines gradient readout trapezoid shape.
 nCycleSpoil = 2;         % readout spoiler gradient area (cycles across voxel dimension)
@@ -46,7 +47,7 @@ limits.design = toppe.systemspecs('maxSlew', 10, 'slewUnit', 'Gauss/cm/ms', ...
 % Define the PHYSICAL limits for each scanner
 % NB! When creating .mod files with toppe.writemod, 'maxGrad' MUST match the PHYSICAL system limit since gradients are scaled relative to this.
 ge.system = toppe.systemspecs('maxSlew', 20, 'slewUnit', 'Gauss/cm/ms', ...
-	'maxGrad', 8, 'gradUnit', 'Gauss/cm', ...
+	'maxGrad', gmaxGE, 'gradUnit', 'Gauss/cm', ...
 	'maxRf', 0.25, 'rfUnit', 'Gauss');
 
 siemens.system = mr.opts('MaxGrad', 28, 'GradUnit', 'mT/m', ...
@@ -271,8 +272,8 @@ fid = fopen('toppe0.meta', 'wt');
 fprintf(fid, metaFileText);
 fclose(fid);
 
-system('tar czf B0scan.tgz modules.txt scanloop.txt tipdown.mod readout.mod toppe0.meta');
+system(sprintf('tar czf B0scan_gmax%d.tgz modules.txt scanloop.txt tipdown.mod readout.mod toppe0.meta', gmaxGE*10));
 
-instr = ['\nPlace toppe0.meta in /usr/g/bin/ on scanner host\n' ...
+instr = ['\nPlace toppe0.meta on scanner host (path is hardcoded in the binary)\n' ...
 'Untar B0scan.tgz in ' GEfilePath ' on scanner host\n' ];
 fprintf(instr);
