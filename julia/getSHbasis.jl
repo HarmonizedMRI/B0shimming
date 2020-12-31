@@ -70,7 +70,6 @@ function getSHbasisGrad(
 	# vector of position vectors 
 	r = map( (x,y,z) -> [x, y, z], x, y, z)
 
-	# SH basis
 	dHx = zeros(size(x,1), sum(2*(0:L) .+ 1))
 	dHy = zeros(size(x,1), sum(2*(0:L) .+ 1))
 	dHz = zeros(size(x,1), sum(2*(0:L) .+ 1))
@@ -78,25 +77,27 @@ function getSHbasisGrad(
 	for l = 0:L
 		for m = -0:l
 			sh1 =  r -> real(c2sph(r, l, m))
-			g = r -> ForwardDiff.gradient(sh1, r)
-			df = map( r -> g(r), r)
+			df = map( r -> ForwardDiff.gradient(sh1, r), r)
 			dHx[:,ic] = map( df -> df[1], df)
 			dHy[:,ic] = map( df -> df[2], df)
-			dHz[:,ic] = map( df -> df[2], df)
+			dHz[:,ic] = map( df -> df[3], df)
 
 			ic = ic+1
 			if m != 0
 				sh1 =  r -> imag(c2sph(r, l, m))
-				g = r -> ForwardDiff.gradient(sh1, r)
-				df = map( r -> g(r), r)
+				df = map( r -> ForwardDiff.gradient(sh1, r), r)
 				dHx[:,ic] = map( df -> df[1], df)
 				dHy[:,ic] = map( df -> df[2], df)
-				dHz[:,ic] = map( df -> df[2], df)
+				dHz[:,ic] = map( df -> df[3], df)
 
 				ic = ic+1
  			end
  		end
  	end
+
+	dHx[isnan.(dHx)] .= 0;
+	dHy[isnan.(dHy)] .= 0;
+	dHz[isnan.(dHz)] .= 0;
 
 	(dHx, dHy, dHz)
 end
