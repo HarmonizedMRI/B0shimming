@@ -5,7 +5,10 @@
 1. Save calibration data and baseline fieldmap to .jld2 files, see `mat2jld2.jl` for an example.
 1. Edit the top section in `shim.jl` accordingly
 1. Calculate optimized shim settings
+```
   julia> include("shim.jl")
+```
+1. Summary of steps:
 
 ```
 julia> f0 = f0[mask]                                           # baseline B0 map before shimming
