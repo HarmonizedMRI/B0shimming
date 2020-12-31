@@ -102,7 +102,8 @@ function getSHbasisGrad(
 	dHy[isnan.(dHy)] .= 0;
 	dHz[isnan.(dHz)] .= 0;
 
-	(dH, dHx, dHy, dHz)
+	# (dH, dHx, dHy, dHz)
+	(dHx, dHy, dHz)
 end
 
 # test function
@@ -116,17 +117,17 @@ function getSHbasis(str::String)
 
 	l = 2
 	H = getSHbasis(x[:], y[:], z[:], l)
-	(dH, dHx, dHy, dHz) = getSHbasisGrad(x[:], y[:], z[:], l)
+	(dHx, dHy, dHz) = getSHbasisGrad(x[:], y[:], z[:], l)
 
 	nb = size(H,2)
 	H = reshape(H, nx, ny, nz, nb)
-	dH = reshape(dH, nx, ny, nz, nb)
+	# dH = reshape(dH, nx, ny, nz, nb)
 	dHx = reshape(dHx, nx, ny, nz, nb)
 	dHy = reshape(dHy, nx, ny, nz, nb)
 	dHz = reshape(dHz, nx, ny, nz, nb)
 
 	# jim(H[:,:,:,7], color=:jet)   # compare with >> evalspharm("test")
 
-	(H, dH, dHx, dHy, dHz)
+	(H, dHx, dHy, dHz)
 end
 
