@@ -2,12 +2,21 @@ using SphericalHarmonics
 using CoordinateTransformations: SphericalFromCartesian
 using MIRT: ndgrid, jim
 using ForwardDiff
-using Plots
+
+c2s = SphericalFromCartesian()
+
+# function evaluates spherical harmonic at one spatial location r = [x, y, z]
+function c2sph(r, l, m)
+	a = c2s(r)
+	(rho, ϕ, θ) = (a.r, a.θ, π/2 - a.ϕ)    # (radius, azimuth, colatitude)
+	Y = computeYlm(θ, ϕ; lmax=l)
+	rho^l * Y[(l,m)]
+end
 
 """
-	getSHbasis(x::Vector, y::Vector, z::Vector, L::Int64)
+	H = getSHbasis(x::Vector, y::Vector, z::Vector, L::Int64)
 
-Get spherical harmonic basis of order L, and its gradient, evaluated at spatial locations x, y, z
+Get spherical harmonic basis of order L evaluated at spatial locations x, y, z
 Order of 0th-2nd order terms:  
 	H[:,1]   cf (center frequency, Hz)  
 	H[:,2]   z
@@ -26,54 +35,21 @@ function getSHbasis(
 	L::Int64
 	)
 
-	# vector of position vectors (needed to calculate gradient)
+	# vector of position vectors 
 	r = map( (x,y,z) -> [x, y, z], x, y, z)
-
-	# function evaluates spherical harmonic at one spatial location r = [x, y, z]
-	c2s = SphericalFromCartesian()
-	function sh(r, l, m)
-		a = c2s(r)
-		(rho, ϕ, θ) = (a.r, a.θ, π/2 - a.ϕ)    # (radius, azimuth, colatitude)
-		Y = computeYlm(θ, ϕ; lmax=l)
-		rho^l * Y[(l,m)]
-	end
 
 	# SH basis
 	H = zeros(size(x,1), sum(2*(0:L) .+ 1))
-	#=
-	Hx = zeros(size(x,1), sum(2*(0:L) .+ 1))
-	Hy = zeros(size(x,1), sum(2*(0:L) .+ 1))
-	Hz = zeros(size(x,1), sum(2*(0:L) .+ 1))
-	=#
 	ic = 1
 	for l = 0:L
 		for m = -0:l
 			# SH evaluated at r
-			f = map( r -> sh(r, l, m), r)
+			f = map( r -> c2sph(r, l, m), r)
 			H[:,ic] = real(f)    
-
-			#= gradient evaluated at r
-			sh1 =  r -> real(sh(r, l, m))
-			g = r -> ForwardDiff.gradient(sh1, r)
-			df = map( r -> g(r), r)
-			Hx[:,ic] = map( r -> r[1], df)
-			Hy[:,ic] = map( r -> r[2], df)
-			Hz[:,ic] = map( r -> r[2], df)
-			=#
 
 			ic = ic+1
 			if m != 0
 				H[:,ic] = imag(f)
-
-				#=
-				sh1 =  r -> imag(sh(r, l, m))
-				g = r -> ForwardDiff.gradient(sh1, r)
-				df = map( r -> g(r), r)
-				Hx[:,ic] = map( r -> r[1], df)
-				Hy[:,ic] = map( r -> r[2], df)
-				Hz[:,ic] = map( r -> r[2], df)
-				=#
-
 				ic = ic+1
  			end
  		end
@@ -82,6 +58,47 @@ function getSHbasis(
 	H[:,1] .= 1.0    # center frequency offset
 
 	H
+end
+
+function getSHbasisGrad(
+	x::Vector{<:Real}, 
+	y::Vector{<:Real}, 
+	z::Vector{<:Real}, 
+	L::Int64
+	)
+
+	# vector of position vectors 
+	r = map( (x,y,z) -> [x, y, z], x, y, z)
+
+	# SH basis
+	dHx = zeros(size(x,1), sum(2*(0:L) .+ 1))
+	dHy = zeros(size(x,1), sum(2*(0:L) .+ 1))
+	dHz = zeros(size(x,1), sum(2*(0:L) .+ 1))
+	ic = 1
+	for l = 0:L
+		for m = -0:l
+			sh1 =  r -> real(c2sph(r, l, m))
+			g = r -> ForwardDiff.gradient(sh1, r)
+			df = map( r -> g(r), r)
+			dHx[:,ic] = map( df -> df[1], df)
+			dHy[:,ic] = map( df -> df[2], df)
+			dHz[:,ic] = map( df -> df[2], df)
+
+			ic = ic+1
+			if m != 0
+				sh1 =  r -> imag(c2sph(r, l, m))
+				g = r -> ForwardDiff.gradient(sh1, r)
+				df = map( r -> g(r), r)
+				dHx[:,ic] = map( df -> df[1], df)
+				dHy[:,ic] = map( df -> df[2], df)
+				dHz[:,ic] = map( df -> df[2], df)
+
+				ic = ic+1
+ 			end
+ 		end
+ 	end
+
+	(dHx, dHy, dHz)
 end
 
 # test function
@@ -95,10 +112,16 @@ function getSHbasis(str::String)
 
 	l = 2
 	H = getSHbasis(x[:], y[:], z[:], l)
-	nb = size(H,2)
+	(dHx, dHy, dHz) = getSHbasisGrad(x[:], y[:], z[:], l)
 
+	nb = size(H,2)
 	H = reshape(H, nx, ny, nz, nb)
+	dHx = reshape(dHx, nx, ny, nz, nb)
+	dHy = reshape(dHy, nx, ny, nz, nb)
+	dHz = reshape(dHz, nx, ny, nz, nb)
 
 	# jim(H[:,:,:,7], color=:jet)   # compare with >> evalspharm("test")
+
+	(H, dHx, dHy, dHz)
 end
 
