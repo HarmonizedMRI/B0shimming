@@ -70,6 +70,7 @@ function getSHbasisGrad(
 	# vector of position vectors 
 	r = map( (x,y,z) -> [x, y, z], x, y, z)
 
+	dH = Array{Vector}(undef, length(x), sum(2*(0:L) .+ 1))
 	dHx = zeros(size(x,1), sum(2*(0:L) .+ 1))
 	dHy = zeros(size(x,1), sum(2*(0:L) .+ 1))
 	dHz = zeros(size(x,1), sum(2*(0:L) .+ 1))
@@ -78,6 +79,7 @@ function getSHbasisGrad(
 		for m = -0:l
 			sh1 =  r -> real(c2sph(r, l, m))
 			df = map( r -> ForwardDiff.gradient(sh1, r), r)
+			dH[:,ic] = df
 			dHx[:,ic] = map( df -> df[1], df)
 			dHy[:,ic] = map( df -> df[2], df)
 			dHz[:,ic] = map( df -> df[3], df)
@@ -86,6 +88,7 @@ function getSHbasisGrad(
 			if m != 0
 				sh1 =  r -> imag(c2sph(r, l, m))
 				df = map( r -> ForwardDiff.gradient(sh1, r), r)
+				dH[:,ic] = df
 				dHx[:,ic] = map( df -> df[1], df)
 				dHy[:,ic] = map( df -> df[2], df)
 				dHz[:,ic] = map( df -> df[3], df)
@@ -99,7 +102,7 @@ function getSHbasisGrad(
 	dHy[isnan.(dHy)] .= 0;
 	dHz[isnan.(dHz)] .= 0;
 
-	(dHx, dHy, dHz)
+	(dH, dHx, dHy, dHz)
 end
 
 # test function
@@ -113,16 +116,17 @@ function getSHbasis(str::String)
 
 	l = 2
 	H = getSHbasis(x[:], y[:], z[:], l)
-	(dHx, dHy, dHz) = getSHbasisGrad(x[:], y[:], z[:], l)
+	(dH, dHx, dHy, dHz) = getSHbasisGrad(x[:], y[:], z[:], l)
 
 	nb = size(H,2)
 	H = reshape(H, nx, ny, nz, nb)
+	dH = reshape(dH, nx, ny, nz, nb)
 	dHx = reshape(dHx, nx, ny, nz, nb)
 	dHy = reshape(dHy, nx, ny, nz, nb)
 	dHz = reshape(dHz, nx, ny, nz, nb)
 
 	# jim(H[:,:,:,7], color=:jet)   # compare with >> evalspharm("test")
 
-	(H, dHx, dHy, dHz)
+	(H, dH, dHx, dHy, dHz)
 end
 
