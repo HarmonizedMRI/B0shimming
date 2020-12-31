@@ -22,13 +22,13 @@ shimlims = (100*ones(3,), 4000*ones(5,), 12000)   # (lin max, hos max, sum hos m
 # baseline field map (and fov, mask). See mat2jld2.jl.
 f0File = "f0.jld2"   
 f0File = "f0_redhead.jld2"   
-f0File = "f0_jar.jld2"   
 f0File = "f0_mgh.jld2"   
 f0File = "f0_fbirn.jld2"
+f0File = "f0_jar.jld2"   
 
 # order of spherical harmonic basis
 # for linear shimming only, set l = 1
-l = 6
+l = 2
 
 # Loss (objective) function for optimization.
 #   The field map model is f = H*A*s + f0, where
