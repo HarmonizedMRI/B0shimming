@@ -8,7 +8,8 @@
 ```
   julia> include("shim.jl")
 ```
-1. Summary of steps:
+
+Summary of steps:
 
 ```
 julia> f0 = f0[mask]                                           # baseline B0 map before shimming
