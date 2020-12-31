@@ -14,9 +14,9 @@ function c2sph(r, l, m)
 end
 
 """
-	H = getSHbasis(x::Vector, y::Vector, z::Vector, L::Int64)
+	H = getSHbasis(x, y, z, L)
 
-Get spherical harmonic basis of order L evaluated at spatial locations x, y, z
+Get spherical harmonic basis up to order L evaluated at spatial locations x, y, z
 Order of 0th-2nd order terms:  
 	H[:,1]   cf (center frequency, Hz)  
 	H[:,2]   z
@@ -57,9 +57,14 @@ function getSHbasis(
 
 	H[:,1] .= 1.0    # center frequency offset
 
-	H
+	return H
 end
 
+"""
+	getSHbasisGrad(x, y, z, L)
+
+Get gradient of spherical harmonic basis up to order L evaluated at spatial locations x, y, z
+"""
 function getSHbasisGrad(
 	x::Vector{<:Real}, 
 	y::Vector{<:Real}, 
@@ -103,10 +108,14 @@ function getSHbasisGrad(
 	dHz[isnan.(dHz)] .= 0;
 
 	# (dH, dHx, dHy, dHz)
-	(dHx, dHy, dHz)
+	return (dHx, dHy, dHz)
 end
 
-# test function
+"""
+	getSHbasis(str::String)
+
+Test function. Usage: (H, dHx, dHy, dHz) = getSHbasis("test")
+"""
 function getSHbasis(str::String)
 
 	(nx,ny,nz) = (40,40,20)
@@ -128,6 +137,6 @@ function getSHbasis(str::String)
 
 	# jim(H[:,:,:,7], color=:jet)   # compare with >> evalspharm("test")
 
-	(H, dHx, dHy, dHz)
+	return (H, dHx, dHy, dHz)
 end
 
