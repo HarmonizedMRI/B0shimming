@@ -2,10 +2,11 @@ using SphericalHarmonics
 using CoordinateTransformations: SphericalFromCartesian
 using MIRT: ndgrid, jim
 using ForwardDiff
-
-c2s = SphericalFromCartesian()
+using AutoGrad
+using ReverseDiff
 
 # function evaluates spherical harmonic at one spatial location r = [x, y, z]
+c2s = SphericalFromCartesian()
 function c2sph(r, l, m)
 	a = c2s(r)
 	(rho, ϕ, θ) = (a.r, a.θ, π/2 - a.ϕ)    # (radius, azimuth, colatitude)
@@ -35,18 +36,15 @@ function getSHbasis(
 	L::Int64
 	)
 
-	# vector of position vectors 
 	r = map( (x,y,z) -> [x, y, z], x, y, z)
 
-	# SH basis
 	H = zeros(size(x,1), sum(2*(0:L) .+ 1))
+
 	ic = 1
 	for l = 0:L
 		for m = -0:l
-			# SH evaluated at r
 			f = map( r -> c2sph(r, l, m), r)
 			H[:,ic] = real(f)    
-
 			ic = ic+1
 			if m != 0
 				H[:,ic] = imag(f)
@@ -72,32 +70,28 @@ function getSHbasisGrad(
 	L::Int64
 	)
 
-	# vector of position vectors 
 	r = map( (x,y,z) -> [x, y, z], x, y, z)
 
-	dH = Array{Vector}(undef, length(x), sum(2*(0:L) .+ 1))
+	# dH = Array{Vector}(undef, length(x), sum(2*(0:L) .+ 1))
 	dHx = zeros(size(x,1), sum(2*(0:L) .+ 1))
 	dHy = zeros(size(x,1), sum(2*(0:L) .+ 1))
 	dHz = zeros(size(x,1), sum(2*(0:L) .+ 1))
+
 	ic = 1
 	for l = 0:L
 		for m = -0:l
 			sh1 =  r -> real(c2sph(r, l, m))
 			df = map( r -> ForwardDiff.gradient(sh1, r), r)
-			dH[:,ic] = df
 			dHx[:,ic] = map( df -> df[1], df)
 			dHy[:,ic] = map( df -> df[2], df)
 			dHz[:,ic] = map( df -> df[3], df)
-
 			ic = ic+1
 			if m != 0
 				sh1 =  r -> imag(c2sph(r, l, m))
 				df = map( r -> ForwardDiff.gradient(sh1, r), r)
-				dH[:,ic] = df
 				dHx[:,ic] = map( df -> df[1], df)
 				dHy[:,ic] = map( df -> df[2], df)
 				dHz[:,ic] = map( df -> df[3], df)
-
 				ic = ic+1
  			end
  		end
@@ -107,16 +101,16 @@ function getSHbasisGrad(
 	dHy[isnan.(dHy)] .= 0;
 	dHz[isnan.(dHz)] .= 0;
 
-	# (dH, dHx, dHy, dHz)
 	return (dHx, dHy, dHz)
 end
 
-"""
-	getSHbasis(str::String)
 
-Test function. Usage: (H, dHx, dHy, dHz) = getSHbasis("test")
 """
-function getSHbasis(str::String)
+	getSHbasis("test", l)
+
+Test function. Usage: (H, dHx, dHy, dHz) = getSHbasis("test", 4)
+"""
+function getSHbasis(str::String, l::Int64)
 
 	(nx,ny,nz) = (40,40,20)
 	rx = range(-10,10,length=nx)
@@ -124,13 +118,11 @@ function getSHbasis(str::String)
 	rz = range(-10,10,length=nz)
 	(x,y,z) = ndgrid(rx,ry,rz)
 
-	l = 2
-	H = getSHbasis(x[:], y[:], z[:], l)
-	(dHx, dHy, dHz) = getSHbasisGrad(x[:], y[:], z[:], l)
+	@time H = getSHbasis(x[:], y[:], z[:], l)
+	@time (dHx, dHy, dHz) = getSHbasisGrad(x[:], y[:], z[:], l)
 
 	nb = size(H,2)
 	H = reshape(H, nx, ny, nz, nb)
-	# dH = reshape(dH, nx, ny, nz, nb)
 	dHx = reshape(dHx, nx, ny, nz, nb)
 	dHy = reshape(dHy, nx, ny, nz, nb)
 	dHz = reshape(dHz, nx, ny, nz, nb)
