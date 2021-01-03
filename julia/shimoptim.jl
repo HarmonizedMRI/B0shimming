@@ -23,7 +23,7 @@ function shimoptim(HA::Array, f0::Vector, shimlims::Tuple;
 	s0::Vector = zeros(size(HA,2),),
 	loss::Function = (s, HA, f0) -> 1/2 * norm(HA*s + f0)^2,
 	ftol_rel = 1e-3,
-	cflim = 1000    # empirical observation: needs to be finite for numerical stability
+	cflim = 2000    # empirical observation: needs to be finite for numerical stability
 	)
 
 	(lin_max, hos_max, hos_sum_max) = shimlims
@@ -32,7 +32,7 @@ function shimoptim(HA::Array, f0::Vector, shimlims::Tuple;
 	opt.ftol_rel = ftol_rel
 	opt.min_objective = (s, grad) -> loss(s, HA, f0)
 
-	# shim current limits
+	# shim current limits (box constraints)
 	if length(s0) > 4
 		opt.lower_bounds = [-cflim; -lin_max; -hos_max]
 		opt.upper_bounds = [ cflim;  lin_max;  hos_max]
@@ -43,10 +43,57 @@ function shimoptim(HA::Array, f0::Vector, shimlims::Tuple;
 
 	# limit on total HO shim current
 	if ~isempty(hos_sum_max) & length(s0) > 4
-		opt.inequality_constraint = (s, grad) -> sum(abs.(s[5:end])) - hos_sum_max
+		inequality_constraint!(opt, (s, grad) -> sum(abs.(s[5:end])) - hos_sum_max)
 	end
 
 	(minf,mins,ret) = optimize(opt, s0)
+
+	#numevals = opt.numevals # the number of function evaluations
+	#println("Loss=$minf after $numevals iterations (returned $ret)")
+
+	mins
+end
+
+function shimoptimminmax(HA::Array, f0::Vector, shimlims::Tuple; 
+	s0::Vector = zeros(size(HA,2),),
+	ftol_rel = 1e-6,
+	cflim = 1000    # empirical observation: needs to be finite for numerical stability
+	)
+
+	(lin_max, hos_max, hos_sum_max) = shimlims
+
+	# add dummy variable to be minimized
+	snaught = copy(s0)
+	snaught = [snaught; maximum(f0)]
+	HA2 = copy(HA);
+	HA2 = [HA2 zeros(size(HA2,1),)] 
+
+	opt = Opt(:LN_COBYLA, length(snaught))
+	opt.ftol_rel = ftol_rel
+	opt.min_objective = (s, grad) -> s[end]
+
+	# box constraints
+	maxf = 300
+	if length(s0) > 4
+		opt.lower_bounds = [-cflim; -lin_max; -hos_max; maxf]
+		opt.upper_bounds = [ cflim;  lin_max;  hos_max; maxf]
+	else
+		opt.lower_bounds = [-cflim; -lin_max; maxf]
+		opt.upper_bounds = [ cflim;  lin_max; maxf]
+	end
+
+	# total HO shim current limit
+	if ~isempty(hos_sum_max) & length(s0) > 4
+		#inequality_constraint!(opt, (s, grad) -> sum(abs.(s[5:end])) - hos_sum_max)
+	end
+
+	# require that field map is less than s[end] everywhere
+	inequality_constraint!(opt, (s, grad) -> HA2*s + f0 .- s[end])
+
+	(minf,mins,ret) = optimize(opt, snaught)
+
+	@show (Int(round(minf)), Int.(round.(mins)))
+	@show maximum(HA2*mins + f0)
 
 	#numevals = opt.numevals # the number of function evaluations
 	#println("Loss=$minf after $numevals iterations (returned $ret)")
