@@ -40,6 +40,7 @@ function loss(s, gHxA, gHyA, gHzA, g0x, g0y, g0z)
 	# TODO: account for non-isotropic voxel size
 	g = map( (gx,gy,gz) -> norm([gx,gy,gz],2), gHxA*s + g0x, gHyA*s + g0y, gHzA*s + g0z)
 	return norm(g, 12)^12 / length(g0x[:])
+	#return norm(g, Inf) 
 end
 
 ############################################################################################
