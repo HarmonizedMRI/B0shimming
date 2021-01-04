@@ -66,9 +66,31 @@ end
 """
 	getSHbasisGrad(x, y, z, L)
 
-Get gradient of spherical harmonic basis up to order L evaluated at spatial locations x, y, z
+Get gradient of spherical harmonic basis up to order L evaluated at spatial locations x, y, z.
+Uses one-sided finite differences (faster than ForwardDiff.gradient)
 """
 function getSHbasisGrad(
+	x::Vector{<:Real}, 
+	y::Vector{<:Real}, 
+	z::Vector{<:Real}, 
+	L::Int64
+	)
+
+	d = 0.01    # distance step
+
+	H = getSHbasis(x, y, z, L);
+	dH = getSHbasis(x, y, z, L);
+	dHx
+
+	return (dHx, dHy, dHz)
+end
+
+"""
+	getSHbasisGradAuto(x, y, z, L)
+
+Get gradient of spherical harmonic basis up to order L evaluated at spatial locations x, y, z
+"""
+function getSHbasisGradAuto(
 	x::Vector{<:Real}, 
 	y::Vector{<:Real}, 
 	z::Vector{<:Real}, 

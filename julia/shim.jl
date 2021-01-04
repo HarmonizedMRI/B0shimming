@@ -96,6 +96,7 @@ H = getSHbasis(x[mask], y[mask], z[mask], l)   # size is [N sum(2*(0:l) .+ 1)]
 # Get calibration matrix A
 A = getcalmatrix(Fm, H, diag(S))
 
+@save "A_l$l.jld2" A
 
 
 ############################################################################################
