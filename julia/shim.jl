@@ -25,10 +25,11 @@ f0File = "f0_fbirn.jld2"
 f0File = "f0_redhead.jld2"   
 f0File = "Psub1.jld2"   
 f0File = "f0_jar.jld2"   
+f0File = "Psub1_localmask.jld2"   
 
 # order of spherical harmonic basis
 # for linear shimming, set l = 1
-l = 4
+l = 6
 
 # Loss (objective) function for optimization.
 # The field map f is modeled as f = H*A*s + f0, where

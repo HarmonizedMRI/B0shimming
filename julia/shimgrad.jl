@@ -23,6 +23,7 @@ shimlims = (100*ones(3,), 4000*ones(5,), 12000)   # (lin max, hos max, sum hos m
 
 # baseline field map, fov, and mask. See mat2jld2.jl.
 f0File = "Psub1.jld2"   
+f0File = "Psub1_localmask.jld2"   
 
 # order of spherical harmonic basis
 # for linear shimming, set l = 1
@@ -40,8 +41,6 @@ function loss(s, gHxA, gHyA, gHzA, g0x, g0y, g0z)
 	g = map( (gx,gy,gz) -> norm([gx,gy,gz],2)^2, gHxA*s + g0x, gHyA*s + g0y, gHzA*s + g0z)
 	return norm(g, 2)^2
 end
-
-ftol_rel = 1e-5
 
 ############################################################################################
 
@@ -206,7 +205,7 @@ gp = map( (gx,gy,gz) -> norm([gx,gy,gz]), gpx, gpy, gpz)
 
 # display original and predicted fieldmap gradients
 pyplot()
-clim = (-100,100)
+clim = (-0,200)
 p1 = jim(cat(g0x.*mask,gpx.*mask;dims=1); clim=clim, color=:jet)
 p2 = jim(cat(g0y.*mask,gpy.*mask;dims=1); clim=clim, color=:jet)
 p3 = jim(cat(g0z.*mask,gpz.*mask;dims=1); clim=clim, color=:jet)
@@ -215,4 +214,4 @@ p4 = jim(cat(g0.*mask,gp.*mask;dims=1); clim=clim, color=:jet)
 p = plot(p1, p2, p3, p4, layout=(2,2))
 display(p4)
 
-@show [maximum(g0m) maximum(gpm)]
+@show [maximum(g0[mask]) maximum(gp[mask])]

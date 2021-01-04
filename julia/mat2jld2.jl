@@ -22,3 +22,10 @@ mask = matf["mask"];
 @save "f0_mgh.jld2" f0 fov mask
 #@save "f0_redhead.jld2" f0 fov mask
 
+# Psub1.mat
+matf = matread("Psub1_localmask.mat")
+f0 = matf["f0"];
+fov = vec(matf["fov"]);
+mask = matf["mask"];
+@save "Psub1_localmask.jld2" f0 fov mask
+
