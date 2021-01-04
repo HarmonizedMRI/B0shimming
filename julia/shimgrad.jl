@@ -1,9 +1,11 @@
 using MAT, JLD2
 using MIRT: embed!, jim, ndgrid
+using Plots
 #using LinearAlgebra
 #using SparseArrays
 
 include("getSHbasis.jl")
+include("getSHbasisGrad.jl")
 include("getcalmatrix.jl")
 include("shimoptim.jl")
 include("fieldgrad.jl")
@@ -33,9 +35,9 @@ l = 2
 #   A = matrix containing shim coil expansion coefficients for basis in H
 #   f0 = baseline field map at mask locations (vector)
 
-function loss(s, dHxA, dHyA, dHzA, g0x, g0y, g0z) 
+function loss(s, gHxA, gHyA, gHzA, g0x, g0y, g0z) 
 	# TODO: account for non-isotropic voxel size
-	g = map( (gx,gy,gz) -> norm([gx,gy,gz],2)^2, dHxA*s + g0x, dHyA*s + g0y, dHzA*s + g0z)
+	g = map( (gx,gy,gz) -> norm([gx,gy,gz],2)^2, gHxA*s + g0x, gHyA*s + g0y, gHzA*s + g0z)
 	return norm(g, 2)^2
 end
 
@@ -121,15 +123,15 @@ N = sum(mask[:])
 	range(-fov[3]/2, fov[3]/2, length=nz) 
 	)
 
-@time (dHx, dHy, dHz) = getSHbasisGrad(x[mask], y[mask], z[mask], l)  
+@time (gHx, gHy, gHz) = getSHbasisGrad(x[mask], y[mask], z[mask], l)  
 
 W = Diagonal(ones(N,))   # optional spatial weighting
 
-@time shat = shimoptim(W*dHx*A, W*dHy*A, W*dHz*A, g0xm, g0ym, g0zm, shimlims, loss)
+@time shat = shimoptim(W*gHx*A, W*gHy*A, W*gHz*A, g0xm, g0ym, g0zm, shimlims, loss)
 @show Int.(round.(shat))
 
-@show loss(0*shat, W*dHx*A, W*dHy*A, W*dHz*A, g0xm, g0ym, g0zm)   # loss before optimization
-@show loss(  shat, W*dHx*A, W*dHy*A, W*dHz*A, g0xm, g0ym, g0zm)   # loss after contrained optimization
+@show loss(0*shat, W*gHx*A, W*gHy*A, W*gHz*A, g0xm, g0ym, g0zm)   # loss before optimization
+@show loss(  shat, W*gHx*A, W*gHy*A, W*gHz*A, g0xm, g0ym, g0zm)   # loss after contrained optimization
 
 shat_ge = Int.(round.(shat))
 shat_siemens = round.(shat; digits=1)
@@ -183,20 +185,34 @@ end
 
 # predicted fieldmap after applying shims
 fp = zeros(size(f0))
-H = getSHbasis(x[mask], y[mask], z[mask], l)   # size is [N sum(2*(0:l) .+ 1)]
-f0m = f0[mask]
-fpm = H*A*shat + f0m;      
+H = getSHbasis(x[mask], y[mask], z[mask], l)
+fpm = H*A*shat + f0[mask]
 embed!(fp, fpm, mask)   
 
-# display predicted fieldmap
-p = jim(log.(abs.(A[:,:]')); color=:jet)
-p = jim(fp; clim=(-200,200), color=:jet)
-p = jim(cat(f0,fp;dims=1); clim=(-200,200), color=:jet)    # compare before and after shimming
-display(p)
+# predicted fieldmap gradients after applying shims
+gpx = zeros(size(f0))
+gpy = zeros(size(f0))
+gpz = zeros(size(f0))
+gpxm = gHx*A*shat + g0x[mask]
+gpym = gHy*A*shat + g0y[mask]
+gpzm = gHz*A*shat + g0z[mask]
+embed!(gpx, gpxm, mask)   
+embed!(gpy, gpym, mask)   
+embed!(gpz, gpzm, mask)   
 
-# write to .mat file for viewing
-matwrite("result.mat", Dict(
-	"mask" => mask,
-	"f0" => f0,
-	"fp" => fp
-))
+# net gradient before and after applying shims
+g0 = map( (gx,gy,gz) -> norm([gx,gy,gz]), g0x, g0y, g0z)
+gp = map( (gx,gy,gz) -> norm([gx,gy,gz]), gpx, gpy, gpz)
+
+# display original and predicted fieldmap gradients
+pyplot()
+clim = (-100,100)
+p1 = jim(cat(g0x.*mask,gpx.*mask;dims=1); clim=clim, color=:jet)
+p2 = jim(cat(g0y.*mask,gpy.*mask;dims=1); clim=clim, color=:jet)
+p3 = jim(cat(g0z.*mask,gpz.*mask;dims=1); clim=clim, color=:jet)
+p4 = jim(cat(g0.*mask,gp.*mask;dims=1); clim=clim, color=:jet)
+
+p = plot(p1, p2, p3, p4, layout=(2,2))
+display(p4)
+
+@show [maximum(g0m) maximum(gpm)]

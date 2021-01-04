@@ -64,75 +64,6 @@ function getSHbasis(
 end
 
 """
-	getSHbasisGrad(x, y, z, L)
-
-Get gradient of spherical harmonic basis up to order L evaluated at spatial locations x, y, z.
-Uses one-sided finite differences (faster than ForwardDiff.gradient)
-"""
-function getSHbasisGrad(
-	x::Vector{<:Real}, 
-	y::Vector{<:Real}, 
-	z::Vector{<:Real}, 
-	L::Int64
-	)
-
-	d = 0.01    # distance step
-
-	H = getSHbasis(x, y, z, L);
-	dH = getSHbasis(x, y, z, L);
-	dHx
-
-	return (dHx, dHy, dHz)
-end
-
-"""
-	getSHbasisGradAuto(x, y, z, L)
-
-Get gradient of spherical harmonic basis up to order L evaluated at spatial locations x, y, z
-"""
-function getSHbasisGradAuto(
-	x::Vector{<:Real}, 
-	y::Vector{<:Real}, 
-	z::Vector{<:Real}, 
-	L::Int64
-	)
-
-	r = map( (x,y,z) -> [x, y, z], x, y, z)
-
-	# dH = Array{Vector}(undef, length(x), sum(2*(0:L) .+ 1))
-	dHx = zeros(size(x,1), sum(2*(0:L) .+ 1))
-	dHy = zeros(size(x,1), sum(2*(0:L) .+ 1))
-	dHz = zeros(size(x,1), sum(2*(0:L) .+ 1))
-
-	ic = 1
-	for l = 0:L
-		for m = -0:l
-			sh1 =  r -> real(c2sph(r, l, m))
-			df = map( r -> ForwardDiff.gradient(sh1, r), r)
-			dHx[:,ic] = map( df -> df[1], df)
-			dHy[:,ic] = map( df -> df[2], df)
-			dHz[:,ic] = map( df -> df[3], df)
-			ic = ic+1
-			if m != 0
-				sh1 =  r -> imag(c2sph(r, l, m))
-				df = map( r -> ForwardDiff.gradient(sh1, r), r)
-				dHx[:,ic] = map( df -> df[1], df)
-				dHy[:,ic] = map( df -> df[2], df)
-				dHz[:,ic] = map( df -> df[3], df)
-				ic = ic+1
- 			end
- 		end
- 	end
-
-	dHx[isnan.(dHx)] .= 0;
-	dHy[isnan.(dHy)] .= 0;
-	dHz[isnan.(dHz)] .= 0;
-
-	return (dHx, dHy, dHz)
-end
-
-
-"""
 	getSHbasis("test", l)
 
 Test function. Usage: (H, dHx, dHy, dHz) = getSHbasis("test", 4)
@@ -153,24 +84,5 @@ function getSHbasis(str::String, l::Int64)
 	# jim(H[:,:,:,7], color=:jet)   # compare with >> evalspharm("test")
 
 	return H
-end
-
-
-function getSHbasisGrad(str::String, l::Int64)
-
-	(nx,ny,nz) = (40,40,20)
-	rx = range(-10,10,length=nx)
-	ry = range(-10,10,length=ny)
-	rz = range(-10,10,length=nz)
-	(x,y,z) = ndgrid(rx,ry,rz)
-
-	@time (dHx, dHy, dHz) = getSHbasisGrad(x[:], y[:], z[:], l)
-
-	nb = size(dHx,2)
-	dHx = reshape(dHx, nx, ny, nz, nb)
-	dHy = reshape(dHy, nx, ny, nz, nb)
-	dHz = reshape(dHz, nx, ny, nz, nb)
-
-	return (dHx, dHy, dHz)
 end
 
