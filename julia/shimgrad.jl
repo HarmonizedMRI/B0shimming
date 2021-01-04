@@ -27,7 +27,7 @@ f0File = "Psub1_localmask.jld2"
 
 # order of spherical harmonic basis
 # for linear shimming, set l = 1
-l = 2
+l = 4
 
 # Loss (objective) function for optimization.
 # The field map f is modeled as f = H*A*s + f0, where
@@ -38,8 +38,8 @@ l = 2
 
 function loss(s, gHxA, gHyA, gHzA, g0x, g0y, g0z) 
 	# TODO: account for non-isotropic voxel size
-	g = map( (gx,gy,gz) -> norm([gx,gy,gz],2)^2, gHxA*s + g0x, gHyA*s + g0y, gHzA*s + g0z)
-	return norm(g, 2)^2
+	g = map( (gx,gy,gz) -> norm([gx,gy,gz],2), gHxA*s + g0x, gHyA*s + g0y, gHzA*s + g0z)
+	return norm(g, 12)^12 / length(g0x[:])
 end
 
 ############################################################################################
@@ -205,11 +205,12 @@ gp = map( (gx,gy,gz) -> norm([gx,gy,gz]), gpx, gpy, gpz)
 
 # display original and predicted fieldmap gradients
 pyplot()
-clim = (-0,200)
-p1 = jim(cat(g0x.*mask,gpx.*mask;dims=1); clim=clim, color=:jet)
-p2 = jim(cat(g0y.*mask,gpy.*mask;dims=1); clim=clim, color=:jet)
-p3 = jim(cat(g0z.*mask,gpz.*mask;dims=1); clim=clim, color=:jet)
-p4 = jim(cat(g0.*mask,gp.*mask;dims=1); clim=clim, color=:jet)
+clim = (-0,600)
+z = 26:44
+p1 = jim(cat(g0x[:,:,z].*mask[:,:,z],gpx[:,:,z].*mask[:,:,z];dims=1); color=:jet)
+p2 = jim(cat(g0y[:,:,z].*mask[:,:,z],gpy[:,:,z].*mask[:,:,z];dims=1); color=:jet)
+p3 = jim(cat(g0z[:,:,z].*mask[:,:,z],gpz[:,:,z].*mask[:,:,z];dims=1); color=:jet)
+p4 = jim(cat(g0[:,:,z].*mask[:,:,z],gp[:,:,z].*mask[:,:,z];dims=1); clim=clim, color=:jet)
 
 p = plot(p1, p2, p3, p4, layout=(2,2))
 display(p4)
