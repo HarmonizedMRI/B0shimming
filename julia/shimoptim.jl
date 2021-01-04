@@ -58,7 +58,7 @@ end
 	Optimize shims based on loss involving fieldmap gradient
 """
 function shimoptim(dHxA::Array, dHyA::Array, dHzA::Array, g0x::Vector, g0y::Vector, g0z::Vector, shimlims::Tuple, loss::Function; 
-	s0::Vector = zeros(size(HxA,2),),
+	s0::Vector = zeros(size(dHxA,2),),
 	ftol_rel = 1e-5,
 	cflim = 2000    # empirical observation: needs to be finite for numerical stability
 	)

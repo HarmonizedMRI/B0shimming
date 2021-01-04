@@ -6,6 +6,7 @@ using MIRT: embed!, jim, ndgrid
 include("getSHbasis.jl")
 include("getcalmatrix.jl")
 include("shimoptim.jl")
+include("fieldgrad.jl")
 
 
 ############################################################################################
@@ -19,16 +20,11 @@ calFile = "CalibrationDataUM10Dec2020.jld2";
 shimlims = (100*ones(3,), 4000*ones(5,), 12000)   # (lin max, hos max, sum hos max)
 
 # baseline field map, fov, and mask. See mat2jld2.jl.
-f0File = "f0.jld2"   
-f0File = "f0_mgh.jld2"   
-f0File = "f0_fbirn.jld2"
-f0File = "f0_redhead.jld2"   
 f0File = "Psub1.jld2"   
-f0File = "f0_jar.jld2"   
 
 # order of spherical harmonic basis
 # for linear shimming, set l = 1
-l = 4
+l = 2
 
 # Loss (objective) function for optimization.
 # The field map f is modeled as f = H*A*s + f0, where
@@ -38,6 +34,7 @@ l = 4
 #   f0 = baseline field map at mask locations (vector)
 
 function loss(s, dHxA, dHyA, dHzA, g0x, g0y, g0z) 
+	# TODO: account for non-isotropic voxel size
 	g = map( (gx,gy,gz) -> norm([gx,gy,gz],2)^2, dHxA*s + g0x, dHyA*s + g0y, dHzA*s + g0z)
 	return norm(g, 2)^2
 end
@@ -124,16 +121,15 @@ N = sum(mask[:])
 	range(-fov[3]/2, fov[3]/2, length=nz) 
 	)
 
-(dHx, dHy, dHz) = getSHbasisGrad(x[mask], y[mask], z[mask], l)  
+@time (dHx, dHy, dHz) = getSHbasisGrad(x[mask], y[mask], z[mask], l)  
 
 W = Diagonal(ones(N,))   # optional spatial weighting
 
-@time shat = shimoptim(W*dHx*A, W*dHy*A, W*dHz*A, g0x, g0y, g0z, shimlims, loss)
+@time shat = shimoptim(W*dHx*A, W*dHy*A, W*dHz*A, g0xm, g0ym, g0zm, shimlims, loss)
 @show Int.(round.(shat))
 
-@show loss(0*s0, W*dHx*A, W*dHy*A, W*dHz*A, g0x, g0y, g0z)   # loss before optimization
-@show loss(s0, W*dHx*A, W*dHy*A, W*dHz*A, g0x, g0y, g0z)     # loss after unconstrained optimization
-@show loss(shat, W*dHx*A, W*dHy*A, W*dHz*A, g0x, g0y, g0z)   # loss after contrained optimization
+@show loss(0*shat, W*dHx*A, W*dHy*A, W*dHz*A, g0xm, g0ym, g0zm)   # loss before optimization
+@show loss(  shat, W*dHx*A, W*dHy*A, W*dHz*A, g0xm, g0ym, g0zm)   # loss after contrained optimization
 
 shat_ge = Int.(round.(shat))
 shat_siemens = round.(shat; digits=1)
