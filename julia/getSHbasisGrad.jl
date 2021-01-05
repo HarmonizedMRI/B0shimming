@@ -34,6 +34,8 @@ end
 
 """
 	getSHbasisGradAuto(x, y, z, L)
+
+Uses Autodiff. Works but is slower.
 """
 function getSHbasisGradAuto(
 	x::Vector{<:Real}, 
@@ -44,7 +46,6 @@ function getSHbasisGradAuto(
 
 	r = map( (x,y,z) -> [x, y, z], x, y, z)
 
-	# dH = Array{Vector}(undef, length(x), sum(2*(0:L) .+ 1))
 	dHx = zeros(size(x,1), sum(2*(0:L) .+ 1))
 	dHy = zeros(size(x,1), sum(2*(0:L) .+ 1))
 	dHz = zeros(size(x,1), sum(2*(0:L) .+ 1))
@@ -84,7 +85,9 @@ Test function.
 Compares `gHx*A*s` with gradient of `H*A*s` -- will differ slightly due to finite grid size. 
 
 """
-function getSHbasisGrad(str::String, l::Int64)
+function getSHbasisGrad(str::String)
+
+	l = 2
 
 	(nx,ny,nz) = (30,30,30)
 	fov = [10, 10, 10]             # cm
@@ -96,7 +99,7 @@ function getSHbasisGrad(str::String, l::Int64)
 	)
 
 	@time (gHx, gHy, gHz) = getSHbasisGrad(x[:], y[:], z[:], l)
-	#@time (gHxa, gHya, gHza) = getSHbasisGradAuto(x[:], y[:], z[:], l)
+	#@time (gHxa, gHya, gHza) = getSHbasisGradAuto(x[:], y[:], z[:], l)   # produces same result but is slower
 
 	@time H = getSHbasis(x[:], y[:], z[:], l)
 
@@ -115,13 +118,9 @@ function getSHbasisGrad(str::String, l::Int64)
 	@time (gx, gy, gz) = fieldgrad(fov, f)
 
 	# Calculate fieldmap using the gradients of the basis H
-	nb = size(gHx,2)
-	gx2 = gHx*A*s
-	gy2 = gHy*A*s
-	gz2 = gHz*A*s
-	gx2 = reshape(gx2, nx, ny, nz)
-	gy2 = reshape(gy2, nx, ny, nz)
-	gz2 = reshape(gz2, nx, ny, nz)
+	gx2 = reshape(gHx*A*s, nx, ny, nz)
+	gy2 = reshape(gHy*A*s, nx, ny, nz)
+	gz2 = reshape(gHz*A*s, nx, ny, nz)
 
 	clim = (-5,5)
 	p1 = jim(cat(gx-gx2;dims=1); clim=clim, color=:jet)
