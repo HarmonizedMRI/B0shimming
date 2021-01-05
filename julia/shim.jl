@@ -24,8 +24,8 @@ f0File = "f0_mgh.jld2"
 f0File = "f0_fbirn.jld2"
 f0File = "f0_redhead.jld2"   
 f0File = "Psub1.jld2"   
-f0File = "f0_jar.jld2"   
 f0File = "Psub1_localmask.jld2"   
+f0File = "f0_jar.jld2"   
 
 # order of spherical harmonic basis
 # for linear shimming, set l = 1
@@ -38,7 +38,7 @@ l = 6
 #   A = matrix containing shim coil expansion coefficients for basis in H
 #   f0 = baseline field map at mask locations (vector)
 loss2 = (s, HA, f0) -> norm(HA*s + f0, 2)^2 / length(f0)
-p = 2
+p = 8
 loss = (s, HA, f0) -> norm(HA*s + f0, p)^p / length(f0)
 
 ftol_rel = 1e-5

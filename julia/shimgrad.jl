@@ -35,6 +35,8 @@ l = 4
 #   H = spherical harmonic basis functions
 #   A = matrix containing shim coil expansion coefficients for basis in H
 #   f0 = baseline field map at mask locations (vector)
+# The fieldmap gradient g is thus g = gH*A*s + df0, where
+#   gH is the gradient of the basis
 
 function loss(s, gHxA, gHyA, gHzA, g0x, g0y, g0z) 
 	# TODO: account for non-isotropic voxel size
@@ -127,6 +129,7 @@ N = sum(mask[:])
 
 W = Diagonal(ones(N,))   # optional spatial weighting
 
+#s0 = [57, 48, 52, 2, 2000, 1, -18, 115, 87]
 @time shat = shimoptim(W*gHx*A, W*gHy*A, W*gHz*A, g0xm, g0ym, g0zm, shimlims, loss)
 @show Int.(round.(shat))
 
@@ -206,7 +209,7 @@ gp = map( (gx,gy,gz) -> norm([gx,gy,gz]), gpx, gpy, gpz)
 
 # display original and predicted fieldmap gradients
 pyplot()
-clim = (-0,600)
+clim = (-0,400)
 z = 26:44
 p1 = jim(cat(g0x[:,:,z].*mask[:,:,z],gpx[:,:,z].*mask[:,:,z];dims=1); color=:jet)
 p2 = jim(cat(g0y[:,:,z].*mask[:,:,z],gpy[:,:,z].*mask[:,:,z];dims=1); color=:jet)

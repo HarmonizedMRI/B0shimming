@@ -42,7 +42,7 @@ function shimoptim(HA::Array, f0::Vector, shimlims::Tuple;
 	end
 
 	# limit on total HO shim current
-	if ~isempty(hos_sum_max) & length(s0) > 4
+	if ~isempty(hos_sum_max) && length(s0) > 4
 		inequality_constraint!(opt, (s, grad) -> sum(abs.(s[5:end])) - hos_sum_max)
 	end
 
@@ -79,7 +79,7 @@ function shimoptim(dHxA::Array, dHyA::Array, dHzA::Array, g0x::Vector, g0y::Vect
 	end
 
 	# limit on total HO shim current
-	if ~isempty(hos_sum_max) & length(s0) > 4
+	if ~isempty(hos_sum_max) && length(s0) > 4
 		inequality_constraint!(opt, (s, grad) -> sum(abs.(s[5:end])) - hos_sum_max)
 	end
 
