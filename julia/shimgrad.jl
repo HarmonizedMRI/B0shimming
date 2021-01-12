@@ -22,8 +22,9 @@ calFile = "CalibrationDataUM10Dec2020.jld2";
 shimlims = (100*ones(3,), 4000*ones(5,), 12000)   # (lin max, hos max, sum hos max)
 
 # baseline field map, fov, and mask. See mat2jld2.jl.
-f0File = "Psub1.jld2"   
 f0File = "Psub1_localmask.jld2"   
+f0File = "Psub1.jld2"   
+f0File = "Psub1_z41_70.jld2"
 
 # order of spherical harmonic basis
 # for linear shimming, set l = 1
@@ -38,11 +39,26 @@ l = 4
 # The fieldmap gradient g is thus g = gH*A*s + df0, where
 #   gH is the gradient of the basis
 
-function loss(s, gHxA, gHyA, gHzA, g0x, g0y, g0z) 
+# Loss based on B0 field gradients
+function loss1(s, gHxA, gHyA, gHzA, g0x, g0y, g0z) 
 	# TODO: account for non-isotropic voxel size
 	g = map( (gx,gy,gz) -> norm([gx,gy,gz],2), gHxA*s + g0x, gHyA*s + g0y, gHzA*s + g0z)
-	return norm(g, 12)^12 / length(g0x[:])
+	# g = map( gy -> norm(gy,2), gHyA*s + g0y)
+	gy = gHyA*s + g0y
+	N = length(g0x[:])
+	@show [norm(gy,6)^6 norm(g, 8)^8]/N
+	beta = 1e5
+	#return (norm(gy, 6)^6 + beta * norm(g, 2)^2) / N
+	return (0*norm(gy, 6)^6 + norm(g, 8)^8) / N
 	#return norm(g, Inf) 
+end
+
+# Loss based on p-norm of B0 field
+function loss2(s, HA, f0) 
+	p = 8
+	c = norm(HA*s + f0, p)^p / length(f0)
+	@show c 
+	return c
 end
 
 ############################################################################################
@@ -126,15 +142,20 @@ N = sum(mask[:])
 	)
 
 @time (gHx, gHy, gHz) = getSHbasisGrad(x[mask], y[mask], z[mask], l)  
+H = getSHbasis(x[mask], y[mask], z[mask], l)  
 
 W = Diagonal(ones(N,))   # optional spatial weighting
 
 #s0 = [57, 48, 52, 2, 2000, 1, -18, 115, 87]
-@time shat = shimoptim(W*gHx*A, W*gHy*A, W*gHz*A, g0xm, g0ym, g0zm, shimlims, loss)
-@show Int.(round.(shat))
+#@time shat = shimoptim(W*gHx*A, W*gHy*A, W*gHz*A, g0xm, g0ym, g0zm, shimlims, loss1)
+#@show loss1(0*shat, W*gHx*A, W*gHy*A, W*gHz*A, g0xm, g0ym, g0zm)   # loss before optimization
+#@show loss1(  shat, W*gHx*A, W*gHy*A, W*gHz*A, g0xm, g0ym, g0zm)   # loss after contrained optimization
 
-@show loss(0*shat, W*gHx*A, W*gHy*A, W*gHz*A, g0xm, g0ym, g0zm)   # loss before optimization
-@show loss(  shat, W*gHx*A, W*gHy*A, W*gHz*A, g0xm, g0ym, g0zm)   # loss after contrained optimization
+@time shat = shimoptim(W*H*A, f0[mask], shimlims; loss=loss2, ftol_rel = 1e-3)
+#@show loss2(0*shat, W*H*A, f0)   # loss before optimization
+#@show loss2(  shat, W*H*A, f0)   # loss after optimization
+
+@show Int.(round.(shat))
 
 shat_ge = Int.(round.(shat))
 shat_siemens = round.(shat; digits=1)
@@ -208,15 +229,15 @@ g0 = map( (gx,gy,gz) -> norm([gx,gy,gz]), g0x, g0y, g0z)
 gp = map( (gx,gy,gz) -> norm([gx,gy,gz]), gpx, gpy, gpz)
 
 # display original and predicted fieldmap gradients
-pyplot()
-clim = (-0,400)
-z = 26:44
-p1 = jim(cat(g0x[:,:,z].*mask[:,:,z],gpx[:,:,z].*mask[:,:,z];dims=1); color=:jet)
-p2 = jim(cat(g0y[:,:,z].*mask[:,:,z],gpy[:,:,z].*mask[:,:,z];dims=1); color=:jet)
-p3 = jim(cat(g0z[:,:,z].*mask[:,:,z],gpz[:,:,z].*mask[:,:,z];dims=1); color=:jet)
-p4 = jim(cat(g0[:,:,z].*mask[:,:,z],gp[:,:,z].*mask[:,:,z];dims=1); clim=clim, color=:jet)
+#pyplot()
+clim = (-100,100)
+p1 = jim(cat(g0x.*mask, gpx.*mask; dims=1); color=:jet)
+p2 = jim(cat(g0y.*mask, gpy.*mask; dims=1); color=:jet)
+p3 = jim(cat(g0z.*mask, gpz.*mask; dims=1); color=:jet)
+p4 = jim(cat( g0.*mask,  gp.*mask; dims=1), "B0 gradient (net)"; clim=clim, color=:jet)
 
 p = plot(p1, p2, p3, p4, layout=(2,2))
 display(p4)
 
 @show [maximum(g0[mask]) maximum(gp[mask])]
+@show [maximum(g0y[mask]) maximum(gpy[mask])]
