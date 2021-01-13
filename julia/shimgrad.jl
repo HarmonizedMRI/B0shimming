@@ -28,7 +28,7 @@ f0File = "Psub1_z41_70.jld2"
 
 # order of spherical harmonic basis
 # for linear shimming, set l = 1
-l = 4
+l = 6
 
 # Loss (objective) function for optimization.
 # The field map f is modeled as f = H*A*s + f0, where
@@ -49,15 +49,15 @@ function loss1(s, gHxA, gHyA, gHzA, g0x, g0y, g0z)
 	#@show [norm(gy,6)^6 norm(g, 8)^8]/N
 	beta = 1e5
 	#return (norm(gy, 6)^6 + beta * norm(g, 2)^2) / N
-	return (0*norm(gy, 6)^6 + norm(g, 2)^2) / N
+	return (0*norm(gy, 6)^6 + norm(g, 6)^6) / N
 	#return norm(g, Inf) 
 end
 
 # Loss based on p-norm of B0 field
+p = 8
 function loss2(s, HA, f0) 
-	p = 8
+	#p = 6
 	c = norm(HA*s + f0, p)^p / length(f0)
-	#@show c 
 	return c
 end
 
@@ -239,14 +239,21 @@ gp = map( (gx,gy,gz) -> norm([gx,gy,gz]), gpx, gpy, gpz)
 # display original and predicted fieldmap gradients
 #pyplot()
 clim = (-50,50)
-p1 = jim(cat(g0x.*mask, gpx.*mask; dims=1); clim=clim, color=:jet)
-p2 = jim(cat(g0y.*mask, gpy.*mask; dims=1); clim=clim, color=:jet)
-p3 = jim(cat(g0z.*mask, gpz.*mask; dims=1); clim=clim, color=:jet)
+zr = 1:3:27
+p1 = jim(cat(g0x[:,:,zr].*mask[:,:,zr], gpx[:,:,zr].*mask[:,:,zr]; dims=1), "gx (Hz/cm)"; clim=clim, color=:jet)
+p2 = jim(cat(g0y[:,:,zr].*mask[:,:,zr], gpy[:,:,zr].*mask[:,:,zr]; dims=1), "gy (Hz/cm)"; clim=clim, color=:jet)
+p3 = jim(cat(g0z[:,:,zr].*mask[:,:,zr], gpz[:,:,zr].*mask[:,:,zr]; dims=1), "gz (Hz/cm)"; clim=clim, color=:jet)
 clim = (-70,70)
-p4 = jim(cat( g0.*mask,  gp.*mask; dims=1), "B0 gradient (net)"; clim=clim, color=:jet)
+p4 = jim(cat(g0[:,:,zr].*mask[:,:,zr], gp[:,:,zr].*mask[:,:,zr]; dims=1), "B0 gradient (Hz/cm)"; clim=clim, color=:jet)
 
-p = plot(p1, p2, p3, p4, layout=(2,2))
-display(p4)
+savefig(p1, string("gx_p", p, ".pdf"))
+savefig(p2, string("gy_p", p, ".pdf"))
+savefig(p3, string("gz_p", p, ".pdf"))
+savefig(p4, string("g_p", p, ".pdf"))
+											
+clim = (-100,100)
+p5 = jim(cat(f0[:,:,zr].*mask[:,:,zr], fp[:,:,zr].*mask[:,:,zr]; dims=1), "B0 (Hz)"; clim=clim, color=:jet)
+savefig(p5, string("b0_p", p, ".pdf"))
 
 @show [maximum(g0[mask]) maximum(gp[mask])]
 @show [maximum(g0y[mask]) maximum(gpy[mask])]
