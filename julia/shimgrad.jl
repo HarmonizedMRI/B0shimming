@@ -54,7 +54,7 @@ function loss1(s, gHxA, gHyA, gHzA, g0x, g0y, g0z)
 end
 
 # Loss based on p-norm of B0 field
-p = 8
+p = 2 
 function loss2(s, HA, f0) 
 	#p = 6
 	c = norm(HA*s + f0, p)^p / length(f0)
@@ -151,17 +151,20 @@ H = getSHbasis(x[mask], y[mask], z[mask], l)
 
 W = Diagonal(ones(N,))   # optional spatial weighting
 
-#s0 = [57, 48, 52, 2, 2000, 1, -18, 115, 87]
+# get optimal shims
 if false
 	@time shat = shimoptim(W*gHx*A, W*gHy*A, W*gHz*A, g0xm, g0ym, g0zm, shimlims, loss1)
 else
 	@time shat = shimoptim(W*H*A, f0[mask], shimlims; loss=loss2, ftol_rel = 1e-3)
 end
 
+# print losses
 @show loss1(0*shat, W*gHx*A, W*gHy*A, W*gHz*A, g0xm, g0ym, g0zm)   # loss before optimization
 @show loss1(  shat, W*gHx*A, W*gHy*A, W*gHz*A, g0xm, g0ym, g0zm)   # loss after contrained optimization
 @show loss2(0*shat, W*H*A, f0[mask], 2)
 @show loss2(  shat, W*H*A, f0[mask], 2)
+@show loss2(0*shat, W*H*A, f0[mask], p)
+@show loss2(  shat, W*H*A, f0[mask], p)
 
 @show Int.(round.(shat))
 
@@ -246,14 +249,24 @@ p3 = jim(cat(g0z[:,:,zr].*mask[:,:,zr], gpz[:,:,zr].*mask[:,:,zr]; dims=1), "gz 
 clim = (-70,70)
 p4 = jim(cat(g0[:,:,zr].*mask[:,:,zr], gp[:,:,zr].*mask[:,:,zr]; dims=1), "B0 gradient (Hz/cm)"; clim=clim, color=:jet)
 
-savefig(p1, string("gx_p", p, ".pdf"))
-savefig(p2, string("gy_p", p, ".pdf"))
-savefig(p3, string("gz_p", p, ".pdf"))
-savefig(p4, string("g_p", p, ".pdf"))
+savefig(p1, string("gx_p", p, "_l", l, ".pdf"))
+savefig(p2, string("gy_p", p, "_l", l, ".pdf"))
+savefig(p3, string("gz_p", p, "_l", l, ".pdf"))
+savefig(p4, string("g_p",  p, "_l", l, ".pdf"))
 											
 clim = (-100,100)
 p5 = jim(cat(f0[:,:,zr].*mask[:,:,zr], fp[:,:,zr].*mask[:,:,zr]; dims=1), "B0 (Hz)"; clim=clim, color=:jet)
-savefig(p5, string("b0_p", p, ".pdf"))
+savefig(p5, string("b0_p", p, "_l", l, ".pdf"))
 
 @show [maximum(g0[mask]) maximum(gp[mask])]
 @show [maximum(g0y[mask]) maximum(gpy[mask])]
+
+# write to .mat files for viewing
+matwrite(string("result_p",  p, "_l", l, ".mat"), Dict(
+	"mask" => collect(mask),
+	"zr" => collect(zr),
+	"g0" => g0,
+	"gp" => gp,
+	"f0" => f0,
+	"fp" => fp
+))
