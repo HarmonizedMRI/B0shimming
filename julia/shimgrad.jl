@@ -25,10 +25,14 @@ shimlims = (100*ones(3,), 4000*ones(5,), 12000)   # (lin max, hos max, sum hos m
 f0File = "Psub1_localmask.jld2"   
 f0File = "Psub1.jld2"   
 f0File = "Psub1_z41_70.jld2"
+subject = 1
+rot = 1
+f0File = string("data/Sub", subject, "rot", rot, ".jld2")
+zmask = collect(21:40)
 
 # order of spherical harmonic basis
 # for linear shimming, set l = 1
-l = 6
+l = 4
 
 # Loss (objective) function for optimization.
 # The field map f is modeled as f = H*A*s + f0, where
@@ -54,7 +58,7 @@ function loss1(s, gHxA, gHyA, gHzA, g0x, g0y, g0z)
 end
 
 # Loss based on p-norm of B0 field
-p = 6
+p = 2
 function loss2(s, HA, f0) 
 	return norm(HA*s + f0, p)^p / length(f0)
 end
@@ -76,7 +80,9 @@ end
 # S = [8 8], shim amplitudes used to obtain F (hardware units)
 @load "$calFile" F S fov mask
 
-mask = BitArray(mask)
+mask2 = 0*mask;
+mask2[:,:,zmask] = mask[:,:,zmask]
+mask = BitArray(mask2)
 
 if l < 2
 	F = F[:,:,:,1:3]
@@ -153,9 +159,9 @@ if false
 	@time shat = shimoptim(W*gHx*A, W*gHy*A, W*gHz*A, g0xm, g0ym, g0zm, shimlims, loss1)
 else
 	# Initialize shims with p=2 solution
-	@time sinit = shimoptim(W*H*A, f0[mask], shimlims; ftol_rel = 1e-5)
-	@show loss2(sinit, W*H*A, f0[mask], p)
-	@time shat = shimoptim(W*H*A, f0[mask], shimlims; loss=loss2, ftol_rel = 1e-3) #, s0=sinit)
+	#@time sinit = shimoptim(W*H*A, f0[mask], shimlims; ftol_rel = 1e-5)
+	#@show loss2(sinit, W*H*A, f0[mask], p)
+	@time shat = shimoptim(W*H*A, f0[mask], shimlims; loss=loss2, ftol_rel = 1e-5) #, s0=sinit)
 	@show loss2(shat, W*H*A, f0[mask], p)
 end
 
@@ -243,21 +249,21 @@ gp = map( (gx,gy,gz) -> norm([gx,gy,gz]), gpx, gpy, gpz)
 # plot original and predicted fieldmap gradients and save to pdf files
 #pyplot()
 clim = (-50,50)
-zr = 1:3:27
+zr = zmask
 p1 = jim(cat(g0x[:,:,zr].*mask[:,:,zr], gpx[:,:,zr].*mask[:,:,zr]; dims=1), "gx (Hz/cm)"; clim=clim, color=:jet)
 p2 = jim(cat(g0y[:,:,zr].*mask[:,:,zr], gpy[:,:,zr].*mask[:,:,zr]; dims=1), "gy (Hz/cm)"; clim=clim, color=:jet)
 p3 = jim(cat(g0z[:,:,zr].*mask[:,:,zr], gpz[:,:,zr].*mask[:,:,zr]; dims=1), "gz (Hz/cm)"; clim=clim, color=:jet)
 clim = (-70,70)
 p4 = jim(cat(g0[:,:,zr].*mask[:,:,zr], gp[:,:,zr].*mask[:,:,zr]; dims=1), "B0 gradient (Hz/cm)"; clim=clim, color=:jet)
 
-savefig(p1, string("gx_p", p, "_l", l, ".pdf"))
-savefig(p2, string("gy_p", p, "_l", l, ".pdf"))
-savefig(p3, string("gz_p", p, "_l", l, ".pdf"))
-savefig(p4, string("g_p",  p, "_l", l, ".pdf"))
+#savefig(p1, string("results/Sub", subject, "rot", rot, "_gx_p", p, "_l", l, ".pdf"))
+#savefig(p2, string("gy_p", p, "_l", l, ".pdf"))
+#savefig(p3, string("gz_p", p, "_l", l, ".pdf"))
+savefig(p4, string("results/Sub", subject, "rot", rot, "_g_p", p, "_l", l, ".pdf"))
 											
 clim = (-100,100)
 p5 = jim(cat(f0[:,:,zr].*mask[:,:,zr], fp[:,:,zr].*mask[:,:,zr]; dims=1), "B0 (Hz)"; clim=clim, color=:jet)
-savefig(p5, string("b0_p", p, "_l", l, ".pdf"))
+savefig(p5, string("results/Sub", subject, "rot", rot, "_b0_p", p, "_l", l, ".pdf"))
 
 @show p
 @show [maximum(g0[mask]) maximum(gp[mask])]
@@ -266,7 +272,7 @@ savefig(p5, string("b0_p", p, "_l", l, ".pdf"))
 # @show [maximum(g0y[mask]) maximum(gpy[mask])]
 
 # write to .mat files for viewing
-matwrite(string("result_p",  p, "_l", l, ".mat"), Dict(
+matwrite(string("results/Sub", subject, "rot", rot, "_p",  p, "_l", l, ".mat"), Dict(
 	"mask" => collect(mask),
 	"zr" => collect(zr),
 	"g0" => g0,

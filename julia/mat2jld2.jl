@@ -35,3 +35,17 @@ f0 = matf["f0"];
 fov = vec(matf["fov"]);
 mask = matf["mask"];
 @save "Psub1_z41_70.jld2" f0 fov mask
+
+# Open B0 field map data set from https://cds.ismrm.org/protected/20MPresentations/abstracts/4219.html
+
+matf = matread("data/FieldmapsAllSubs.mat");
+fov = [25.6, 25.6, 22.4]    # cm
+for subject = 1:18
+	for rot = 1:7
+		f0 = matf[string("FieldmapsSub", subject)][:,:,:,rot];
+		mask = matf[string("MaskSub", rot)][:,:,:,rot];
+		@save string("data/Sub", subject, "rot", rot, ".jld2") f0 fov mask;
+	end
+end
+
+
