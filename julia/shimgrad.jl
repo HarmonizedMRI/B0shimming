@@ -54,16 +54,13 @@ function loss1(s, gHxA, gHyA, gHzA, g0x, g0y, g0z)
 end
 
 # Loss based on p-norm of B0 field
-p = 2 
+p = 6
 function loss2(s, HA, f0) 
-	#p = 6
-	c = norm(HA*s + f0, p)^p / length(f0)
-	return c
+	return norm(HA*s + f0, p)^p / length(f0)
 end
 
 function loss2(s, HA, f0, p) 
-	c = norm(HA*s + f0, p)^p / length(f0)
-	return c
+	return norm(HA*s + f0, p)^p / length(f0)
 end
 
 ############################################################################################
@@ -155,12 +152,16 @@ W = Diagonal(ones(N,))   # optional spatial weighting
 if false
 	@time shat = shimoptim(W*gHx*A, W*gHy*A, W*gHz*A, g0xm, g0ym, g0zm, shimlims, loss1)
 else
-	@time shat = shimoptim(W*H*A, f0[mask], shimlims; loss=loss2, ftol_rel = 1e-3)
+	# Initialize shims with p=2 solution
+	@time sinit = shimoptim(W*H*A, f0[mask], shimlims; ftol_rel = 1e-5)
+	@show loss2(sinit, W*H*A, f0[mask], p)
+	@time shat = shimoptim(W*H*A, f0[mask], shimlims; loss=loss2, ftol_rel = 1e-3) #, s0=sinit)
+	@show loss2(shat, W*H*A, f0[mask], p)
 end
 
 # print losses
-@show loss1(0*shat, W*gHx*A, W*gHy*A, W*gHz*A, g0xm, g0ym, g0zm)   # loss before optimization
-@show loss1(  shat, W*gHx*A, W*gHy*A, W*gHz*A, g0xm, g0ym, g0zm)   # loss after contrained optimization
+# @show loss1(0*shat, W*gHx*A, W*gHy*A, W*gHz*A, g0xm, g0ym, g0zm)   # loss before optimization
+# @show loss1(  shat, W*gHx*A, W*gHy*A, W*gHz*A, g0xm, g0ym, g0zm)   # loss after contrained optimization
 @show loss2(0*shat, W*H*A, f0[mask], 2)
 @show loss2(  shat, W*H*A, f0[mask], 2)
 @show loss2(0*shat, W*H*A, f0[mask], p)
@@ -239,7 +240,7 @@ embed!(gpz, gpzm, mask)
 g0 = map( (gx,gy,gz) -> norm([gx,gy,gz]), g0x, g0y, g0z)
 gp = map( (gx,gy,gz) -> norm([gx,gy,gz]), gpx, gpy, gpz)
 
-# display original and predicted fieldmap gradients
+# plot original and predicted fieldmap gradients and save to pdf files
 #pyplot()
 clim = (-50,50)
 zr = 1:3:27
@@ -258,8 +259,11 @@ clim = (-100,100)
 p5 = jim(cat(f0[:,:,zr].*mask[:,:,zr], fp[:,:,zr].*mask[:,:,zr]; dims=1), "B0 (Hz)"; clim=clim, color=:jet)
 savefig(p5, string("b0_p", p, "_l", l, ".pdf"))
 
+@show p
 @show [maximum(g0[mask]) maximum(gp[mask])]
-@show [maximum(g0y[mask]) maximum(gpy[mask])]
+@show [maximum(f0[mask]) maximum(fp[mask])]
+@show [minimum(f0[mask]) minimum(fp[mask])]
+# @show [maximum(g0y[mask]) maximum(gpy[mask])]
 
 # write to .mat files for viewing
 matwrite(string("result_p",  p, "_l", l, ".mat"), Dict(
