@@ -32,12 +32,12 @@ zmask = collect(1:64)
 zmask = collect(27:42)
 
 # define outliers
-f0max = 150
-f0min = -150
+f0max = Inf
+f0min = -Inf
 
 # order of spherical harmonic basis
 # for linear shimming, set l = 1
-l = 4
+l = 1
 
 # Loss (objective) function for optimization.
 # The field map f is modeled as f = H*A*s + f0, where
@@ -63,7 +63,7 @@ function loss1(s, gHxA, gHyA, gHzA, g0x, g0y, g0z)
 end
 
 # Loss based on p-norm of B0 field
-p = 8
+p = 2
 function loss2(s, HA, f0) 
 	return norm(HA*s + f0, p)^p / length(f0)
 end
@@ -85,7 +85,7 @@ end
 # S = [8 8], shim amplitudes used to obtain F (hardware units)
 @load "$calFile" F S fov mask
 
-if l < 2
+if l == 1
 	F = F[:,:,:,1:3]
 	s = diag(S)
 	S = Diagonal(s[1:3])
@@ -254,7 +254,7 @@ gp = map( (gx,gy,gz) -> norm([gx,gy,gz]), gpx, gpy, gpz)
 
 # plot original and predicted fieldmap gradients and save to pdf files
 #pyplot()
-clim = (-50,50)
+clim = (-100,100)
 zr = zmask
 p1 = jim(cat(g0x[:,:,zr].*mask[:,:,zr], gpx[:,:,zr].*mask[:,:,zr]; dims=1), "gx (Hz/cm)"; clim=clim, color=:jet)
 p2 = jim(cat(g0y[:,:,zr].*mask[:,:,zr], gpy[:,:,zr].*mask[:,:,zr]; dims=1), "gy (Hz/cm)"; clim=clim, color=:jet)
@@ -267,7 +267,7 @@ p4 = jim(cat(g0[:,:,zr].*mask[:,:,zr], gp[:,:,zr].*mask[:,:,zr]; dims=1), "B0 gr
 #savefig(p3, string("gz_p", p, "_l", l, ".pdf"))
 savefig(p4, string("results/Sub", subject, "rot", rot, "_g_p", p, "_l", l, ".pdf"))
 											
-clim = (-100,100)
+clim = (-200,200)
 p5 = jim(cat(f0[:,:,zr].*mask[:,:,zr], fp[:,:,zr].*mask[:,:,zr]; dims=1), "B0 (Hz)"; clim=clim, color=:jet)
 savefig(p5, string("results/Sub", subject, "rot", rot, "_b0_p", p, "_l", l, ".pdf"))
 
@@ -277,6 +277,7 @@ display(p5)
 @show [maximum(g0[mask]) maximum(gp[mask])]
 @show [maximum(f0[mask]) maximum(fp[mask])]
 @show [minimum(f0[mask]) minimum(fp[mask])]
+@show [maximum(abs.(f0[mask])) maximum(abs.(fp[mask]))]
 # @show [maximum(g0y[mask]) maximum(gpy[mask])]
 
 # write to .mat files for viewing
