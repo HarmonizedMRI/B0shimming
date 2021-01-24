@@ -14,11 +14,11 @@ include("fieldgrad.jl")
 ############################################################################################
 ## EDIT this section
 
-# Shim calibration data
+# Shim calibration data and shim system current limits
 calFile = "CalibrationDataSiemensMGH12Dec2020.jld2"
-calFile = "CalibrationDataUM10Dec2020.jld2"; 
 
-# shim system current limits
+# GE MR750:
+calFile = "CalibrationDataUM10Dec2020.jld2"; 
 shimlims = (100*ones(3,), 4000*ones(5,), 12000)   # (lin max, hos max, sum hos max)
 
 # baseline field map, fov, and mask. See mat2jld2.jl.
@@ -28,7 +28,12 @@ f0File = "Psub1_z41_70.jld2"
 subject = 1
 rot = 1
 f0File = string("data/Sub", subject, "rot", rot, ".jld2")
-zmask = collect(21:40)
+zmask = collect(1:64)
+zmask = collect(27:42)
+
+# define outliers
+f0max = 150
+f0min = -150
 
 # order of spherical harmonic basis
 # for linear shimming, set l = 1
@@ -58,7 +63,7 @@ function loss1(s, gHxA, gHyA, gHzA, g0x, g0y, g0z)
 end
 
 # Loss based on p-norm of B0 field
-p = 2
+p = 8
 function loss2(s, HA, f0) 
 	return norm(HA*s + f0, p)^p / length(f0)
 end
@@ -79,10 +84,6 @@ end
 # F = [nx ny nz 8] (Hz), in order 'x', 'y', 'z', 'z2', 'xy', 'zx', 'x2y2', 'zy'
 # S = [8 8], shim amplitudes used to obtain F (hardware units)
 @load "$calFile" F S fov mask
-
-mask2 = 0*mask;
-mask2[:,:,zmask] = mask[:,:,zmask]
-mask = BitArray(mask2)
 
 if l < 2
 	F = F[:,:,:,1:3]
@@ -133,7 +134,12 @@ A = getcalmatrix(Fm, H, diag(S))
 
 (nx,ny,nz) = size(f0)
 
-mask = BitArray(mask)
+mask[f0.>f0max] .= 0
+mask[f0.<f0min] .= 0
+
+mask2 = 0*mask;
+mask2[:,:,zmask] = mask[:,:,zmask]
+mask = BitArray(mask2)
 
 (g0x,g0y,g0z) = fieldgrad(fov, f0);
 
@@ -161,8 +167,8 @@ else
 	# Initialize shims with p=2 solution
 	#@time sinit = shimoptim(W*H*A, f0[mask], shimlims; ftol_rel = 1e-5)
 	#@show loss2(sinit, W*H*A, f0[mask], p)
-	@time shat = shimoptim(W*H*A, f0[mask], shimlims; loss=loss2, ftol_rel = 1e-5) #, s0=sinit)
-	@show loss2(shat, W*H*A, f0[mask], p)
+	@time shat = shimoptim(W*H*A, f0[mask], shimlims; loss=loss2, ftol_rel = 1e-3) #, s0=sinit)
+	#@show loss2(shat, W*H*A, f0[mask], p)
 end
 
 # print losses
@@ -264,6 +270,8 @@ savefig(p4, string("results/Sub", subject, "rot", rot, "_g_p", p, "_l", l, ".pdf
 clim = (-100,100)
 p5 = jim(cat(f0[:,:,zr].*mask[:,:,zr], fp[:,:,zr].*mask[:,:,zr]; dims=1), "B0 (Hz)"; clim=clim, color=:jet)
 savefig(p5, string("results/Sub", subject, "rot", rot, "_b0_p", p, "_l", l, ".pdf"))
+
+display(p5)
 
 @show p
 @show [maximum(g0[mask]) maximum(gp[mask])]
