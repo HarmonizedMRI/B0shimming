@@ -37,7 +37,7 @@ f0min = -Inf
 
 # order of spherical harmonic basis
 # for linear shimming, set l = 1
-l = 1
+l = 6
 
 # Loss (objective) function for optimization.
 # The field map f is modeled as f = H*A*s + f0, where
@@ -62,6 +62,8 @@ function loss1(s, gHxA, gHyA, gHzA, g0x, g0y, g0z)
 	#return norm(g, Inf) 
 end
 
+ftol_rel = 1e-5
+
 # Loss based on p-norm of B0 field
 p = 2
 function loss2(s, HA, f0) 
@@ -85,7 +87,7 @@ end
 # S = [8 8], shim amplitudes used to obtain F (hardware units)
 @load "$calFile" F S fov mask
 
-if l == 1
+if l < 2
 	F = F[:,:,:,1:3]
 	s = diag(S)
 	S = Diagonal(s[1:3])
@@ -119,10 +121,14 @@ for ii = 1:nShim
 end
 
 # Get spherical harmonic basis of degree l
-H = getSHbasis(x[mask], y[mask], z[mask], l)   # size is [N sum(2*(0:l) .+ 1)]
-
-# Get calibration matrix A
-A = getcalmatrix(Fm, H, diag(S))
+if l > 0
+	H = getSHbasis(x[mask], y[mask], z[mask], l)   # size is [N sum(2*(0:l) .+ 1)]
+	# Get calibration matrix A
+	A = getcalmatrix(Fm, H, diag(S))
+else
+	H = ones(N,)
+	A = 1.0
+end
 
 
 
@@ -137,17 +143,21 @@ A = getcalmatrix(Fm, H, diag(S))
 mask[f0.>f0max] .= 0
 mask[f0.<f0min] .= 0
 
+maskfull = copy(mask)
+maskfull = BitArray(maskfull)
+
 mask2 = 0*mask;
 mask2[:,:,zmask] = mask[:,:,zmask]
 mask = BitArray(mask2)
 
-(g0x,g0y,g0z) = fieldgrad(fov, f0);
+(g0x,g0y,g0z) = fieldgrad(fov, f0)
 
 g0xm = g0x[mask]
 g0ym = g0y[mask]
 g0zm = g0z[mask]
 
 N = sum(mask[:])
+Nfull = sum(maskfull[:])
 
 (x,y,z) = ndgrid(
 	range(-fov[1]/2, fov[1]/2, length=nx), 
@@ -157,8 +167,10 @@ N = sum(mask[:])
 
 @time (gHx, gHy, gHz) = getSHbasisGrad(x[mask], y[mask], z[mask], l)  
 H = getSHbasis(x[mask], y[mask], z[mask], l)  
+Hfull = getSHbasis(x[maskfull], y[maskfull], z[maskfull], l)  
 
 W = Diagonal(ones(N,))   # optional spatial weighting
+Wfull = Diagonal(ones(Nfull,)) 
 
 # get optimal shims
 if false
@@ -167,7 +179,8 @@ else
 	# Initialize shims with p=2 solution
 	#@time sinit = shimoptim(W*H*A, f0[mask], shimlims; ftol_rel = 1e-5)
 	#@show loss2(sinit, W*H*A, f0[mask], p)
-	@time shat = shimoptim(W*H*A, f0[mask], shimlims; loss=loss2, ftol_rel = 1e-3) #, s0=sinit)
+	@time shat = shimoptim(W*H*A, f0[mask], shimlims; loss=loss2, ftol_rel=ftol_rel) #, s0=sinit)
+	#@time shatfull = shimoptim(Wfull*Hfull*A, f0[maskfull], shimlims; loss=loss2, ftol_rel = 1e-3) #, s0=sinit)
 	#@show loss2(shat, W*H*A, f0[mask], p)
 end
 
@@ -176,6 +189,8 @@ end
 # @show loss1(  shat, W*gHx*A, W*gHy*A, W*gHz*A, g0xm, g0ym, g0zm)   # loss after contrained optimization
 @show loss2(0*shat, W*H*A, f0[mask], 2)
 @show loss2(  shat, W*H*A, f0[mask], 2)
+#@show loss2(0*shatfull, W*H*A, f0[mask], 2)
+#@show loss2(  shatfull, W*H*A, f0[mask], 2)
 @show loss2(0*shat, W*H*A, f0[mask], p)
 @show loss2(  shat, W*H*A, f0[mask], p)
 

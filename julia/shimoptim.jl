@@ -36,9 +36,12 @@ function shimoptim(HA::Array, f0::Vector, shimlims::Tuple;
 	if length(s0) > 4
 		opt.lower_bounds = [-cflim; -lin_max; -hos_max]
 		opt.upper_bounds = [ cflim;  lin_max;  hos_max]
-	else
+	elseif length(s0) > 1
 		opt.lower_bounds = [-cflim; -lin_max]
 		opt.upper_bounds = [ cflim;  lin_max]
+	else
+		opt.lower_bounds = [-cflim]
+		opt.upper_bounds = [ cflim]
 	end
 
 	# limit on total HO shim current
