@@ -60,8 +60,13 @@ fa(~mask) = -inf;
 
 figure;
 r2 = max(abs(f0(mask)));
-r2 = 100;
-im(cat(1,f0.*mask, fa.*mask), r2*[-1 1]); colormap jet; 
+r2 = 150;
+f0(~mask) = -r2;
+fa(~mask) = -r2;
+im(cat(1,f0, fa), r2*[-1 1]); colormap jet; 
+m = colormap;
+m(1,:) = 0;   % black background
+colormap(m);
 h = colorbar;
 h.TickLabels{end} = 'Hz';
 axis off
