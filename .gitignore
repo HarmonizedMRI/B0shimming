@@ -2,9 +2,8 @@
 
 # except
 !.gitignore
-!*.m
 !*.jl
-#!*.txt
+!*.m
 !*.md
 
 # even if in sub-dirs
