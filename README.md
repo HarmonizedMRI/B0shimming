@@ -10,22 +10,18 @@ For example, the user may want to:
 1. Minimize root-mean-square (RMS) B0 inhomogeneity over a user-specified 3D subvolume.
 1. Minimize the maximum through-voxel B0 gradient, to reduce signal loss in T2\*-weighted imaging.
 
-To do this we define the system shim model
+To do this we define the shim system model
 ```
 f(s) = H*A*s + f0         
-f:  [N 1]           fieldmap (Hz), where N = number of voxels
-f0: [N 1]           observed 'baseline' field map, e.g., after setting all shim currents to zero
-H:  [N nShim]       spherical harmonic basis (see getSHbasis.m)
-A:  [nShim nShim]   calibration matrix
-s:  [nShim 1]       change in shim current amplitudes from baseline (hardware units)
+f:  [N 1]        fieldmap (Hz), where N = number of voxels
+f0: [N 1]        observed 'baseline' field map, e.g., after setting all shim currents to zero
+H:  [N nb]       spherical harmonic basis (see julia/getSHbasis.jl). nb = number of basis functions.
+A:  [nb nb]      calibration matrix (see julia/getcalmatrix.jl)
+s:  [nShim+1 1]  change in center frequency (cf) offset and shim current amplitudes from baseline (hardware units)
 ```
-For 2nd order shim systems (e.g., GE MR750), we have
-```
-nShim = 9
-H = [1 x y z z2 xy zx x2-y2 zy]
-```
-where each term in `H` is an `[N 1]` vector, evaluated at the same `N` spatial locations as `f`. 
-The first column corresponds to the DC (spatially invariant) offset.
+For 2nd order shim systems, nShim = 8 (3 linear and 5 2nd order).  
+Each term in `H` is an `[N 1]` vector, evaluated at the same `N` spatial locations as `f`. 
+The first column corresponds to the center frequency offset.
 
 The goal here is to set the shim current vector `s` to make `f(s)` as homogeneous
 as possible -- or more generally, to choose `s` according to some desired property of `f`
@@ -43,13 +39,9 @@ We then obtain `A` as follows:
 F = HAS
 F: [N nShim]                   fieldmaps (Hz) obtained by turning on/off individual shim coils
 S: [nShim nShim]               applied shim currents (pairwise differences) used to obtain F
-A = inv(H'*H)*H'*F*inv(S);     [nShim nShim] 
+A = inv(H'*H)*H'*F*inv(S);     [nShim+1 nShim+1]  (see julia/getcalmatrix.jl). Include cf offset term.
 ```
 
-Example: ./examples/demoWLS.m  
-
-As an example, here is the calibration matrix obtained on a GE 3T scanner:
-<img src="doc/A.png" alt="Example calibration matrix" width="400"/>
 
 
 ## How to perform 2nd order shimming
