@@ -1,0 +1,17 @@
+*
+
+# except
+!.gitignore
+!*.m
+!*.jl
+#!*.txt
+!*.md
+
+# even if in sub-dirs
+!*/
+
+# but never in these folders
+*back/
+*arch/
+*.vscode/
+
