@@ -16,14 +16,9 @@
 %addpath ~/pulseq_home/github/toppe/
 %addpath ~/pulseq_home/github/PulseGEq/
 
-<<<<<<< HEAD
-% Scan file path (GE only)
-GEfilePath = '/usr/g/research/rathi/';
-=======
 % Settings for GE
 GEfilePath = '/usr/g/research/pulseq/';    % Scan file path (GE only)
 gmaxGE = 8;                                % Physical hardware spec (Gauss/cm)
->>>>>>> develop
 
 
 %% Acquisition parameters
@@ -35,10 +30,7 @@ if fov(1) ~= fov(2)
 	error('In-plane fov must be square');
 end
 nz = 2*round(nx*fov(3)/fov(1)/2);  % isotropic voxels
-<<<<<<< HEAD
-=======
 deltaTE = [0 1.0];
->>>>>>> develop
 deltaTE = [0 0.5 1.0 2.0];       % Change in TE (from minimum) for each of the >= 2 scans needed to estimate B0 field (msec)
 oprbw = 125/4;           % Acquisition bandwidth (kHz) for TOPPE scan. Determines gradient readout trapezoid shape.
 nCycleSpoil = 2;         % readout spoiler gradient area (cycles across voxel dimension)
@@ -55,11 +47,7 @@ limits.design = toppe.systemspecs('maxSlew', 10, 'slewUnit', 'Gauss/cm/ms', ...
 % Define the PHYSICAL limits for each scanner
 % NB! When creating .mod files with toppe.writemod, 'maxGrad' MUST match the PHYSICAL system limit since gradients are scaled relative to this.
 ge.system = toppe.systemspecs('maxSlew', 20, 'slewUnit', 'Gauss/cm/ms', ...
-<<<<<<< HEAD
-	'maxGrad', 8, 'gradUnit', 'Gauss/cm', ...
-=======
 	'maxGrad', gmaxGE, 'gradUnit', 'Gauss/cm', ...
->>>>>>> develop
 	'maxRf', 0.25, 'rfUnit', 'Gauss');
 
 siemens.system = mr.opts('MaxGrad', 28, 'GradUnit', 'mT/m', ...
@@ -195,11 +183,7 @@ for iz = 0:nz     % iz = 0 is used as discarded acquisitions to reach steady sta
 
 		 	% readout (TOPPE)
 			toppe.write2loop('readout.mod', ...
-<<<<<<< HEAD
-				'Gamplitude', [a_gz a_gy 1]', ...
-=======
 				'Gamplitude', [1 a_gy a_gz]', ...
->>>>>>> develop
 				'DAQphase', rfphs, ...
 				'slice', max(iz,1), 'echo', ie, 'view', iy, ...  % data is stored in 'slice', 'echo', and 'view' indeces. Will change to ScanArchive in future.
 				'textra', max(deltaTE)-deltaTE(ie), ...
@@ -277,12 +261,8 @@ fid = fopen('modules.txt', 'wt');
 fprintf(fid, modFileText);
 fclose(fid);
 
-<<<<<<< HEAD
-% Create toppe0.meta. This file is the main entry point for toppev3, and must be placed in /usr/g/bin/. 
-=======
 % Create toppe0.meta. This file is the main entry point for toppev3, 
 % and must be placed in /usr/g/bin/ (or another hardcoded path). 
->>>>>>> develop
 metaFileText = ['' ...
 GEfilePath 'modules.txt\n' ...
 GEfilePath 'scanloop.txt\n' ...
@@ -292,14 +272,8 @@ fid = fopen('toppe0.meta', 'wt');
 fprintf(fid, metaFileText);
 fclose(fid);
 
-<<<<<<< HEAD
-system('tar czf B0scan.tgz modules.txt scanloop.txt tipdown.mod readout.mod');
-
-instr = ['\nPlace toppe0.meta in /usr/g/bin/ on scanner host\n' ...
-=======
 system(sprintf('tar czf B0scan_gmax%d.tgz modules.txt scanloop.txt tipdown.mod readout.mod toppe0.meta', gmaxGE*10));
 
 instr = ['\nPlace toppe0.meta on scanner host (path is hardcoded in the binary)\n' ...
->>>>>>> develop
 'Untar B0scan.tgz in ' GEfilePath ' on scanner host\n' ];
 fprintf(instr);
