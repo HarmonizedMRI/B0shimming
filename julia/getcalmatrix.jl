@@ -1,19 +1,29 @@
 using LinearAlgebra
 
+"""
+	getcalmatrix(F::Array, H::Array, s::Vector)
+
+TODO: complete help text
+
+"""
 function getcalmatrix(
-	F::Array{<:Real,2},
-	H::Array{<:Real,2},
-	S::Array{<:Real,2}
+	F::Array{<:Real,2},   # [nvoxels nshims] Acquired field maps
+	H::Array{<:Real,2},   # [nvoxels nbasis] Spatial basis functions
+	s::Vector             # applied shim currents (e.g., pairwise differences) used to acquire F
 	)
 
-	# Insert DC terms
-	N = size(F,1)
-	F = [ones(N) F] 
-	Sin = S;
-	S = zeros(9,9);
-	S[1,1] = 1;
-	S[2:end,2:end] = Sin;
+	nb = size(H,2)      # number of basis functions
+	ns = length(s)      # number of shim terms (excluding center frequency)
 
-	# return calibration matrix
-	inv(H'*H)*H'*F*inv(S)
+	A = zeros(nb, ns+1)
+
+	# center frequency (identity by definition)
+	A[1,1] = 1.0
+
+	# fit each acquired fieldmap to basis
+	for ii = 1:ns
+		A[:,ii+1] = s[ii] * H \ F[:,ii]
+	end
+
+	return A
 end
