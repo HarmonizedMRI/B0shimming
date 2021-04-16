@@ -11,14 +11,18 @@ over a user-specified 3D subvolume.
 
 ## Quick start
 
-1. Start Julia (download from https://julialang.org/)
-2. Press `]` to enter the Julia package manager and do:
+1. Get this toolbox
+```
+$ git clone git@github.com:HarmonizedMRI/B0shimming.git
+```
+2. Start Julia (download from https://julialang.org/). Current version is 1.6.0.
+3. Press `]` to enter the Julia package manager and do:
 ```
 (@v1.5) pkg> activate .
 (@v1.5) pkg> instantiate
 ```
-3. Press `backspace` to get back to the Julia prompt.
-4. Run the example:
+4. Press `backspace` to get back to the Julia prompt.
+5. Run the example:
 ```
 julia> cd("julia")
 julia> include("example.jl")
