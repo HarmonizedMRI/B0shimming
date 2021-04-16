@@ -1,9 +1,6 @@
 using SphericalHarmonics
 using CoordinateTransformations: SphericalFromCartesian
 using MIRT: ndgrid, jim
-using ForwardDiff
-using AutoGrad
-using ReverseDiff
 
 c2s = SphericalFromCartesian()
 
