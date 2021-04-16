@@ -1,14 +1,28 @@
 # An open toolbox for B0 shimming 
 
+## Quick start
+
+1. Start Julia (download from https://julialang.org/)
+2. Press `]` to enter the Julia package manager and do:
+```
+(@v1.5) pkg> activate .
+(@v1.5) pkg> instantiate
+```
+3. Press `backspace` to get back to the Julia prompt.
+3. Run the demo program:
+```
+julia> cd("julia")
+julia> include("shim.jl")
+```
+
 
 ##  Goal
 
 To provide an alternative to the scanner's built-in B0 shimming routine,
 so that the linear and high-order B0 shims can be set according to well-defined 
 (and potentially application-specific) critera.
-For example, the user may want to:
-1. Minimize root-mean-square (RMS) B0 inhomogeneity over a user-specified 3D subvolume.
-1. Minimize the maximum through-voxel B0 gradient, to reduce signal loss in T2\*-weighted imaging.
+For example, the user may want to minimize root-mean-square (RMS) B0 inhomogeneity 
+over a user-specified 3D subvolume.
 
 To do this we define the shim system model
 ```
@@ -16,7 +30,7 @@ f(s) = H*A*s + f0
 f:  [N 1]        fieldmap (Hz), where N = number of voxels
 f0: [N 1]        observed 'baseline' field map, e.g., after setting all shim currents to zero
 H:  [N nb]       spherical harmonic basis (see julia/getSHbasis.jl). nb = number of basis functions.
-A:  [nb nb]      calibration matrix (see julia/getcalmatrix.jl)
+A:  [nb nb]      shim coil expansion coefficients for basis in H (see julia/getcalmatrix.jl)
 s:  [nShim+1 1]  change in center frequency (cf) offset and shim current amplitudes from baseline (hardware units)
 ```
 For 2nd order shim systems, nShim = 8 (3 linear and 5 2nd order).  
@@ -41,6 +55,8 @@ F: [N nShim]                   fieldmaps (Hz) obtained by turning on/off individ
 S: [nShim nShim]               applied shim currents (pairwise differences) used to obtain F
 A = inv(H'*H)*H'*F*inv(S);     [nShim+1 nShim+1]  (see julia/getcalmatrix.jl). Include cf offset term.
 ```
+
+See `julia/shim.jl` for a complete example, and additional information for how to construct F.
 
 
 

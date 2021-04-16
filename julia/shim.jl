@@ -1,7 +1,5 @@
 using MAT, JLD2
 using MIRT: embed!, jim, ndgrid
-#using LinearAlgebra
-#using SparseArrays
 
 include("getSHbasis.jl")
 include("getcalmatrix.jl")
@@ -11,15 +9,15 @@ include("shimoptim.jl")
 ############################################################################################
 ## EDIT this section
 
+# GE 3T scanner at U of Michigan:
+
 # Shim calibration data
-# calFile = "CalibrationDataSiemensMGH12Dec2020.jld2"  # Siemens 3T scanner at MGH
-calFile = "CalibrationDataUM10Dec2020.jld2";  # GE 3T scanner at U of Michigan
+calFile = "CalibrationDataUM10Dec2020.jld2";  
 
-# shim system current limits
-shimlims = (100*ones(3,), 4000*ones(5,), 12000)   # (lin max, hos max, sum hos max)
+# shim system current limits 
+shimlims = (100*ones(3,), 4000*ones(5,), 12000)   # (lin max, hos max, sum hos max). For GE 3T scanner at U of Michigan.
 
-# baseline field map, fov, and mask. See mat2jld2.jl.
-# f0File = "f0_mgh.jld2"       # # Siemens 3T scanner at MGH
+# baseline field map, fov, and mask. 
 f0File = "f0_jar.jld2"       # U of Michigan GE 3T scanner
 
 # order of spherical harmonic basis
@@ -32,9 +30,7 @@ l = 6
 #   H = spherical harmonic basis functions
 #   A = matrix containing shim coil expansion coefficients for basis in H
 #   f0 = baseline field map at mask locations (vector)
-loss2 = (s, HA, f0) -> norm(HA*s + f0, 2)^2 / length(f0)
-p = 4
-loss = (s, HA, f0) -> norm(HA*s + f0, p)^p / length(f0)
+loss = (s, HA, f0) -> norm(HA*s + f0, 2)^2 / length(f0)
 
 ftol_rel = 1e-5
 
@@ -119,14 +115,13 @@ H = getSHbasis(x[mask], y[mask], z[mask], l)
 W = Diagonal(ones(N,))   # optional spatial weighting
 
 s0 = -(W*H*A)\(W*f0m)    # Unconstrained least-squares solution (for comparison)
-@show Int.(round.(s0))
 
+# This is where it all happens.
 @time shat = shimoptim(W*H*A, W*f0m, shimlims; loss=loss, ftol_rel=ftol_rel) 
 @show Int.(round.(shat))
 
-@show loss2(0*s0, W*H*A, W*f0m)   # loss before optimization
-@show loss2(s0, W*H*A, W*f0m)     # loss after unconstrained optimization
-@show loss2(shat, W*H*A, W*f0m)   # loss after constrained optimization
+# Print and plot results
+
 @show loss(0*s0, W*H*A, W*f0m)   # loss before optimization
 @show loss(s0, W*H*A, W*f0m)     # loss after unconstrained optimization
 @show loss(shat, W*H*A, W*f0m)   # loss after constrained optimization
@@ -186,9 +181,7 @@ fp = zeros(size(f0))
 fpm = H*A*shat + f0m;      
 embed!(fp, fpm, mask)   
 
-println()
-@show maximum(abs.(f0m))
-@show maximum(abs.(fpm))
+# println()
 
 # display predicted fieldmap
 p = jim(log.(abs.(A[:,:]')); color=:jet)
@@ -196,9 +189,10 @@ p = jim(fp; clim=(-200,200), color=:jet)
 p = jim(cat(f0,fp;dims=1); clim=(-200,200), color=:jet)    # compare before and after shimming
 display(p)
 
-# write to .mat file for viewing
-matwrite("result.mat", Dict(
-	"mask" => mask,
-	"f0" => f0,
-	"fp" => fp
-))
+# Optional: write to .mat file for viewing
+# requires MAT package
+# matwrite("result.mat", Dict(
+#	"mask" => mask,
+#	"f0" => f0,
+#	"fp" => fp
+#))
