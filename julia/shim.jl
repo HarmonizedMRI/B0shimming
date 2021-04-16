@@ -12,20 +12,14 @@ include("shimoptim.jl")
 ## EDIT this section
 
 # Shim calibration data
-calFile = "CalibrationDataSiemensMGH12Dec2020.jld2"  # Siemens 3T scanner at MGH
+# calFile = "CalibrationDataSiemensMGH12Dec2020.jld2"  # Siemens 3T scanner at MGH
 calFile = "CalibrationDataUM10Dec2020.jld2";  # GE 3T scanner at U of Michigan
 
 # shim system current limits
 shimlims = (100*ones(3,), 4000*ones(5,), 12000)   # (lin max, hos max, sum hos max)
 
 # baseline field map, fov, and mask. See mat2jld2.jl.
-f0File = "f0.jld2"   
-f0File = "f0_mgh.jld2"   
-f0File = "f0_fbirn.jld2"
-f0File = "f0_redhead.jld2"   
-f0File = "Psub1.jld2"   
-f0File = "Psub1_localmask.jld2"   
-f0File = "Psub1_z41_70.jld2"
+# f0File = "f0_mgh.jld2"       # # Siemens 3T scanner at MGH
 f0File = "f0_jar.jld2"       # U of Michigan GE 3T scanner
 
 # order of spherical harmonic basis
