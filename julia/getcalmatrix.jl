@@ -12,7 +12,7 @@ function getcalmatrix(
 	s::Vector             # applied shim currents (e.g., pairwise differences) used to acquire F
 	)
 
-	nb = size(H,2)      # number of basis functions
+	nb = size(H,2)      # number of basis functions. Includes center frequency.
 	ns = length(s)      # number of shim terms (excluding center frequency)
 
 	A = zeros(nb, ns+1)
@@ -24,6 +24,8 @@ function getcalmatrix(
 	for ii = 1:ns
 		A[:,ii+1] = s[ii] * H \ F[:,ii]
 	end
+
+	# A = inv(H'*H)*H'*F*inv(S);   [nb nb] Includes cf offset term.	
 
 	return A
 end
