@@ -18,8 +18,8 @@ $ git clone git@github.com:HarmonizedMRI/B0shimming.git
 2. Start Julia (download from https://julialang.org/). Current version is 1.6.0.
 3. Press `]` to enter the Julia package manager and do:
 ```
-(@v1.5) pkg> activate .
-(@v1.5) pkg> instantiate
+(@v1.6) pkg> activate .
+(julia) pkg> instantiate
 ```
 4. Press `backspace` to get back to the Julia prompt.
 5. Run the example:
