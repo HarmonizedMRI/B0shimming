@@ -70,6 +70,8 @@ to the basis in `H`, using least-squares fitting (backslash in Julia); see julia
 
 See `julia/example.jl` for a complete example, and additional information for how to construct F.
 
+See also the [slides](https://docs.google.com/presentation/d/1yG0HDH7A2q6pesgoA8B1EkceJAb5U383ru7LACXKRT4/edit?usp=sharing)
+presented at ISMRM 2021.
 
 
 ## Cite
