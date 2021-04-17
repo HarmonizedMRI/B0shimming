@@ -5,8 +5,11 @@
 To provide an alternative to the scanner's built-in B0 shimming routine,
 so that the linear and high-order B0 shims can be set according to well-defined 
 (and potentially application-specific) critera.
-For example, the user may want to minimize root-mean-square (RMS) B0 inhomogeneity 
-over a user-specified 3D subvolume.
+
+The framework allows for nonlinear loss functions, and may be useful for exploring alternative shimming criteria (beyond least-squares) in the future. 
+For example, the user may want to minimize root-mean-square (RMS) B0 inhomogeneity over a user-specified 3D subvolume.
+
+We envision this tool as one component of a more harmonized cross-vendor MRI workflow in support of **reproducible MRI research**.
 
 
 ## Quick start
@@ -44,7 +47,7 @@ A:  [nb nb]      shim coil expansion coefficients for basis in H (see julia/getc
 s:  [nShim+1 1]  change in center frequency (cf) and shim currents from baseline (hardware units)
 ```
 For 2nd order shim systems, nShim = 8 (3 linear and 5 2nd order).  
-Each term in `H` is an [N 1] vector, evaluated at the same `N` spatial locations as `f`. 
+Each column in `H` is an [N 1] vector, evaluated at the same `N` spatial locations as `f`. 
 The first column corresponds to the center frequency offset.
 This toolbox provides support for spherical harmonic basis functions of arbitrary order
 (see julia/getSHbasis.jl), but the code should work equally well with other bases.
@@ -62,7 +65,7 @@ F: [N nShim]       fieldmaps (Hz) obtained by turning on/off individual shim coi
 S: [nShim nShim]   applied shim currents (pairwise differences) used to obtain F
 ```
 `F` should be obtained in a stationary phantom, and only needs to be acquired once for each scanner.
-For a given choice of basis `H` we then obtain `A` by fitting each column in `F`
+We then obtain `A` by fitting each column in `F`
 to the basis in `H`, using least-squares fitting (backslash in Julia); see julia/getcalmatrix.jl.
 
 See `julia/example.jl` for a complete example, and additional information for how to construct F.
