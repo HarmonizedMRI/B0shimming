@@ -74,8 +74,8 @@ See `julia/example.jl` for a complete example, and additional information for ho
 
 ## Cite
 
-Jon-Fredrik Nielsen, Berkin Bilgic, Jason P. Stockmann, Borjan Gagoski, 
+*Jon-Fredrik Nielsen, Berkin Bilgic, Jason P. Stockmann, Borjan Gagoski, 
 Jr-Yuan George Chiou, Jr, Lipeng Ning, Yang Ji, Yogesh Rathi, 
 Jeffrey A. Fessler, Douglas C. Noll, and Maxim Zaitsev.
 An open toolbox for harmonized B0 shimming.
-Proc. Intl. Soc. Mag. Reson. Med. 2021; 3772.
+Proc. Intl. Soc. Mag. Reson. Med. 2021; 3772.*
