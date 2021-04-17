@@ -25,5 +25,7 @@ function getcalmatrix(
 		A[:,ii+1] = s[ii] * H \ F[:,ii]
 	end
 
+	# A = inv(H'*H)*H'*F*inv(S);   [nb nb] Includes cf offset term.	
+
 	return A
 end
