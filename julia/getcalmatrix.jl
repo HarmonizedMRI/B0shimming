@@ -12,7 +12,7 @@ function getcalmatrix(
 	s::Vector             # applied shim currents (e.g., pairwise differences) used to acquire F
 	)
 
-	nb = size(H,2)      # number of basis functions
+	nb = size(H,2)      # number of basis functions. Includes center frequency.
 	ns = length(s)      # number of shim terms (excluding center frequency)
 
 	A = zeros(nb, ns+1)
