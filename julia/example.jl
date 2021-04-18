@@ -194,7 +194,8 @@ embed!(fp, fpm, mask)
 # display predicted fieldmap
 p = jim(log.(abs.(A[:,:]')); color=:jet)
 p = jim(fp; clim=(-200,200), color=:jet)
-p = jim(cat(f0,fp;dims=1); clim=(-200,200), color=:jet)    # compare before and after shimming
+iz = 16:45 # compare these slices before and after shimming:
+p = jim(cat(f0[:,:,iz],fp[:,:,iz];dims=1); ncol=6, clim=(-200,200), color=:jet)
 display(p)
 
 # Optional: write to .mat file for viewing
