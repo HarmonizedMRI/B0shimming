@@ -18,18 +18,28 @@ We envision this tool as one component of a more harmonized cross-vendor MRI wor
 ```
 $ git clone git@github.com:HarmonizedMRI/B0shimming.git
 ```
-2. Start Julia (download from https://julialang.org/). Current version is 1.6.0.
-3. Press `]` to enter the Julia package manager and do:
+
+2. Change into the `julia` subdirectory
+```
+julia> cd("julia")
+
+```
+
+3. Start Julia (download from https://julialang.org/). Current version is 1.6.0.
+
+4. Press `]` to enter the Julia package manager and do:
 ```
 (@v1.6) pkg> activate .
 (julia) pkg> instantiate
 ```
-4. Press `backspace` to get back to the Julia prompt.
-5. Run the example:
+
+5. Press `backspace` to get back to the Julia prompt.
+
+6. Run the example:
 ```
-julia> cd("julia")
 julia> include("example.jl")
 ```
+
 Each panel in the output image shows the field map (in Hz) before (left) and 
 after (right) 2nd order shimming of a cylindrical jar phantom:
 ![output of examples.jl](resources/out30.png "Example")
