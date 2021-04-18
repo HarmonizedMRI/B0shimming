@@ -70,11 +70,7 @@ N = sum(vec(mask))
 
 (nx,ny,nz,nShim) = size(F)
 
-(x,y,z) = (
-	LinRange(-fov[1]/2, fov[1]/2, nx),
-	LinRange(-fov[2]/2, fov[2]/2, ny),
-	LinRange(-fov[3]/2, fov[3]/2, nz),
-	)
+(x,y,z) = LinRange.(-1, 1, [nx,ny,nz]) .* vec(fov)/2
 
 # mask F and reshape to [N 8]
 Fm = zeros(N, nShim)
@@ -84,7 +80,6 @@ for ii = 1:nShim
 end
 
 # Get spherical harmonic basis of degree l
-#H = getSHbasis(x[mask], y[mask], z[mask]; L=l)
 H = getSHbasis(x, y, z; L=l) # [nx ny nz numSH(l)]
 H = reshape(H, :, size(H,4))
 H = H[vec(mask), :] # size is [N sum(2*(0:l) .+ 1)]
@@ -109,14 +104,8 @@ f0m = f0[mask]
 
 N = sum(vec(mask))
 
-(x,y,z) =
-(
-	LinRange(-fov[1]/2, fov[1]/2, nx),
-	LinRange(-fov[2]/2, fov[2]/2, ny),
-	LinRange(-fov[3]/2, fov[3]/2, nz),
-	)
+(x,y,z) = LinRange.(-1, 1, [nx,ny,nz]) .* vec(fov)/2
 
-#H = getSHbasis(x[mask], y[mask], z[mask], l)
 H = getSHbasis(x, y, z; L=l)
 H = reshape(H, :, size(H,4))
 H = H[vec(mask), :]
