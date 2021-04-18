@@ -22,7 +22,6 @@ $ git clone git@github.com:HarmonizedMRI/B0shimming.git
 2. Change into the `julia` subdirectory
 ```
 julia> cd("julia")
-
 ```
 
 3. Start Julia (download from https://julialang.org/). Current version is 1.6.0.
