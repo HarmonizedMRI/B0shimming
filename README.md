@@ -18,21 +18,30 @@ We envision this tool as one component of a more harmonized cross-vendor MRI wor
 ```
 $ git clone git@github.com:HarmonizedMRI/B0shimming.git
 ```
-2. Start Julia (download from https://julialang.org/). Current version is 1.6.0.
-3. Press `]` to enter the Julia package manager and do:
+
+2. Change into the `julia` subdirectory
+```
+julia> cd("julia")
+```
+
+3. Start Julia (download from https://julialang.org/). Current version is 1.6.0.
+
+4. Press `]` to enter the Julia package manager and do:
 ```
 (@v1.6) pkg> activate .
 (julia) pkg> instantiate
 ```
-4. Press `backspace` to get back to the Julia prompt.
-5. Run the example:
+
+5. Press `backspace` to get back to the Julia prompt.
+
+6. Run the example:
 ```
-julia> cd("julia")
 julia> include("example.jl")
 ```
+
 Each panel in the output image shows the field map (in Hz) before (left) and 
 after (right) 2nd order shimming of a cylindrical jar phantom:
-![output of examples.jl](resources/out.png "Example")
+![output of examples.jl](resources/out30.png "Example")
 
 
 ## Description
@@ -40,14 +49,14 @@ after (right) 2nd order shimming of a cylindrical jar phantom:
 The code is based on the model
 ```
 f(s) = H*A*s + f0         
-f:  [N 1]        fieldmap (Hz), where N = number of voxels
-f0: [N 1]        observed 'baseline' field map, e.g., after setting all shim currents to zero
+f:  [N]          fieldmap (Hz), where N = number of voxels
+f0: [N]          observed 'baseline' field map, e.g., after setting all shim currents to zero
 H:  [N nb]       spherical harmonic basis (see julia/getSHbasis.jl). nb = # of basis functions.
 A:  [nb nb]      shim coil expansion coefficients for basis in H (see julia/getcalmatrix.jl)
-s:  [nShim+1 1]  change in center frequency (cf) and shim currents from baseline (hardware units)
+s:  [nShim+1]    change in center frequency (cf) and shim currents from baseline (hardware units)
 ```
 For 2nd order shim systems, nShim = 8 (3 linear and 5 2nd order).  
-Each column in `H` is an [N 1] vector, evaluated at the same `N` spatial locations as `f`. 
+Each column in `H` is an `N`-vector, evaluated at the same `N` spatial locations as `f`. 
 The first column corresponds to the center frequency offset.
 This toolbox provides support for spherical harmonic basis functions of arbitrary order
 (see julia/getSHbasis.jl), but the code should work equally well with other bases.
