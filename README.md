@@ -40,7 +40,7 @@ julia> include("example.jl")
 ```
 
 Each panel in the output image shows the field map (in Hz) before (left) and 
-after (right) 2nd order shimming of a cylindrical jar phantom:
+after (right) 2nd order shimming of a cylindrical jar phantom:  
 ![output of examples.jl](resources/out30.png "Example")
 
 
