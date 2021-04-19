@@ -1,9 +1,10 @@
 using MAT, JLD2
-using MIRT: embed!, jim, ndgrid
+using MIRT: embed!
+using MIRTjim: jim
 
-include("getSHbasis.jl")
-include("getcalmatrix.jl")
-include("shimoptim.jl")
+include("getSHbasis.jl") # getSHbasis()
+include("getcalmatrix.jl") # getcalmatrix()
+include("shimoptim.jl") # shimoptim()
 
 
 ############################################################################################
@@ -12,12 +13,12 @@ include("shimoptim.jl")
 # GE 3T scanner at U of Michigan:
 
 # Shim calibration data
-calFile = "CalibrationDataUM10Dec2020.jld2";  
+calFile = "CalibrationDataUM10Dec2020.jld2"
 
-# shim system current limits 
+# shim system current limits
 shimlims = (100*ones(3,), 4000*ones(5,), 12000)   # (lin max, hos max, sum hos max). For GE 3T scanner at U of Michigan.
 
-# baseline field map, fov, and mask. 
+# baseline field map, fov, and mask.
 f0File = "f0_jar.jld2"       # U of Michigan GE 3T scanner
 
 # order of spherical harmonic basis
@@ -26,7 +27,7 @@ l = 6
 
 # Loss (objective) function for optimization.
 # The field map f is modeled as f = H*A*s + f0, where
-#   s = shim amplitudes (vector), 
+#   s = shim amplitudes (vector),
 #   H = spherical harmonic basis functions
 #   A = matrix containing shim coil expansion coefficients for basis in H
 #   f0 = baseline field map at mask locations (vector)
@@ -42,7 +43,7 @@ ftol_rel = 1e-5
 # Load calibration data and calculate calibration matrix A
 ############################################################################################
 
-# For 2nd order shims: 
+# For 2nd order shims:
 # F = [nx ny nz 8] (Hz), in order 'x', 'y', 'z', 'z2', 'xy', 'zx', 'x2y2', 'zy'
 # S = [8 8], shim amplitudes used to obtain F (hardware units)
 @load "$calFile" F S fov mask
@@ -58,24 +59,20 @@ end
 # 0th-2nd order terms in getSHbasis.jl are in order [dc z x y z2 zx zy x2y2 xy],
 # so reorder F to match that.
 # No need to reorder S
-inds = [3, 1, 2, 4, 6, 8, 7, 5] 
+inds = [3, 1, 2, 4, 6, 8, 7, 5]
 Fr = copy(F)
 for ii = 1:size(F,4)
 	Fr[:,:,:,ii] = F[:,:,:,inds[ii]]
 end
 F = Fr
 
-N = sum(mask[:])
+N = sum(vec(mask))
 
 (nx,ny,nz,nShim) = size(F)
 
-(x,y,z) = ndgrid(
-	range(-fov[1]/2, fov[1]/2, length=nx), 
-	range(-fov[2]/2, fov[2]/2, length=ny), 
-	range(-fov[3]/2, fov[3]/2, length=nz) 
-	)
+(x,y,z) = LinRange.(-1, 1, [nx,ny,nz]) .* vec(fov)/2
 
-# mask F and reshape to [N 8] 
+# mask F and reshape to [N 8]
 Fm = zeros(N, nShim)
 for ii = 1:nShim
 	f1 = F[:,:,:,ii]
@@ -83,12 +80,14 @@ for ii = 1:nShim
 end
 
 # Get spherical harmonic basis of degree l
-H = getSHbasis(x[mask], y[mask], z[mask], l)   # size is [N sum(2*(0:l) .+ 1)]
+H = getSHbasis(x, y, z; L=l) # [nx ny nz numSH(l)]
+H = reshape(H, :, size(H,4))
+H = H[vec(mask), :] # size is [N sum(2*(0:l) .+ 1)]
 
 # Get calibration matrix A
 A = getcalmatrix(Fm, H, diag(S))
 
-@save "A_l$l.jld2" A
+# @save "A_l$l.jld2" A # uncomment this if you want to save it
 
 
 ############################################################################################
@@ -103,21 +102,19 @@ mask = BitArray(mask)
 
 f0m = f0[mask]
 
-N = sum(mask[:])
+N = sum(vec(mask))
 
-(x,y,z) = ndgrid(
-	range(-fov[1]/2, fov[1]/2, length=nx), 
-	range(-fov[2]/2, fov[2]/2, length=ny), 
-	range(-fov[3]/2, fov[3]/2, length=nz) 
-	)
+(x,y,z) = LinRange.(-1, 1, [nx,ny,nz]) .* vec(fov)/2
 
-H = getSHbasis(x[mask], y[mask], z[mask], l)  
+H = getSHbasis(x, y, z; L=l)
+H = reshape(H, :, size(H,4))
+H = H[vec(mask), :]
 W = Diagonal(ones(N,))   # optional spatial weighting
 
 s0 = -(W*H*A)\(W*f0m)    # Unconstrained least-squares solution (for comparison)
 
 # This is where it all happens.
-@time shat = shimoptim(W*H*A, W*f0m, shimlims; loss=loss, ftol_rel=ftol_rel) 
+@time shat = shimoptim(W*H*A, W*f0m, shimlims; loss=loss, ftol_rel=ftol_rel)
 @show Int.(round.(shat))
 
 # Print and plot results
@@ -129,33 +126,33 @@ s0 = -(W*H*A)\(W*f0m)    # Unconstrained least-squares solution (for comparison)
 shat_ge = Int.(round.(shat))
 shat_siemens = round.(shat; digits=1)
 
-println("\nRecommended shim changes:") 
+println("\nRecommended shim changes:")
 
 println(string(
-	"\tcf, x, y, z = ", 
+	"\tcf, x, y, z = ",
 	shat_ge[1], ", ",
-	shat_ge[3], ", ", 
-	shat_ge[4], ", ", 
-	shat_ge[2])) 
+	shat_ge[3], ", ",
+	shat_ge[4], ", ",
+	shat_ge[2]))
 
 if length(shat) > 4
 	println(string("\t",
 		"z2 ", shat_ge[5],
-		" zx ", shat_ge[6], 
-		" zy ", shat_ge[7], 
-		" x2y2 ", shat_ge[8], 
+		" zx ", shat_ge[6],
+		" zy ", shat_ge[7],
+		" x2y2 ", shat_ge[8],
 		" xy ", shat_ge[9]))
 
 println(" ")
 println(string(
 	"GE: ",
-	"\tset cf, x, y, z shims in Manual Prescan"));
+	"\tset cf, x, y, z shims in Manual Prescan"))
 	println(string(
 		"\tsetNavShimCurrent",
 		" z2 ", shat_ge[5],
-		" zx ", shat_ge[6], 
-		" zy ", shat_ge[7], 
-		" x2y2 ", shat_ge[8], 
+		" zx ", shat_ge[6],
+		" zy ", shat_ge[7],
+		" x2y2 ", shat_ge[8],
 		" xy ", shat_ge[9]))
 	println(" ")
 	println(string(
@@ -178,15 +175,16 @@ end
 
 # predicted fieldmap after applying shims
 fp = zeros(size(f0))
-fpm = H*A*shat + f0m;      
-embed!(fp, fpm, mask)   
+fpm = H*A*shat + f0m
+embed!(fp, fpm, mask)
 
 # println()
 
 # display predicted fieldmap
 p = jim(log.(abs.(A[:,:]')); color=:jet)
 p = jim(fp; clim=(-200,200), color=:jet)
-p = jim(cat(f0,fp;dims=1); clim=(-200,200), color=:jet)    # compare before and after shimming
+iz = 16:45 # compare these slices before and after shimming:
+p = jim(cat(f0[:,:,iz],fp[:,:,iz];dims=1); ncol=6, clim=(-200,200), color=:jet)
 display(p)
 
 # Optional: write to .mat file for viewing

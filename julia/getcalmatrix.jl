@@ -1,16 +1,17 @@
 using LinearAlgebra
 
 """
-	getcalmatrix(F::Array, H::Array, s::Vector)
+    A = getcalmatrix(F::Array, H::Array, s::Vector)
 
-TODO: complete help text
-
+In:
+* `F` [nvoxel nshim] Acquired field maps
+* `H` [nvoxel nbasis] Spatial basis functions
+* `s` [nshim] applied shim currents (e.g., pairwise differences) used to acquire `F`
+(excluding center frequency)
+Out:
+* `A` [nbasis nshim+1] (first column corresponds to center frequency)
 """
-function getcalmatrix(
-	F::Array{<:Real,2},   # [nvoxels nshims] Acquired field maps
-	H::Array{<:Real,2},   # [nvoxels nbasis] Spatial basis functions
-	s::Vector             # applied shim currents (e.g., pairwise differences) used to acquire F
-	)
+function getcalmatrix(F::AbstractMatrix{<:Real}, H::AbstractMatrix{<:Real}, s::AbstractVector)
 
 	nb = size(H,2)      # number of basis functions. Includes center frequency.
 	ns = length(s)      # number of shim terms (excluding center frequency)
