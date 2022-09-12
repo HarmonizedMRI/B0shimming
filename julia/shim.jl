@@ -25,7 +25,7 @@ l = 2
 #   f0 = baseline field map at mask locations (vector)
 loss = (s, HA, f0) -> norm(HA*s + f0, 2)^2 / length(f0)
 
-ftol_rel = 1e-5
+ftol_rel = 0.5e-5
 
 
 ############################################################################################
@@ -113,8 +113,8 @@ W = Diagonal(ones(N,))   # optional spatial weighting
 s0 = -(W*H*A)\(W*f0m)    # Unconstrained least-squares solution (for comparison)
 
 # This is where it all happens.
-#@time shat = shimoptim(W*H*A, W*f0m, shimlims; loss=loss, ftol_rel=ftol_rel)
-shat = s0
+@time shat = shimoptim(W*H*A, W*f0m, shimlims; loss=loss, ftol_rel=ftol_rel)
+# shat = s0
 @show Int.(round.(shat))
 
 # Print and plot results
@@ -189,8 +189,8 @@ display(p)
 
 # Optional: write to .mat file for viewing
 # requires MAT package
-# matwrite("result.mat", Dict(
-#	"mask" => mask,
-#	"f0" => f0,
-#	"fp" => fp
-#))
+matwrite("result.mat", Dict(
+	"mask" => mask,
+	"f0" => f0,
+	"fp" => fp
+))
