@@ -63,7 +63,7 @@ N = sum(vec(mask))
 
 (nx,ny,nz,nShim) = size(F)
 
-(x,y,z) = LinRange.(-1, 1, [nx,ny,nz]) .* vec(fov)/2
+(x,y,z) = LinRange.(1, -1, [nx,ny,nz]) .* vec(fov)/2
 
 # mask F and reshape to [N 8]
 Fm = zeros(N, nShim)
@@ -104,7 +104,6 @@ f0m = f0[mask]
 N = sum(vec(mask))
 
 (x,y,z) = LinRange.(1, -1, [nx,ny,nz]) .* vec(fov)/2
-#(x,y,z) = LinRange.(1, -1, [nx,ny,nz]) .* vec(fov.-fov./N)/2
 
 H = getSHbasis(x, y, z; L=l)
 H = reshape(H, :, size(H,4))
