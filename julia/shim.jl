@@ -10,18 +10,12 @@ include("getSHbasis.jl")     # getSHbasis()
 include("getcalmatrix.jl")   # getcalmatrix()
 include("shimoptim.jl")      # shimoptim()
 
-# Shim calibration data
-calFile = "shimcal.mat"  
-
 # shim system current limits
 shimlims = (100*ones(3,), 4000*ones(5,), 12000)   # (lin max, hos max, sum hos max). For GE 3T scanner at U of Michigan.
 
-# baseline field map of object we wish to shim, object mask, and X/Y/Z coordinates.
-f0File = "f0.mat"
-
 # Order of spherical harmonic basis.
 # For linear shimming, set l = 1.
-l = 6
+l = 2
 
 # Loss (objective) function for optimization.
 # The field map f is modeled as f = H*A*s + f0, where
@@ -35,13 +29,17 @@ ftol_rel = 1e-5
 
 
 ############################################################################################
-# Load calibration data and calculate calibration matrix A
+# Calculate calibration matrix A
 ############################################################################################
 
 # For 2nd order shims:
 # F = [nx ny nz 8] (Hz), in order 'x', 'y', 'z', 'z2', 'xy', 'zx', 'x2y2', 'zy'
 # S = [8 8], shim amplitudes used to obtain F (hardware units)
-@load "$calFile" F S fov mask
+matf = matread("shimcal.mat");
+F = matf["F"]   # [nx ny nz 8] for 2nd order shim systems
+S = matf["S"]   # [8 8] matrix with shim amplitudes (typically diagonal)
+mask = matf["mask"];
+fov = matf["FOV"];
 
 mask = BitArray(mask)
 
@@ -85,11 +83,17 @@ A = getcalmatrix(Fm, H, diag(S))
 # @save "A_l$l.jld2" A # uncomment this if you want to save it
 
 
+
 ############################################################################################
 # Now that A is determined we can use it to optimize shims for a given acquired fieldmap f0.
 ############################################################################################
 
-@load "$f0File" f0 fov mask
+matf = matread("f0.mat");
+f0 = matf["f0"]   # B0 field map we wish to shim
+fov = matf["FOV"];
+
+matf = matread("shimvol.mat")
+mask = matf["mask"]
 
 (nx,ny,nz) = size(f0)
 
@@ -99,7 +103,8 @@ f0m = f0[mask]
 
 N = sum(vec(mask))
 
-(x,y,z) = LinRange.(-1, 1, [nx,ny,nz]) .* vec(fov)/2
+(x,y,z) = LinRange.(1, -1, [nx,ny,nz]) .* vec(fov)/2
+#(x,y,z) = LinRange.(1, -1, [nx,ny,nz]) .* vec(fov.-fov./N)/2
 
 H = getSHbasis(x, y, z; L=l)
 H = reshape(H, :, size(H,4))
@@ -109,7 +114,8 @@ W = Diagonal(ones(N,))   # optional spatial weighting
 s0 = -(W*H*A)\(W*f0m)    # Unconstrained least-squares solution (for comparison)
 
 # This is where it all happens.
-@time shat = shimoptim(W*H*A, W*f0m, shimlims; loss=loss, ftol_rel=ftol_rel)
+#@time shat = shimoptim(W*H*A, W*f0m, shimlims; loss=loss, ftol_rel=ftol_rel)
+shat = s0
 @show Int.(round.(shat))
 
 # Print and plot results
