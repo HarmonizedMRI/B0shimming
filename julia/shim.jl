@@ -11,7 +11,7 @@ include("getcalmatrix.jl")   # getcalmatrix()
 include("shimoptim.jl")      # shimoptim()
 
 # shim system current limits
-shimlims = (100*ones(3,), 4000*ones(5,), 12000)   # (lin max, hos max, sum hos max). For GE 3T scanner at U of Michigan.
+shimlims = (5000*ones(3,), 4000*ones(5,), 12000)   # (lin max, hos max, sum hos max). For GE 3T scanner at U of Michigan.
 
 # Order of spherical harmonic basis.
 # For linear shimming, set l = 1.
