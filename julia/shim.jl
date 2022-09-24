@@ -1,6 +1,15 @@
-# Based on example.jl in B0shimming repo
+# Julia script for calculating optimal shim settings
 #
 # Run this function from the HarmonizedMRI/B0shimming/julia directory
+#
+# This script requires the following files to exist in the current path:
+#   shimcal.mat      F S mask FOV
+#   f0.mat           f0 FOV. Defines N and FOV used to create shimvol.mat.
+#   shimvol.mat      mask. Shim ROI mask on grid defined by N and FOV,
+#                    excluding points outside object mask (defined in f0.mat)
+#
+# In addition, to use SlicePlanner to select an ROI, you'll need:
+#   Localizer.h5     For displaying object in SlicePlanner GUI
 
 using MAT, JLD2
 using MIRT: embed!
