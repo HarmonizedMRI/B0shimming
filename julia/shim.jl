@@ -122,8 +122,8 @@ W = Diagonal(ones(N,))   # optional spatial weighting
 s0 = -(W*H*A)\(W*f0m)    # Unconstrained least-squares solution (for comparison)
 
 # This is where it all happens.
-@time shat = shimoptim(W*H*A, W*f0m, shimlims; loss=loss, ftol_rel=ftol_rel)
-# shat = s0
+# @time shat = shimoptim(W*H*A, W*f0m, shimlims; loss=loss, ftol_rel=ftol_rel)
+shat = s0
 @show Int.(round.(shat))
 
 # Print and plot results
