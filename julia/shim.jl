@@ -196,10 +196,19 @@ iz = 16:45 # compare these slices before and after shimming:
 p = jim(cat(f0[:,:,iz],fp[:,:,iz];dims=1); ncol=6, clim=(-200,200), color=:jet)
 display(p)
 
+# predicted fieldmap after applying shims, no mask
+fpnm = zeros(size(f0));
+H = getSHbasis(x, y, z; L=l);
+H = reshape(H, :, size(H,4));
+fpnmv = H*A*shat;
+embed!(fpnm, fpnmv, BitArray(ones(nx,ny,nz)));
+fpnm = fpnm + f0;
+
 # Optional: write to .mat file for viewing
 # requires MAT package
 matwrite("result.mat", Dict(
 	"mask" => mask,
 	"f0" => f0,
-	"fp" => fp
+	"fp" => fp,
+	"fpnm" => fpnm
 ))
