@@ -60,7 +60,7 @@ end
 
 # 0th-2nd order terms in getSHbasis.jl are in order [dc z x y z2 zx zy x2y2 xy],
 # so reorder F to match that.
-# No need to reorder S
+# TODO: also reorder S (ok for now since same amplitude used for 1st (and 2nd) order terms
 inds = [3, 1, 2, 4, 6, 8, 7, 5]
 Fr = copy(F)
 for ii = 1:size(F,4)
