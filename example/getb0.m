@@ -29,7 +29,7 @@ mask = magraw > thr*max(magraw(:));
 mag = magraw.*mask;
 
 % get phase difference map (th)
-if true
+if false
     if size(im1, 4) > 1   % multicoil
         th = toppe.utils.phasecontrastmulticoil(im2, im1);
     else
