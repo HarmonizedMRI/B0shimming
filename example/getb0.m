@@ -1,6 +1,21 @@
 % Reconstruct b0 map and save to b0.mat
 
-preamble;
+% data file location
+[status, tmp] = system('hostname');
+hostname = strip(tmp); % remove newline
+if strcmp(hostname, 'quickstep')
+    datDir = '/mnt/storage/jfnielse/data/20221013_UM3TUHP_3dspiral/';
+else
+    datDir = '/media/jon/USB/Data/20221013_UM3TUHP_3dspiral/';
+end
+
+% fov and matrix size 
+res = 0.24;       % cm
+N = [92 92 42];   % image matrix size
+FOV = N*res;     % cm
+
+% TE shift(s) for b0 mapping
+deltaTE = [0 1000/440/2 1000/440];  % TE delays (ms)
 
 pfile = [datDir 'P,b0.7'];
 readoutFile = [datDir 'readout_b0.mod'];

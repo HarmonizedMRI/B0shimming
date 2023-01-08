@@ -1,18 +1,29 @@
-# B0 shimming workflow 
+# B0 shimming workflow
 
-Copied from ../20220909_UM3TMR750_B0shim/README.md
+# Overview: B0 shimming steps
+
+1. Create soft link to the shim calibration data file `shimcal.mat`
+   1. See `makeshimcal.m` for details.
+
+2. Acquire B0 map and save to `f0.mat`
 
 The workflow requires the following experimental files:
 ```
 shimcal.mat     # F S mask FOV. Used to calculate the shim calibration matrix `A`.
 f0.mat          # f0 FOV mask. Defines N and FOV used to create shimvol.mat. 
                 % Note: mask, FOV here are independent of shimcal.mat
-Localizer.h5    # For displaying object in SlicePlanner GUI
+Localizer.h5    # (optional) For displaying object in SlicePlanner GUI
 shimvol.mat     # mask. Shim ROI mask on grid defined by N and FOV,
                 # excluding points outside object mask (defined in f0.mat)
 ```
 For convenience and consistency, we suggest placing these files in `~/shimtmpfiles/`
 (symbolic links are ok).
+
+# Shim calibration file (shimcal.mat)
+
+## UM3TMR750
+
+See ~/github/jfnielsen/scanLog/20220907_UM3TMR750_B0shim
 
 The shim calculation script is HarmonizedMRI/B0shimming/julia/shim.jl, which
 requires access to the three .mat files listed above.
