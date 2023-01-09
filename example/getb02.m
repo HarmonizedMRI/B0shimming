@@ -20,6 +20,7 @@ deltaTE = [0 1000/440/2 1000/440];  % TE delays (ms)
 pfile = [datDir 'P,b0.7'];
 readoutFile = [datDir 'readout_b0.mod'];
 
+
 % get coil images
 echo1 = 1;
 echo2 = 2;

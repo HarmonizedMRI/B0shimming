@@ -1,4 +1,4 @@
-% Reconstruct b0 map and save to b0.mat
+% Recon initial b0map, unwrapped
 
 % data file location
 [status, tmp] = system('hostname');
@@ -52,8 +52,7 @@ if false
     end
 else
     % complex coil combination
-    load([datDir 'sens_bart']);
-    sens = sens_bart(:,:,:,:,1);
+    getsens;
     x1 = coilcombine(im1, sens, mask);
     x2 = coilcombine(im2, sens, mask);
     th = angle(x2./x1).*mask;  % radians. Input to unwrap.
@@ -74,12 +73,18 @@ input('Run unwrap/main.jl, then press any key to continue');
 % Press backspace to get back to the Julia prompt.
 % julia> include("main.jl")    # input to unwrap() is phase image in radians
 
+return
 
 % load unwrapped phase map
 load unwrap/thuw           % radians
 thuw = thuw.*mask;         % unwrap() adds pixels at edges!
 
-% regularize field map
+dte = diff(echotime)
+b0init = thuw/(2*pi)/dte; % Hz
+
+return
+
+% regularize field map in Matlab
 % NB! Input to mri_field_map_reg is rad/sec
 yik(:,:,:,1) = x1;
 yik(:,:,:,2) = x2;
