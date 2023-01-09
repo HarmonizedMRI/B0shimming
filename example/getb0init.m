@@ -1,4 +1,9 @@
 % Recon initial b0map, unwrapped
+% Also save the following that are used by b0reg/main.jl:
+% images.mat     complex coil images
+% echotime.mat   echo times (sec)
+% 
+%
 
 % data file location
 [status, tmp] = system('hostname');
@@ -32,12 +37,21 @@ im2 = toppe.utils.recon3dft(pfile, ...
     'readoutFile', readoutFile, ...
     'alignWithUCS', true);  
 
+echotime = deltaTE([echo1 echo2])*1e-3;  % sec
+save echotime echotime
+
+clear images;
+images(:,:,:,:,1) = im1;
+images(:,:,:,:,2) = im2;
+save images images
+
 % echo time difference
 dte = 1e-3*(deltaTE(echo2) - deltaTE(echo1));  % TE difference, sec
 
 % mask
 thr = 0.05;
 mask = magraw > thr*max(magraw(:));
+save mask mask
 
 mag = magraw.*mask;
 
@@ -79,37 +93,5 @@ thuw = thuw.*mask;         % unwrap() adds pixels at edges!
 
 b0init = thuw/(2*pi)/dte; % Hz
 
-return
+save b0init b0init
 
-% regularize field map in Matlab
-% NB! Input to mri_field_map_reg is rad/sec
-yik(:,:,:,1) = x1;
-yik(:,:,:,2) = x2;
-l2b = -1;
-fprintf('Regularizing field map...');
-tic
-[wmap, wconv] = mri_field_map_reg(yik, [0 dte], ...
-    'mask', mask, 'winit', thuw/dte, 'l2b', l2b);
-fprintf(' done\n');
-toc
-wmap = wmap .* mask;   % rad/sec
-
-% final b0 estimate
-b0 = wmap / (2*pi);  % Hz
-
-return
-
-
-% old code
-
-if size(im1, 4) > 1   % multicoil
-    th = toppe.utils.phasecontrastmulticoil(im2, im1);
-else
-    th = angle(im2./im1);
-end
-
-b0 = th/(2*pi)/(dte*1e-3); % Hz
-
-b0 = b0 .* mask;
-
-save b0.mat b0 mask FOV 
