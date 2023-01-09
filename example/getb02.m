@@ -22,7 +22,8 @@ readoutFile = [datDir 'readout_b0.mod'];
 
 % get coil images
 echo1 = 1;
-echo2 = 3;
+echo2 = 2;
+echo3 = 3;
 [im1, magraw] = toppe.utils.recon3dft(pfile, ...
     'echo', echo1, ...
     'readoutFile', readoutFile, ...
@@ -31,16 +32,15 @@ im2 = toppe.utils.recon3dft(pfile, ...
     'echo', echo2, ...
     'readoutFile', readoutFile, ...
     'alignWithUCS', true);  
+im3 = toppe.utils.recon3dft(pfile, ...
+    'echo', echo3, ...
+    'readoutFile', readoutFile, ...
+    'alignWithUCS', true);  
 
 images(:,:,:,:,1) = im1;
-images(:,:,:,:,2) = im2;
+images(:,:,:,:,2) = im3;
 
-echotime = deltaTE([echo1 echo2])*1e-3;  % sec
-
-% load sensitivity maps. Permute so it aligns with UCS.
-load([datDir 'sens_bart']);
-sens = sens_bart(:,:,:,:,1);
-save sens sens
+echotime = deltaTE([echo1 echo3])*1e-3;  % sec
 
 cd b0reg
 save images images
