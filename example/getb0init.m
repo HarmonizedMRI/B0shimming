@@ -23,16 +23,14 @@ readoutFile = [datDir 'readout_b0.mod'];
 % get coil images
 echo1 = 1;
 echo2 = 3;
-if ~exist('im1', 'var')
-    [im1, magraw] = toppe.utils.recon3dft(pfile, ...
-        'echo', echo1, ...
-        'readoutFile', readoutFile, ...
-        'alignWithUCS', true);  
-    im2 = toppe.utils.recon3dft(pfile, ...
-        'echo', echo2, ...
-        'readoutFile', readoutFile, ...
-        'alignWithUCS', true);  
-end
+[im1, magraw] = toppe.utils.recon3dft(pfile, ...
+    'echo', echo1, ...
+    'readoutFile', readoutFile, ...
+    'alignWithUCS', true);  
+im2 = toppe.utils.recon3dft(pfile, ...
+    'echo', echo2, ...
+    'readoutFile', readoutFile, ...
+    'alignWithUCS', true);  
 
 % echo time difference
 dte = 1e-3*(deltaTE(echo2) - deltaTE(echo1));  % TE difference, sec
@@ -59,6 +57,8 @@ else
     th(isnan(th)) = 0;
 end
 
+b0wrap = th/(2*pi)/dte; % Hz
+
 % unwrap in Julia and save result in unwrap/thuw.mat
 cd unwrap
 save th th mask mag
@@ -73,13 +73,10 @@ input('Run unwrap/main.jl, then press any key to continue');
 % Press backspace to get back to the Julia prompt.
 % julia> include("main.jl")    # input to unwrap() is phase image in radians
 
-return
-
 % load unwrapped phase map
 load unwrap/thuw           % radians
 thuw = thuw.*mask;         % unwrap() adds pixels at edges!
 
-dte = diff(echotime)
 b0init = thuw/(2*pi)/dte; % Hz
 
 return
