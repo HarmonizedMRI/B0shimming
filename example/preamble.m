@@ -25,6 +25,6 @@ FOV = [24 24 24];
 N = [60 60 60];   % image matrix size
 
 % TE shift(s) for b0 mapping
-deltaTE = [0 1000/440/2 1000/440];  % TE delays (ms)
+deltaTE = [0 1000/440];  % TE delays (ms)
 
 

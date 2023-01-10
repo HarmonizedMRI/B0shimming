@@ -5,6 +5,7 @@
 % 
 %
 
+if false
 % data file location
 [status, tmp] = system('hostname');
 hostname = strip(tmp); % remove newline
@@ -24,6 +25,9 @@ deltaTE = [0 1000/440/2 1000/440];  % TE delays (ms)
 
 pfile = [datDir 'P,b0.7'];
 readoutFile = [datDir 'readout_b0.mod'];
+else
+    preamble;
+end
 
 % get coil images
 echo1 = 1;
