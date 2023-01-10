@@ -22,11 +22,10 @@ sens = ComplexF32.(sens) # 32-bit floats saves memory and thus time
 # initial (unwrapped) field map
 matf = matread("../b0init.mat")
 b0init = matf["b0init"]
-b0init = ComplexF32.(b0init) # 32-bit floats saves memory and thus time
+b0init = Float32.(b0init) # 32-bit floats saves memory and thus time
 
 # get regularized fieldmap in Hz
-b0, _, _ = b0map(images, echotime; smap=sens)   # this runs
-b0, _, _ = b0map(images, echotime; smap=sens, finit=b0init) # fails
+b0, _, _ = b0map(images, echotime; smap=sens, finit=b0init)
 # b0, _, _ = b0map(images, echotime; smap=sens, finit=b0init) # , mask=mask) 
 
 # Write to .mat file for viewing
