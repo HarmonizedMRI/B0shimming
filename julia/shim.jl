@@ -5,8 +5,7 @@
 # This script requires the following files to exist in the current path:
 #   shimcal.mat      F S mask FOV
 #   f0.mat           f0 FOV. Defines N and FOV used to create shimvol.mat.
-#   shimvol.mat      mask. Shim ROI mask on grid defined by N and FOV,
-#                    excluding points outside object mask (defined in f0.mat)
+#   shimvol.mat      mask. Shim ROI mask on same grid as f0
 #
 # In addition, to use SlicePlanner to select an ROI, you'll need:
 #   Localizer.h5     For displaying object in SlicePlanner GUI
@@ -192,8 +191,7 @@ embed!(fp, fpm, mask)
 # display predicted fieldmap
 p = jim(log.(abs.(A[:,:]')); color=:jet)
 p = jim(fp; clim=(-200,200), color=:jet)
-iz = 16:45 # compare these slices before and after shimming:
-p = jim(cat(f0[:,:,iz],fp[:,:,iz];dims=1); ncol=6, clim=(-200,200), color=:jet)
+p = jim(cat(f0[:,:,:],fp[:,:,:];dims=1); ncol=6, clim=(-200,200), color=:jet)
 display(p)
 
 # predicted fieldmap after applying shims, no mask
