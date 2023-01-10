@@ -21,9 +21,8 @@ sys.ge = toppe.systemspecs('maxSlew', 15, 'slewUnit', 'Gauss/cm/ms', ...
 %    'rfRingdownTime', 20e-6, 'rfDeadTime', 100e-6, 'adcDeadTime', 10e-6);
 
 % fov and matrix size 
-res = 0.24;       % cm
-N = [92 92 42];   % image matrix size
-FOV = N*res;     % cm
+FOV = [24 24 24];
+N = [60 60 60];   % image matrix size
 
 % TE shift(s) for b0 mapping
 deltaTE = [0 1000/440/2 1000/440];  % TE delays (ms)
