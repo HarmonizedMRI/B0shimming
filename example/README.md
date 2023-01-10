@@ -1,14 +1,5 @@
 # B0 shimming workflow
 
-# Overview: B0 shimming steps
-
-1. Create soft link to the shim calibration data file `shimcal.mat`
-   1. See `makeshimcal.m` for details.
-
-2. Acquire B0 map and save to `f0.mat`
-
-3. Create `shimvol.mat` containing shim volume mask  
-
 The workflow requires the following experimental files:
 ```
 shimcal.mat     # F S mask FOV. Used to calculate the shim calibration matrix `A`.
@@ -16,8 +7,30 @@ f0.mat          # f0 FOV. Defineus N and FOV used to create shimvol.mat.
 Localizer.h5    # (optional) For displaying object in SlicePlanner GUI
 shimvol.mat     # mask. Shim volume, defined as mask on grid defined by f0.mat
 ```
-For convenience and consistency, we suggest placing these files in `~/shimtmpfiles/`
-(symbolic links are ok).
+
+
+# Overview: B0 shimming steps
+
+Contents of `main.m`:
+```
+% create shimcal.mat (F S mask FOV)
+makeshimcal;
+
+% create f0.mat (f0 FOV)
+getb0init;  % b0init, mask, x1/x2
+makef0;    
+
+% create shimvol.mat (mask)
+makeshimvol;
+
+```
+
+1. Create soft link to the shim calibration data file `shimcal.mat`
+   1. See `makeshimcal.m` for details.
+
+2. Acquire B0 map and save to `f0.mat`
+
+3. Create `shimvol.mat` containing shim volume mask  
 
 
 ## Shim calibration files
