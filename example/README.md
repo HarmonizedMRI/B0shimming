@@ -8,29 +8,22 @@ Localizer.h5    # (optional) For displaying object in SlicePlanner GUI
 shimvol.mat     # mask. Shim volume, defined as mask on grid defined by f0.mat
 ```
 
+## Overview: B0 shimming steps
 
-# Overview: B0 shimming steps
-
-Contents of `main.m`:
+### create shimcal.mat (F S mask FOV)
 ```
-% create shimcal.mat (F S mask FOV)
 makeshimcal;
-
-% create f0.mat (f0 FOV)
-getb0init;  % b0init, mask, x1/x2
-makef0;    
-
-% create shimvol.mat (mask)
-makeshimvol;
-
 ```
 
-1. Create soft link to the shim calibration data file `shimcal.mat`
-   1. See `makeshimcal.m` for details.
+### create f0.mat (f0 FOV)
+```
+getb0init;  % b0init, mask, x1/x2. Phase unwrapping is done in unwrap/main.jl
+makef0;     % regularized B0 estimation done in Matlab or in b0reg/main.jl
+```
 
-2. Acquire B0 map and save to `f0.mat`
-
-3. Create `shimvol.mat` containing shim volume mask  
+### create shimvol.mat (mask)
+```
+makeshimvol;  % uses FSL (bet) to do skull stripping
 
 
 ## Shim calibration files
