@@ -1,7 +1,7 @@
 % Create shimvol.mat (define shim region)
 % Here we do this by skull stripping using FSL's 'bet' tool
 
-m = abs(x1);  % magnitude image
+m = magraw;  % magnitude image
 
 % flip dimensions to match expected orientation for nii images
 m = flipdim(m, 1);
