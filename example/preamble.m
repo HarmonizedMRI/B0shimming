@@ -6,6 +6,7 @@ if strcmp(hostname, 'quickstep')
     datDir = '/mnt/storage/jfnielse/data/20221013_UM3TUHP_3dspiral/';
 else
     datDir = '/media/jon/USB/Data/20221013_UM3TUHP_3dspiral/';
+    datDir = '';
 end
 
 % system hardware limits

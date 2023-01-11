@@ -2,36 +2,16 @@
 % Also save the following that are used by b0reg/main.jl:
 % images.mat     complex coil images
 % echotime.mat   echo times (sec)
-% 
 %
 
-if false
-% data file location
-[status, tmp] = system('hostname');
-hostname = strip(tmp); % remove newline
-if strcmp(hostname, 'quickstep')
-    datDir = '/mnt/storage/jfnielse/data/20221013_UM3TUHP_3dspiral/';
-else
-    datDir = '/media/jon/USB/Data/20221013_UM3TUHP_3dspiral/';
-end
-
-% fov and matrix size 
-res = 0.24;       % cm
-N = [92 92 42];   % image matrix size
-FOV = N*res;     % cm
-
-% TE shift(s) for b0 mapping
-deltaTE = [0 1000/440/2 1000/440];  % TE delays (ms)
+preamble;
 
 pfile = [datDir 'P,b0.7'];
 readoutFile = [datDir 'readout_b0.mod'];
-else
-    preamble;
-end
 
 % get coil images
 echo1 = 1;
-echo2 = 3;
+echo2 = 2;
 [im1, magraw] = toppe.utils.recon3dft(pfile, ...
     'echo', echo1, ...
     'readoutFile', readoutFile, ...
@@ -60,7 +40,7 @@ save mask mask
 mag = magraw.*mask;
 
 % get phase difference map (th)
-if false
+if true
     if size(im1, 4) > 1   % multicoil
         th = toppe.utils.phasecontrastmulticoil(im2, im1);
     else

@@ -3,8 +3,8 @@
 
 % regularize field map
 % NB! Input to mri_field_map_reg is rad/sec
-yik(:,:,:,1) = x1;
-yik(:,:,:,2) = x2;
+yik(:,:,:,1) = magraw;
+yik(:,:,:,2) = magraw .* exp(1i*2*pi*b0init*dte);
 l2b = -1;
 fprintf('Regularizing field map...');
 load mask  % from getb0init.m

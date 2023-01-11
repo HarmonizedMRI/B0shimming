@@ -1,5 +1,7 @@
 # B0 shimming workflow
 
+## Files involved
+
 The workflow requires the following experimental files:
 ```
 shimcal.mat     # F S mask FOV. Used to calculate the shim calibration matrix `A`.
@@ -8,22 +10,42 @@ Localizer.h5    # (optional) For displaying object in SlicePlanner GUI
 shimvol.mat     # mask. Shim volume, defined as mask on grid defined by f0.mat
 ```
 
-## Overview: B0 shimming steps
+## Workflow 
 
-### create shimcal.mat (F S mask FOV)
+### Create shimcal.mat (F S mask FOV)
 ```
 makeshimcal;
 ```
 
-### create f0.mat (f0 FOV)
+### Create f0.mat (f0 FOV)
 ```
 getb0init;  % b0init, mask, x1/x2. Phase unwrapping is done in unwrap/main.jl
 makef0;     % regularized B0 estimation done in Matlab or in b0reg/main.jl
 ```
 
-### create shimvol.mat (mask)
+### Create shimvol.mat (mask)
 ```
 makeshimvol;  % uses FSL (bet) to do skull stripping
+```
+
+### Calculate shims
+
+Run ../julia/shim.jl
+
+
+## Running Julia scripts
+
+1. cd into the folder containing the Julia code (main.jl)
+1. Press `]` to enter the Julia package manager and do:
+```
+(@v1.7) pkg> activate .
+(julia) pkg> instantiate
+```
+1. Press backspace to get back to the Julia prompt.
+1. Run the script:
+```
+  julia> include("shim.jl")
+```
 
 
 ## Shim calibration files
