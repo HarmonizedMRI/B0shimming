@@ -3,6 +3,16 @@
 
 m = magraw;  % magnitude image
 
+% reduce resolution to test bet tool
+if false
+    d = fftshift(fftn(fftshift(m)));
+    n = 92;
+    r = (size(d,1)/2-n/2):(size(d,1)/2+n/2-1);
+    d = d(r, r, :);
+    m = fftshift(ifftn(fftshift(d)));
+    m = abs(m);
+end
+
 % flip dimensions to match expected orientation for nii images
 m = flipdim(m, 1);
 m = flipdim(m, 2);
