@@ -24,5 +24,7 @@ toc
 
 f0 = b0;
 
+im(cat(1, b0init, f0), 200*[-1 1]); colormap jet; colorbar; 
+
 save f0.mat f0 FOV
 

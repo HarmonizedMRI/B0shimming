@@ -77,5 +77,7 @@ thuw = thuw.*mask;         % unwrap() adds pixels at edges!
 
 b0init = thuw/(2*pi)/dte; % Hz
 
+%im(b0init, 200*[-1 1]); colormap jet; colorbar; title('b0init');
+
 save b0init b0init
 
