@@ -1,4 +1,4 @@
-using MRIFieldmaps
+using MRIFieldmaps, MAT
 
 # Load complex coil images 
 matf = matread("../images.mat")

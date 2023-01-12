@@ -3,6 +3,12 @@
 
 m = magraw;  % magnitude image
 
+if true
+    mask = magraw > 0.2*max(magraw(:));
+    save shimvol.mat mask
+    return
+end
+
 % reduce resolution to test bet tool
 if false
     d = fftshift(fftn(fftshift(m)));
