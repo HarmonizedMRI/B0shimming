@@ -19,7 +19,7 @@ makeshimcal;
 
 ### Create f0.mat (f0 FOV)
 ```
-getb0init;  % b0init, mask, x1/x2. Phase unwrapping is done in unwrap/main.jl
+getb0init;  % b0init, mask, magraw. Phase unwrapping is done in unwrap/main.jl
 makef0;     % regularized B0 estimation done in Matlab or in b0reg/main.jl
 ```
 
