@@ -1,0 +1,1 @@
+rsync -avz --progress jfnielse@quickstep.engin.umich.edu:/export/jfnielse/transfer/P,*.7 .
