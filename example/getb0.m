@@ -1,18 +1,38 @@
-% Regularize B0 map
+function b0 = getb0(pfile, readoutFile, deltaTE)
+%
+% Reconstruct b0 map from pfile, first two echoes.
+%
+%  pfile    string   Pfile name
+%  readout  string   e.g., 'readout.mod'
+%  deltaTE  [1 2]    echo times (ms)
 
-% regularize field map
-% NB! Input to mri_field_map_reg is rad/sec
-yik(:,:,:,1) = x1;
-yik(:,:,:,2) = x2;
-l2b = -1;
-fprintf('Regularizing field map...');
-tic
-[wmap, wconv] = mri_field_map_reg(yik, [0 dte], ...
-    'mask', mask, 'winit', b0init*2*pi, 'l2b', l2b);
-fprintf(' done\n');
-toc
-wmap = wmap .* mask;   % rad/sec
+% get coil images
+echo1 = 1;
+echo2 = 2;
+[im1, magraw] = toppe.utils.recon3dft(pfile, ...
+    'echo', echo1, ...
+    'readoutFile', readoutFile, ...
+    'alignWithUCS', true);  
+im2 = toppe.utils.recon3dft(pfile, ...
+    'echo', echo2, ...
+    'readoutFile', readoutFile, ...
+    'alignWithUCS', true);  
 
-% final b0 estimate
-b0 = wmap / (2*pi);  % Hz
+dte = 1e-3*(deltaTE(echo2) - deltaTE(echo1));  % TE difference, sec
+
+% mask
+thr = 0.05;
+mask = magraw > thr*max(magraw(:));
+save mask mask
+
+mag = magraw.*mask;
+
+% get phase difference map (th)
+if size(im1, 4) > 1   % multicoil
+    th = toppe.utils.phasecontrastmulticoil(im2, im1);
+else
+    th = angle(im2./im1).*mask;
+end
+
+b0 = th/(2*pi)/dte; % Hz
 
