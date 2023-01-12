@@ -3,11 +3,14 @@
 
 m = magraw;  % magnitude image
 
-if true
+a = input('In vivo scan? (y/n) ', 's');
+if strcmp(a, 'n')
     mask = magraw > 0.2*max(magraw(:));
     save shimvol.mat mask
     return
 end
+
+% Do skull stripping
 
 % reduce resolution to test bet tool
 if false
