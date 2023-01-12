@@ -14,23 +14,35 @@ shimvol.mat     # mask. Shim volume, defined as mask on grid defined by f0.mat
 
 ### Create shimcal.mat (F S mask FOV)
 ```
-makeshimcal;
+>> makeshimcal;
 ```
 
 ### Create f0.mat (f0 FOV)
+
+Scan, save as `P,b0.7`.  
+
+Then:
 ```
-getb0init;  % b0init, mask, magraw. Phase unwrapping is done in unwrap/main.jl
-makef0;     % regularized B0 estimation done in Matlab or in b0reg/main.jl
+>> getb0init;  % b0init, mask, magraw. Phase unwrapping is done in unwrap/main.jl
+>> makef0;     % regularized B0 estimation done in Matlab or in b0reg/main.jl
 ```
 
 ### Create shimvol.mat (mask)
 ```
-makeshimvol;  % uses FSL (bet) to do skull stripping
+>> makeshimvol;  % uses FSL (bet) to do skull stripping
 ```
 
 ### Calculate shims
 
 Run ../julia/shim.jl
+
+
+### Scan, then compare pre/post fieldmap
+
+Scan, save as `P,b0,post.7`. Then:
+```
+>> compareb0;
+```
 
 
 ## Running Julia scripts
