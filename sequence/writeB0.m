@@ -8,7 +8,8 @@ addpath ~/github/pulseq/matlab/      % +mr toolbox
 params;
 
 if true
-	b04ge(sysGE, N, FOV, flip, deltaTE);
+	b04ge(sysGE, N, FOV, flip, deltaTE, ...
+        'autoChop', true);  % only acquire data on gradient plateau
 	system('cp tipdown.mod tipdown_orig.mod');
 else
 	system('cp tipdown_orig.mod tipdown.mod');
@@ -23,7 +24,7 @@ toppe.writemod(sysGE, 'rf', rf, 'gz', gz, 'desc', desc, ...
     'nChop', [48 48], 'ofname', 'tipdown.mod');
 system(sprintf('tar cf b0.tar seqstamp.txt scanloop.txt modules.txt *.mod'));
 
-if false
+if true
 	pulsegeq.ge2seq('b0.tar', sysGE, sysSiemens, 'seqFile', 'b0.seq');
 else
 	% test
