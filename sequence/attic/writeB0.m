@@ -1,4 +1,11 @@
-% Create B0 mapping scan files for GE and Siemens
+% Deprecated.
+%
+% Create B0 mapping scan files for GE and Siemens,
+% by first creating a set of TOPPE files using the toppe Matlab toolbox,
+% then converting to .seq file using ge2seq.
+% This conversion is easy and robust, but since the broader community
+% is used to creating .seq files directly (e.g., using the Pulseq Matlab or pyPulseq toolboxes)
+% we're making an effort to do the same and then use seq2ge to convert to TOPPE.
 
 addpath ~/github/HarmonizedMRI/Calibration/b0/GE/    % b04ge.m
 addpath ~/github/toppeMRI/PulseGEq/                  % +pulsegeq toolbox
