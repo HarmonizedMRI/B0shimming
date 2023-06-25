@@ -12,8 +12,8 @@
 % see https://github.com/jfnielsen/TOPPEpsdSourceCode/wiki.
 
 % Define experimental parameters
-sys = mr.opts('maxGrad', 30, 'gradUnit','mT/m', ...
-              'maxSlew', 100, 'slewUnit', 'T/m/s', ...
+sys = mr.opts('maxGrad', 22, 'gradUnit','mT/m', ...
+              'maxSlew', 80, 'slewUnit', 'T/m/s', ...
               'rfDeadTime', 100e-6, ...
               'rfRingdownTime', 60e-6, ...
               'adcDeadTime', 40e-6, ...
@@ -27,11 +27,11 @@ timessi = 100e-6;    % start sequence interrupt (SSI) time (required delay at en
 fov = [240e-3 240e-3 240e-3];     % FOV (m)
 Nx = 60; Ny = Nx; Nz = 20;        % Matrix size
 dwell = 16e-6;                    % ADC sample time (s). For GE, must be multiple of 2us.
-alpha = 5;                        % flip angle (degrees)
+alpha = 3;                        % flip angle (degrees)
 fatChemShift = 3.5*1e-6;          % 3.5 ppm
 fatOffresFreq = sys.gamma*sys.B0*fatChemShift;  % Hz
 TE = 2e-3 + [0 1/fatOffresFreq];                % fat and water in phase for both echoes
-TR = 10e-3*[1 1];                               % constant TR
+TR = 7e-3*[1 1];                                % constant TR
 nCyclesSpoil = 2;    % number of spoiler cycles, along x and z
 alphaPulseDuration = 0.2e-3;
 Tpre = 0.5e-3;       % prephasing trapezoid duration
@@ -85,7 +85,8 @@ delayTR = ceil((TR-TRmin)/seq.gradRasterTime)*seq.gradRasterTime;
 % iZ < 0: Dummy shots to reach steady state
 % iZ = 0: ADC is turned on and used for receive gain calibration on GE scanners (during auto prescan)
 % iZ > 0: Image acquisition
-for iZ = 1:4 %Nz
+nDummyZLoops = 2;
+for iZ = -nDummyZLoops:Nz
     if iZ > 0
         for ib = 1:40
             fprintf('\b');
@@ -141,8 +142,8 @@ else
 end
 
 % Visualise sequence and output for execution
-Ndummy = length(TE)*2*Ny;
-seq.plot('TimeRange',[Ndummy+1 Ndummy+8]*TR(1), 'timedisp', 'ms')
+Ndummy = length(TE)*Ny*nDummyZLoops;
+seq.plot('TimeRange',[Ndummy+1 Ndummy+6]*TR(1), 'timedisp', 'ms')
 
 seq.setDefinition('FOV', fov);
 seq.setDefinition('Name', 'b0');
