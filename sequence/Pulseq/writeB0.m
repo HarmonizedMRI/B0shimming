@@ -22,6 +22,8 @@ sys = mr.opts('maxGrad', 30, 'gradUnit','mT/m', ...
               'blockDurationRaster', 10e-6, ...
               'B0', 3.0);
 
+timessi = 100e-6;    % start sequence interrupt (SSI) time (required delay at end of block group/TR)
+
 fov = [240e-3 240e-3 240e-3];     % FOV (m)
 Nx = 60; Ny = Nx; Nz = 20;        % Matrix size
 dwell = 16e-6;                    % ADC sample time (s). For GE, must be multiple of 2us.
@@ -29,9 +31,10 @@ alpha = 5;                        % flip angle (degrees)
 fatChemShift = 3.5*1e-6;          % 3.5 ppm
 fatOffresFreq = sys.gamma*sys.B0*fatChemShift;  % Hz
 TE = 2e-3 + [0 1/fatOffresFreq];                % fat and water in phase for both echoes
-TR = 6e-3*[1 1];
+TR = 10e-3*[1 1];                               % constant TR
 nCyclesSpoil = 2;    % number of spoiler cycles, along x and z
 alphaPulseDuration = 0.2e-3;
+Tpre = 0.5e-3;       % prephasing trapezoid duration
 
 % Create a new sequence object
 seq = mr.Sequence(sys);           
@@ -44,11 +47,14 @@ seq = mr.Sequence(sys);
 deltak = 1./fov;
 Tread = Nx*dwell;
 gxPre = mr.makeTrapezoid('x', sys, ...
-    'Area', -Nx*deltak(1)/2);
+    'Area', -Nx*deltak(1)/2, ...
+    'Duration', Tpre);
 gyPre = mr.makeTrapezoid('y', sys, ...
-    'Area', Ny*deltak(2)/2);   % maximum PE1 gradient, max positive amplitude
+    'Area', Ny*deltak(2)/2, ...   % maximum PE1 gradient, max positive amplitude
+    'Duration', Tpre);
 gzPre = mr.makeTrapezoid('z', sys, ...
-    'Area', Nz*deltak(3)/2);   % maximum PE2 gradient, max positive amplitude
+    'Area', Nz*deltak(3)/2, ...   % maximum PE2 gradient, max positive amplitude
+    'Duration', Tpre);
 gxtmp = mr.makeTrapezoid('x', sys, ...   % temporary object
     'Amplitude', Nx*deltak(1)/Tread, ...
     'FlatTime', Tread);
@@ -68,16 +74,18 @@ pe1Steps = ((0:Ny-1)-Ny/2)/Ny*2;
 pe2Steps = ((0:Nz-1)-Nz/2)/Nz*2;
 
 % Calculate timing
-delayTE = ceil((TE - mr.calcDuration(rf) + mr.calcRfCenter(rf) + rf.delay - mr.calcDuration(gxPre)  ...
-    - mr.calcDuration(gx)/2)/seq.gradRasterTime)*seq.gradRasterTime;
-delayTR = ceil((TR - mr.calcDuration(rf) - mr.calcDuration(gxPre) ...
-    - mr.calcDuration(gx) - mr.calcDuration(gxSpoil) - delayTE)/seq.gradRasterTime)*seq.gradRasterTime;
+TEmin = rf.shape_dur/2 + rf.ringdownTime + mr.calcDuration(gxPre) ...
+      + adc.delay + Nx/2*dwell;
+delayTE = ceil((TE-TEmin)/seq.gradRasterTime)*seq.gradRasterTime;
+TRmin = mr.calcDuration(rf) + delayTE + mr.calcDuration(gxPre) ...
+      + mr.calcDuration(gx) + mr.calcDuration(gxSpoil);
+delayTR = ceil((TR-TRmin)/seq.gradRasterTime)*seq.gradRasterTime;
 
 % Loop over phase encodes and define sequence blocks
 % iZ < 0: Dummy shots to reach steady state
 % iZ = 0: ADC is turned on and used for receive gain calibration on GE scanners (during auto prescan)
 % iZ > 0: Image acquisition
-for iZ = -1:Nz
+for iZ = 1:4 %Nz
     if iZ > 0
         for ib = 1:40
             fprintf('\b');
@@ -94,7 +102,11 @@ for iZ = -1:Nz
             adc.phaseOffset = rf.phaseOffset;
             
             % Excitation
-            seq.addBlock(rf, rfDelay);
+            % Mark start of block group (= one TR) by adding label
+            % (subsequent blocks in block group are not labelled).
+            %seq.addBlock(rf, rfDelay);
+            blockGroupID = 1;
+            seq.addBlock(rf, mr.makeLabel('SET', 'LIN', blockGroupID));
             
             % Encoding
             seq.addBlock(mr.makeDelay(delayTE(c)));
@@ -108,20 +120,18 @@ for iZ = -1:Nz
             end
 
             % rephasing/spoiling
-            seq.addBlock(mr.scaleGrad(gyPre, -yStep), ...
-                mr.scaleGrad(gzPre, -zStep), ...
-                gxSpoil);
-            seq.addBlock(gzSpoil);
+            seq.addBlock(gxSpoil, ...
+                mr.scaleGrad(gyPre, -yStep), ...
+                mr.scaleGrad(gzPre, -zStep));
+            %seq.addBlock(gzSpoil);
             seq.addBlock(mr.makeDelay(delayTR(c)));
         end
     end
 end
-
 fprintf('\nSequence ready\n');
 
-% check whether the timing of the sequence is correct
+% Check sequence timing
 [ok, error_report]=seq.checkTiming;
-
 if (ok)
     fprintf('Timing check passed successfully\n');
 else
@@ -132,11 +142,13 @@ end
 
 % Visualise sequence and output for execution
 Ndummy = length(TE)*2*Ny;
-seq.plot('TimeRange',[Ndummy+1 Ndummy+4]*TR(1), 'timedisp', 'ms')
+seq.plot('TimeRange',[Ndummy+1 Ndummy+8]*TR(1), 'timedisp', 'ms')
 
 seq.setDefinition('FOV', fov);
 seq.setDefinition('Name', 'b0');
 seq.write('b0.seq', false);
+
+return
 
 % visualize the 3D k-space (only makes sense for low-res, otherwise one sees nothing)
 if Nx<=32
@@ -145,47 +157,4 @@ if Nx<=32
     toc
     figure;plot3(kf(1,:),kf(2,:),kf(3,:));
     hold on;plot3(kfa(1,:),kfa(2,:),kfa(3,:),'r.');
-end
-
-return
-
-%% create a smoothly rotating plot
-if Nx<=16
-    figure;plot3(kf(1,:),kf(2,:),kf(3,:));
-    hold on;plot3(kfa(1,:),kfa(2,:),kfa(3,:),'r.');
-    kabsmax=max(abs(kf)')';
-    kxyabsmax=max(kabsmax(1:2));
-    kxyzabsmax=max(kabsmax);
-    %axis([-kxyabsmax kxyabsmax -kxyabsmax kxyabsmax -kabsmax(3) kabsmax(3)])
-    axis([-kxyzabsmax kxyzabsmax -kxyzabsmax kxyzabsmax -kxyzabsmax kxyzabsmax])
-    [caz,cel] = view;
-    for caz_add=0:1:359 
-        view(caz+caz_add,cel);
-        drawnow;
-    end
-end
-
-%% create a smoothly rotating plot (rotated to read along z)
-if Nx<=16
-    figure;plot3(kf(2,:),-kf(3,:),kf(1,:));
-    hold on;plot3(kfa(2,:),-kfa(3,:),kfa(1,:),'r.');
-    set(gca,'visible','off'); % hide axes
-    set(gca, 'CameraViewAngle',get(gca, 'CameraViewAngle')); % freeze the view
-    kabsmax=max(abs(kf)')';
-    kxyabsmax=max(kabsmax(1:2));
-    kxyzabsmax=max(kabsmax);
-    %axis([-kxyabsmax kxyabsmax -kxyabsmax kxyabsmax -kabsmax(3) kabsmax(3)])
-    %axis([-kxyzabsmax kxyzabsmax -kxyzabsmax kxyzabsmax -kxyzabsmax kxyzabsmax])
-    s1=1.2;    
-    axis([ -kabsmax(2)*s1 kabsmax(2)*s1  -kabsmax(2)*s1 kabsmax(2)*s1 min(kf(1,:)) kabsmax(1)]);
-    [caz,cel] = view;
-    folder='kspace3d';
-    mkdir(folder);
-    for caz_add=0:1:359 
-        view(caz+caz_add,cel);
-        drawnow;
-        print( '-r100', '-dpng', [folder '/frame_' num2str(caz_add,'%03d') '.png']);
-        % use convert frame_???.png -gravity center -crop 300x300+0+0 +repage -delay 0.1 -loop 0 kspace_gre3d.gif
-        % to create a GIF movie
-    end
 end
