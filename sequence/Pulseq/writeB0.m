@@ -25,7 +25,7 @@ sys = mr.opts('maxGrad', 22, 'gradUnit','mT/m', ...
 timessi = 100e-6;    % start sequence interrupt (SSI) time (required delay at end of block group/TR)
 
 fov = [240e-3 240e-3 240e-3];     % FOV (m)
-Nx = 60; Ny = Nx; Nz = 60;        % Matrix size
+Nx = 60; Ny = Nx; Nz = 20;        % Matrix size
 dwell = 16e-6;                    % ADC sample time (s). For GE, must be multiple of 2us.
 alpha = 4;                        % flip angle (degrees)
 fatChemShift = 3.5*1e-6;          % 3.5 ppm
@@ -85,7 +85,7 @@ delayTR = ceil((TR-TRmin)/seq.gradRasterTime)*seq.gradRasterTime;
 % iZ < 0: Dummy shots to reach steady state
 % iZ = 0: ADC is turned on and used for receive gain calibration on GE scanners (during auto prescan)
 % iZ > 0: Image acquisition
-nDummyZLoops = 2;
+nDummyZLoops = 0;
 for iZ = -nDummyZLoops:Nz
     if iZ > 0
         for ib = 1:40
