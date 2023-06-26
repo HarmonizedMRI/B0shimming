@@ -25,9 +25,9 @@ sys = mr.opts('maxGrad', 22, 'gradUnit','mT/m', ...
 timessi = 100e-6;    % start sequence interrupt (SSI) time (required delay at end of block group/TR)
 
 fov = [240e-3 240e-3 240e-3];     % FOV (m)
-Nx = 60; Ny = Nx; Nz = 20;        % Matrix size
+Nx = 60; Ny = Nx; Nz = 60;        % Matrix size
 dwell = 16e-6;                    % ADC sample time (s). For GE, must be multiple of 2us.
-alpha = 3;                        % flip angle (degrees)
+alpha = 4;                        % flip angle (degrees)
 fatChemShift = 3.5*1e-6;          % 3.5 ppm
 fatOffresFreq = sys.gamma*sys.B0*fatChemShift;  % Hz
 TE = 2e-3 + [0 1/fatOffresFreq];                % fat and water in phase for both echoes
