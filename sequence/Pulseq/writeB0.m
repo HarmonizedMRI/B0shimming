@@ -106,7 +106,7 @@ for iZ = -nDummyZLoops:Nz
             % Mark start of block group (= one TR) by adding label
             % (subsequent blocks in block group are not labelled).
             %seq.addBlock(rf, rfDelay);
-            blockGroupID = 1;
+            blockGroupID = c;
             seq.addBlock(rf, mr.makeLabel('SET', 'LIN', blockGroupID));
             
             % Encoding
