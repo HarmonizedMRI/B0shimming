@@ -85,7 +85,7 @@ delayTR = ceil((TR-TRmin)/seq.gradRasterTime)*seq.gradRasterTime;
 % iZ < 0: Dummy shots to reach steady state
 % iZ = 0: ADC is turned on and used for receive gain calibration on GE scanners (during auto prescan)
 % iZ > 0: Image acquisition
-nDummyZLoops = 0;
+nDummyZLoops = 2;
 for iZ = -nDummyZLoops:Nz
     if iZ > 0
         for ib = 1:40
