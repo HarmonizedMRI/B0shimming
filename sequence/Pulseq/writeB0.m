@@ -85,16 +85,29 @@ delayTR = ceil((TR-TRmin)/seq.gradRasterTime)*seq.gradRasterTime;
 % iZ < 0: Dummy shots to reach steady state
 % iZ = 0: ADC is turned on and used for receive gain calibration on GE scanners (during auto prescan)
 % iZ > 0: Image acquisition
-nDummyZLoops = 2;
+
+nDummyZLoops = 1;
+
 for iZ = -nDummyZLoops:Nz
+    isDummyTR = iZ < 0;
+
+    if isDummyTR
+        % assign dummy TRs their own block group, since no ADC object
+        blockGroupIDOffset = 0;
+    else
+        blockGroupIDOffset = length(TE);
+    end
+
     if iZ > 0
         for ib = 1:40
             fprintf('\b');
         end
         fprintf('Writing kz encode %d of %d', iZ, Nz);
     end
+
     for iY = 1:Ny
-        % turn off y and z prephasing lobes during receive gain calibration (auto prescan)
+        % Turn on y and z prephasing lobes, except during dummy scans and
+        % receive gain calibration (auto prescan)
         yStep = (iZ > 0) * pe1Steps(iY);
         zStep = (iZ > 0) * pe2Steps(max(1,iZ));
         for c = 1:length(TE)
@@ -105,8 +118,7 @@ for iZ = -nDummyZLoops:Nz
             % Excitation
             % Mark start of block group (= one TR) by adding label
             % (subsequent blocks in block group are not labelled).
-            %seq.addBlock(rf, rfDelay);
-            blockGroupID = c;
+            blockGroupID = blockGroupIDOffset + c;
             seq.addBlock(rf, mr.makeLabel('SET', 'LIN', blockGroupID));
             
             % Encoding
