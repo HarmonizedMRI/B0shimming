@@ -7,10 +7,10 @@ return
 fn = 'b0.seq';
 
 % TOPPE system specs struct
-peakRF = max( [rf.signal] ) / sys.gamma * 1e4;  % Gauss
+peakRF = max(abs([0.1, rf.signal])) / sys.gamma * 1e4;  % Gauss
 sysGE = toppe.systemspecs('maxGrad', sys.maxGrad, ...   % G/cm
     'maxSlew', 15, ...           % G/cm/ms
-    'maxRF', peakRF*1.01, ...    % Gauss. Must be >= peak RF in sequence.
+    'maxRF', peakRF, ...         % Gauss. Must be >= peak RF in sequence.
     'timessi', 100, ...          % us
     'rfDeadTime', 50, ...        % us
     'rfRingdownTime', 54, ...    % us
