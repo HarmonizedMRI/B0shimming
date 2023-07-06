@@ -1,20 +1,22 @@
 addpath ~/github/HarmonizedMRI/B0shimming/sequence/Pulseq/
 % create .seq file
- writeB0;  
-return
+%writeB0;  
 
 % Convert to TOPPE .tar file for execution on GE scanners
 fn = 'b0.seq';
 
 % TOPPE system specs struct
-peakRF = max(abs([0.1, rf.signal])) / sys.gamma * 1e4;  % Gauss
-sysGE = toppe.systemspecs('maxGrad', sys.maxGrad, ...   % G/cm
-    'maxSlew', 15, ...           % G/cm/ms
+peakRF = max(abs([0.25, rf.signal/sys.gamma*1e4]));  % Gauss
+maxGrad = sys.maxGrad/sys.gamma*100;   % G/cm
+maxSlew = sys.maxSlew/sys.gamma/10;    % G/cm/ms
+sysGE = toppe.systemspecs('maxGrad', maxGrad, ...   % G/cm
+    'maxSlew', maxSlew, ...           % G/cm/ms
     'maxRF', peakRF, ...         % Gauss. Must be >= peak RF in sequence.
-    'timessi', 100, ...          % us
-    'rfDeadTime', 50, ...        % us
-    'rfRingdownTime', 54, ...    % us
-    'adcDeadTime', 40);          % us
+    'timessi', 100, ...                             % us
+    'maxView', 60, ...
+    'rfDeadTime', sys.rfDeadTime*1e6, ...           % us
+    'rfRingdownTime', sys.rfRingdownTime*1e6, ...   % us
+    'adcDeadTime', sys.adcDeadTime*1e6);            % us
 
 verbose = true;    % so it doesn't remove the individual scan files from local folder
 pulsegeq.seq2ge(seq, sysGE, 'verbose', verbose, 'tarFile', [fn(1:(end-4)) '.tar']);
