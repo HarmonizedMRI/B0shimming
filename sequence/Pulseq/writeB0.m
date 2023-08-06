@@ -1,75 +1,78 @@
-% Low-resolution 3D B0 mapping sequence in Pulseq, optimized
-% for identical execution on Siemens and GE scanners.
+% writeB0.m
 %
-% This script creates the file 'b0.seq', that can be executed directly
-% on Siemens MRI scanners using the Pulseq interpreter.
-% The .seq file can also be converted to a .tar file that can be executed on GE
-% scanners, see main.m.
-%
-% The experimental parameters below are chosen such that the sequence 
-% can be executed identically (to us precision) on Siemens and GE systems.
-% For more information about preparing a Pulseq file for execution on GE scanners,
-% see https://github.com/jfnielsen/TOPPEpsdSourceCode/wiki.
+% 3D GRE B0 mapping demo sequence for Pulseq on GE v1.0 User Guide
 
-% Define experimental parameters
-sys = mr.opts('maxGrad', 22, 'gradUnit','mT/m', ...
-              'maxSlew', 80, 'slewUnit', 'T/m/s', ...
+% RF/gradient delay (sec). 
+% Conservative choice that should work across all GE scanners.
+psd_rf_wait = 200e-6;  
+
+% System/design parameters.
+% Here we extend rfRingdownTime by psd_rf_wait to ensure that 
+% the subsequent wait pulse (delay block) doesn't overlap with
+% the 'true' RF ringdown time (54 us).
+sys = mr.opts('maxGrad', 40, 'gradUnit','mT/m', ...
+              'maxSlew', 150, 'slewUnit', 'T/m/s', ...
               'rfDeadTime', 100e-6, ...
-              'rfRingdownTime', 60e-6, ...
+              'rfRingdownTime', 60e-6 + psd_rf_wait, ...
               'adcDeadTime', 40e-6, ...
               'adcRasterTime', 2e-6, ...
-              'gradRasterTime', 10e-6, ...
               'blockDurationRaster', 10e-6, ...
               'B0', 3.0);
 
-timessi = 100e-6;    % start sequence interrupt (SSI) time (required delay at end of block group/TR)
-
-fov = [240e-3 240e-3 240e-3];     % FOV (m)
-Nx = 60; Ny = Nx; Nz = 60;        % Matrix size
-dwell = 16e-6;                    % ADC sample time (s). For GE, must be multiple of 2us.
-alpha = 4;                        % flip angle (degrees)
-fatChemShift = 3.5*1e-6;          % 3.5 ppm
+% Acquisition parameters
+fov = [240e-3 240e-3 240e-3];   % FOV (m)
+Nx = 60; Ny = Nx; Nz = 60;      % Matrix size
+dwell = 10e-6;                  % ADC sample time (s)
+alpha = 3;                      % flip angle (degrees)
+fatChemShift = 3.5e-6;          % 3.5 ppm
 fatOffresFreq = sys.gamma*sys.B0*fatChemShift;  % Hz
-TE = 2e-3 + [0 1/fatOffresFreq];                % fat and water in phase for both echoes
-TR = 7e-3*[1 1];                                % constant TR
-TE = 2e-3;
-TR = 7e-3;
-nCyclesSpoil = 2;    % number of spoiler cycles, along x and z
-alphaPulseDuration = 0.2e-3;
-Tpre = 0.5e-3;       % prephasing trapezoid duration
+TE = 1/fatOffresFreq*[1 2];     % fat and water in phase for both echoes
+TR = 6e-3*[1 1];                % constant TR
+nCyclesSpoil = 2;               % number of spoiler cycles
+Tpre = 0.5e-3;                  % prephasing trapezoid duration
+rfSpoilingInc = 117;            % RF spoiling increment
 
 % Create a new sequence object
 seq = mr.Sequence(sys);           
 
 % Create non-selective pulse
-[rf, rfDelay] = mr.makeBlockPulse(alpha/180*pi, sys, 'Duration', alphaPulseDuration);
+[rf] = mr.makeBlockPulse(alpha/180*pi, sys, 'Duration', 0.2e-3);
 
 % Define other gradients and ADC events
 % Cut the redaout gradient into two parts for optimal spoiler timing
 deltak = 1./fov;
 Tread = Nx*dwell;
-gxPre = mr.makeTrapezoid('x', sys, ...
-    'Area', -Nx*deltak(1)/2, ...
-    'Duration', Tpre);
+
 gyPre = mr.makeTrapezoid('y', sys, ...
     'Area', Ny*deltak(2)/2, ...   % maximum PE1 gradient, max positive amplitude
     'Duration', Tpre);
 gzPre = mr.makeTrapezoid('z', sys, ...
     'Area', Nz*deltak(3)/2, ...   % maximum PE2 gradient, max positive amplitude
     'Duration', Tpre);
-gxtmp = mr.makeTrapezoid('x', sys, ...   % temporary object
+
+gxtmp = mr.makeTrapezoid('x', sys, ...  % readout trapezoid, temporary object
     'Amplitude', Nx*deltak(1)/Tread, ...
     'FlatTime', Tread);
+gxPre = mr.makeTrapezoid('x', sys, ...
+    'Area', -gxtmp.area/2, ...
+    'Duration', Tpre);
+
 adc = mr.makeAdc(Nx, sys, ...
     'Duration', Tread,...
     'Delay', gxtmp.riseTime);
+
+% extend flat time so we can split at end of ADC dead time
 gxtmp2 = mr.makeTrapezoid('x', sys, ...  % temporary object
     'Amplitude', Nx*deltak(1)/Tread, ...
-    'FlatTime', Tread + adc.deadTime);   % extend flat time so we can split at end of ADC dead time
+    'FlatTime', Tread + adc.deadTime);   
+[gx, ~] = mr.splitGradientAt(gxtmp2, gxtmp2.riseTime + gxtmp2.flatTime);
+%gx = gxtmp;
+
 gzSpoil = mr.makeTrapezoid('z', sys, ...
     'Area', Nx*deltak(1)*nCyclesSpoil);
 gxSpoil = mr.makeExtendedTrapezoidArea('x', gxtmp.amplitude, 0, gzSpoil.area, sys);
-[gx, ~] = mr.splitGradientAt(gxtmp2, gxtmp2.riseTime + gxtmp2.flatTime);
+%gxSpoil = mr.makeTrapezoid('x', sys, ...
+%    'Area', Nx*deltak(1)*nCyclesSpoil);
 
 % y/z PE steps
 pe1Steps = ((0:Ny-1)-Ny/2)/Ny*2;
@@ -85,43 +88,34 @@ delayTR = ceil((TR-TRmin)/seq.gradRasterTime)*seq.gradRasterTime;
 
 % Loop over phase encodes and define sequence blocks
 % iZ < 0: Dummy shots to reach steady state
-% iZ = 0: ADC is turned on and used for receive gain calibration on GE scanners (during auto prescan)
+% iZ = 0: ADC is turned on and used for receive gain calibration on GE scanners
 % iZ > 0: Image acquisition
 
 nDummyZLoops = 1;
+rf_phase = 0;
+rf_inc = 0;
 
 for iZ = -nDummyZLoops:Nz
     isDummyTR = iZ < 0;
-
-    if isDummyTR
-        % assign dummy TRs their own block group, since no ADC object
-        blockGroupIDOffset = 0;
-    else
-        blockGroupIDOffset = length(TE);
-    end
-
-    if iZ > 0
-        for ib = 1:40
-            fprintf('\b');
-        end
-        fprintf('Writing kz encode %d of %d', iZ, Nz);
-    end
 
     for iY = 1:Ny
         % Turn on y and z prephasing lobes, except during dummy scans and
         % receive gain calibration (auto prescan)
         yStep = (iZ > 0) * pe1Steps(iY);
         zStep = (iZ > 0) * pe2Steps(max(1,iZ));
+
         for c = 1:length(TE)
+
             % RF spoiling
-            rf.phaseOffset = mod(117*(iY^2+iY+2)*pi/180, 2*pi);
-            adc.phaseOffset = rf.phaseOffset;
+            rf.phaseOffset = rf_phase/180*pi;
+            adc.phaseOffset = rf_phase/180*pi;
+            rf_inc = mod(rf_inc+rfSpoilingInc, 360.0);
+            rf_phase = mod(rf_phase+rf_inc, 360.0);
             
             % Excitation
-            % Mark start of block group (= one TR) by adding label
-            % (subsequent blocks in block group are not labelled).
-            blockGroupID = blockGroupIDOffset + c;
-            seq.addBlock(rf, mr.makeLabel('SET', 'LIN', blockGroupID));
+            % Mark start of segment (block group) by adding label.
+            % Subsequent blocks in block group are NOT labelled.
+            seq.addBlock(rf, mr.makeLabel('SET', 'LIN', 2-isDummyTR));
             
             % Encoding
             seq.addBlock(mr.makeDelay(delayTE(c)));
@@ -138,12 +132,11 @@ for iZ = -nDummyZLoops:Nz
             seq.addBlock(gxSpoil, ...
                 mr.scaleGrad(gyPre, -yStep), ...
                 mr.scaleGrad(gzPre, -zStep));
-            %seq.addBlock(gzSpoil);
             seq.addBlock(mr.makeDelay(delayTR(c)));
         end
     end
 end
-fprintf('\nSequence ready\n');
+fprintf('Sequence ready\n');
 
 % Check sequence timing
 [ok, error_report]=seq.checkTiming;
@@ -155,21 +148,11 @@ else
     fprintf('\n');
 end
 
-% Visualise sequence and output for execution
-Ndummy = length(TE)*Ny*nDummyZLoops;
-seq.plot('TimeRange',[Ndummy+1 Ndummy+6]*TR(1), 'timedisp', 'ms')
-
+% Output for execution
 seq.setDefinition('FOV', fov);
 seq.setDefinition('Name', 'b0');
 seq.write('b0.seq', false);
 
-return
-
-% visualize the 3D k-space (only makes sense for low-res, otherwise one sees nothing)
-if Nx<=32
-    tic;
-    [kfa,ta,kf]=seq.calculateKspacePP();
-    toc
-    figure;plot3(kf(1,:),kf(2,:),kf(3,:));
-    hold on;plot3(kfa(1,:),kfa(2,:),kfa(3,:),'r.');
-end
+% Plot sequence
+Noffset = length(TE)*Ny*(nDummyZLoops+1);
+seq.plot('timerange',[Noffset Noffset+4]*TR(1), 'timedisp', 'ms');
