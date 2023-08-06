@@ -2,7 +2,7 @@
 
 This repository aims to provide an alternative to the scanner's built-in B0 shimming routine,
 so that the linear and high-order B0 shims can be set according to well-defined 
-(and potentially application-specific) critera across different vendor platforms.
+(and potentially application-specific) critera across different sites and vendor platforms.
 We envision this tool as one component of a more harmonized cross-vendor MRI workflow 
 in support of **reproducible MRI research**.
 
@@ -12,14 +12,18 @@ The key features of this toolbox are:
 The entire workflow, from data acquisition to field map estimation, uses open-source and vendor-neutral tools
 that are designed to ensure consistent and reproducible B0 shimming across sites and MRI scanner vendors.
 Specifically, data acquisition is based on [Pulseq](https://pulseq.github.io/),
-and data processing is done using code provided in this repository.
+which guarantees that low-level details of the acquisition sequence
+(e.g., the precise sequence timing, RF pulse shapes, etc)
+are identical across sites and vendor platforms.
+In addition, all subsequent data processing is done using code provided in this repository,
+in a completely vendor-independent way.
 
 * **Robust field map estimation:** 
 We estimate field maps in a robust way using the `b0map()` function from
 [MRIFieldmaps.jl](https://github.com/MagneticResonanceImaging/MRIFieldmaps.jl).
 
 * **Freedom to define the shim optimization critera**:
-The framework allows for nonlinear loss functions, 
+The framework allows for arbitrary (e.g., nonlinear) loss functions, 
 and may be useful for exploring alternative shimming criteria (beyond least-squares) in the future. 
 For example, the user may want to minimize root-mean-square (RMS) B0 inhomogeneity 
 over a user-specified (not necessarily contiguous) 3D subvolume.
@@ -36,7 +40,7 @@ mask     3D region over which to shim (logical).
 ```
 This repository also contains MATLAB code for obtaining these matrix inputs.
 
-To see how these pieces fit together, see the **'example' folder** 
+To see how these pieces fit together, see the [example](./example) **'example' folder** 
 that contains a complete, harmonized workflow for B0 field mapping. 
 The workflow involves the following steps:
 

@@ -24,7 +24,7 @@ f0       [nx ny nz]          Fieldmap we wish to shim over (Hz)
 FOV      [3]                 FOV (cm) corresponding to f0
 mask     [nx ny nz]          Logical/binary mask defining the desired shim region
 ```
-Here, the subscript `_c` denotes 'calibration'.
+Here, the subscript `_c` refers to the calibration data.
 
 We then calculate the optimal shim settings by running the Julia
 script ../julia/shim.jl.
