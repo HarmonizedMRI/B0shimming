@@ -1,5 +1,7 @@
 # B0 shimming example from start to finish
 
+WIP
+
 ## Overview 
 
 We first create the following experimental files:
