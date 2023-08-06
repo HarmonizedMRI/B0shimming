@@ -1,52 +1,59 @@
-# An open toolbox for B0 shimming 
+# An open, vendor-neutral toolbox for B0 shimming 
 
-##  Goal
-
-To provide an alternative to the scanner's built-in B0 shimming routine,
+This repository aims to provide an alternative to the scanner's built-in B0 shimming routine,
 so that the linear and high-order B0 shims can be set according to well-defined 
 (and potentially application-specific) critera.
-
-The framework allows for nonlinear loss functions, and may be useful for exploring alternative shimming criteria (beyond least-squares) in the future. 
-For example, the user may want to minimize root-mean-square (RMS) B0 inhomogeneity over a user-specified 3D subvolume.
-
 We envision this tool as one component of a more harmonized cross-vendor MRI workflow in support of **reproducible MRI research**.
 
+The key features of this toolbox are:
 
-## Quick start
+* **Vendor neutrality**: 
+The entire workflow, from data acquisition to field map estimation, uses open-source and vendor-neutral tools
+that are designed to ensure consistent and reproducible B0 shimming across sites and MRI scanner vendors
+(at the moment, Siemens and GE scanners are supported).
+Specifically, data acquisition is based on [Pulseq](https://pulseq.github.io/),
+and data processing is done using MATLAB and Julia code provided in this repository.
 
-1. Get this toolbox
+* **Robust field map estimation:** 
+We estimate field maps in a robust way using the `b0map()` function from
+[MRIFieldmaps.jl](https://github.com/MagneticResonanceImaging/MRIFieldmaps.jl).
+
+* **Freedom to define the shim optimization critera**:
+The framework allows for nonlinear loss functions, 
+and may be useful for exploring alternative shimming criteria (beyond least-squares) in the future. 
+For example, the user may want to minimize root-mean-square (RMS) B0 inhomogeneity 
+over a user-specified (not necessarily contiguous) 3D subvolume.
+
+
+## Overview and example usage
+
+At the heart of this toolbox is the Julia script **shim.jl** (in the 'julia' folder), that calculates
+optimal shim settings given the following inputs:
 ```
-$ git clone git@github.com:HarmonizedMRI/B0shimming.git
+A        shim calibration matrix 
+f0       3D field map (Hz)
+mask     3D region over which to shim (logical).
 ```
+This repository also contains MATLAB code for obtaining these matrix inputs.
 
-2. Change into the `julia` subdirectory
-```
-julia> cd("julia")
-```
+To see how these pieces fit together, see the **'example' folder** 
+that contains a complete, harmonized workflow for B0 field mapping. 
+The workflow involves the following steps:
 
-3. Start Julia (download from https://julialang.org/). Current version is 1.6.0.
+1. **Calibrating your scanner's B0 shimming channels**.
+This is done by scanning a uniform phantom with a Pulseq sequence that we provide (see sequence/Pulseq folder). 
+This just needs to be done once for each scanner.
 
-4. Press `]` to enter the Julia package manager and do:
-```
-(@v1.6) pkg> activate .
-(julia) pkg> instantiate
-```
+2. **Acquiring and reconstructing a B0 field map in the object you wish to shim over**.
+This involves running a Pulseq scan and calculating the field map.
 
-5. Press `backspace` to get back to the Julia prompt.
-
-6. Run the example:
-```
-julia> include("example.jl")
-```
-
-Each panel in the output image shows the field map (in Hz) before (left) and 
-after (right) 2nd order shimming of a cylindrical jar phantom:  
-![output of examples.jl](resources/out30.png "Example")
+3. **Calculating and applying the optimal shim current settings**.
+This involves defining the shim region, and running 'shim.jl' to obtain the new shim settings.
 
 
-## Description
+## Code description
 
-The code is based on the model
+The code in this repository is based on the model
 ```
 f(s) = H*A*s + f0         
 f:  [N]          fieldmap (Hz), where N = number of voxels
@@ -55,7 +62,7 @@ H:  [N nb]       spherical harmonic basis (see julia/getSHbasis.jl). nb = # of b
 A:  [nb nb]      shim coil expansion coefficients for basis in H (see julia/getcalmatrix.jl)
 s:  [nShim+1]    change in center frequency (cf) and shim currents from baseline (hardware units)
 ```
-For 2nd order shim systems, nShim = 8 (3 linear and 5 2nd order).  
+For 2<sup>nd</sup> order shim systems, nShim = 8 (3 linear and 5 2<sup>nd</sup> order).  
 Each column in `H` is an `N`-vector, evaluated at the same `N` spatial locations as `f`. 
 The first column corresponds to the center frequency offset.
 This toolbox provides support for spherical harmonic basis functions of arbitrary order
