@@ -9,10 +9,9 @@ The key features of this toolbox are:
 
 * **Vendor neutrality**: 
 The entire workflow, from data acquisition to field map estimation, uses open-source and vendor-neutral tools
-that are designed to ensure consistent and reproducible B0 shimming across sites and MRI scanner vendors
-(at the moment, Siemens and GE scanners are supported).
+that are designed to ensure consistent and reproducible B0 shimming across sites and MRI scanner vendors.
 Specifically, data acquisition is based on [Pulseq](https://pulseq.github.io/),
-and data processing is done using MATLAB and Julia code provided in this repository.
+and data processing is done using code provided in this repository.
 
 * **Robust field map estimation:** 
 We estimate field maps in a robust way using the `b0map()` function from
