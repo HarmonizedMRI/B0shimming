@@ -81,7 +81,7 @@ which contains the basis expansion coefficients for a particular shim system.
 We do this by turning the shims on/off one-by-one and acquiring a 3D fieldmap for each shim setting,
 and assembling that data into a matrix `F`:
 ```
-F: [N nShim]       fieldmaps (Hz) obtained by turning on/off individual shim coils
+F: [N_c nShim]     fieldmaps (Hz) obtained by turning on/off individual shim coils
 S: [nShim nShim]   applied shim currents (pairwise differences) used to obtain F
 ```
 `F` should be obtained in a stationary phantom, and only needs to be acquired once for each scanner.
