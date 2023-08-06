@@ -56,7 +56,7 @@ Understanding the following information is not strictly necessary
 in order to use this toolbox, but may be helpful for troubleshooting
 or for those who wish to modify or contribute to this repository.
 
-The code in this repository is based on the model
+The code in this repository is based on the following model:
 ```
 f(s) = H*A*s + f0         
 f:  [N]          fieldmap (Hz), where N = number of voxels
@@ -87,7 +87,9 @@ S: [nShim nShim]   applied shim currents (pairwise differences) used to obtain F
 We then obtain `A` by fitting each column in `F`
 to the basis in `H`, using least-squares fitting (backslash in Julia); see julia/getcalmatrix.jl.
 
+<!---
 See `julia/example.jl` for a complete example, and additional information for how to construct F.
+-->
 
 
 
