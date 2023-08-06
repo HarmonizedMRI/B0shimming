@@ -1,9 +1,10 @@
-# An open, vendor-neutral toolbox for B0 shimming 
+# An open toolbox for vendor-neutral B0 shimming 
 
 This repository aims to provide an alternative to the scanner's built-in B0 shimming routine,
 so that the linear and high-order B0 shims can be set according to well-defined 
-(and potentially application-specific) critera.
-We envision this tool as one component of a more harmonized cross-vendor MRI workflow in support of **reproducible MRI research**.
+(and potentially application-specific) critera across different vendor platforms.
+We envision this tool as one component of a more harmonized cross-vendor MRI workflow 
+in support of **reproducible MRI research**.
 
 The key features of this toolbox are:
 
