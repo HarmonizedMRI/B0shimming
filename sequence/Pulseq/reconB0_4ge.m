@@ -1,6 +1,7 @@
 % reconB0.m
 %
-% Reconstruct B0 field maps obtained with b0.seq
+% Reconstruct B0 field map from a GE P-file obtained with the TOPPE version of b0.seq, 
+% see writeB0.m. See also the 'Pulseq on GE' manual.
 
 % load data from P-file (set CV2 = 1 to save P-file)
 d = toppe.utils.loadpfile('P,b0.7');
