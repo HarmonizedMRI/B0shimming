@@ -53,6 +53,10 @@ This involves defining the shim region, and running 'shim.jl' to obtain the new 
 
 ## Code description
 
+Understanding the following information is not strictly necessary 
+in order to use this toolbox, but may be helpful for troubleshooting
+or for those who wish to modify or contribute to this repository.
+
 The code in this repository is based on the model
 ```
 f(s) = H*A*s + f0         
