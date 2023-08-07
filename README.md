@@ -26,7 +26,7 @@ We estimate field maps in a robust way using the `b0map()` function from
 The framework allows for arbitrary (e.g., nonlinear) loss functions, 
 and may be useful for exploring alternative shimming criteria (beyond least-squares) in the future. 
 For example, the user may want to minimize root-mean-square (RMS) B0 inhomogeneity 
-over a user-specified (not necessarily contiguous) 3D subvolume.
+over a user-specified (and not necessarily contiguous) 3D subvolume.
 
 
 ## Overview and example usage
@@ -41,7 +41,7 @@ mask     3D region over which to shim (logical).
 This repository also contains MATLAB code for obtaining these matrix inputs.
 
 To see how these pieces fit together, see the [example](./example) folder
-that contains a complete, harmonized workflow for B0 field mapping. 
+that contains a complete workflow for harmonized B0 field mapping. 
 The workflow involves the following steps:
 
 1. **Calibrating your scanner's B0 shimming channels**.
