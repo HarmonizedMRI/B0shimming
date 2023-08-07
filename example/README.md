@@ -2,6 +2,10 @@
 
 [under construction. Jon 6-Aug-2023]
 
+TODO:
+* Step 0 is to load raw data. From there everything is vendor-agnostic.
+   * Write script to load P-file (GE). Separate script for Siemens etc.
+
 [The example scripts in this folder were written for GE data]
 
 
@@ -68,9 +72,9 @@ script ../julia/shim.jl.
     In addition, we acquire one **reference image volume** with all shim channels off.
 
     [NB! When testing we actually acquired two B0 maps for each shim channel:
-    first with value 'a', then with '-a'. The shim amplitudes listed above
+    first with amplitude 'a/2', then with '-a/2'. The shim amplitudes listed above
     are the **difference** between these settings.
-    Not sure if we need to acquired in pairs?]
+    Not sure if we need to acquire in pairs?]
     
 3. **Construct F and S, and write to file.**
     This involves reconstructing the B0 maps 
