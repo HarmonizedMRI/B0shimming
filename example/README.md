@@ -3,38 +3,40 @@
 [under construction. Jon 6-Aug-2023]
 
 TODO:
-* Update scripts, and make them vendor-agnostic
-   * makeshimcal.m
-   * getb0init.m
+* Streamline by calling Julia from MATLAB? Looks like not so straightforward.
+* How to streamline Julia unwrap step (awkward to go back to MATLAB before running shim.jl)
+* Creating f0.mat: Update scripts, and make them vendor-agnostic
+   * getb0init.m: clean up, and separate out Julia unwrap step
    * makef0.m  (and separate out regularized estimation part)
+* update makeshimvol.m
 * Comment on how to define shim region.
 
 
 ## Overview 
 
-We first create the following experimental files:
-```
-<filename>      <variables>          <purpose>
-shimcal.mat     F S FOV_c mask_c     Used to calculate the shim calibration matrix `A`
-f0.mat          f0 FOV               Field map (Hz) and FOV (cm) we wish to shim over
-shimvol.mat     mask                 Shim volume; logical/binary mask on grid defined by f0
-```
+1. We first create the following experimental files:
+    ```
+    <filename>      <variables>          <purpose>
+    shimcal.mat     F S FOV_c mask_c     Used to calculate the shim calibration matrix `A`
+    f0.mat          f0 FOV               Field map (Hz) and FOV (cm) we wish to shim over
+    shimvol.mat     mask                 Shim volume; logical/binary mask on grid defined by f0
+    ```
 
-The variables contained in these files are:
-```
-F   [nx_x ny_c nz_c nShim]  Fieldmaps (Hz) obtained by turning on/off individual shim coils
-                            N_c = number of voxels in calibration imaging volume (FOV_c)
-                            nShim = number of shim channels (e.g., 3 (linear) or 8 (2nd order))
-S        [nShim nShim]      Applied shim currents (pairwise differences) used to obtain F
-FOV_c    [3]                Field of view (cm) for the calibration data
-mask_c   [nx_c ny_c nz_c]   Logical/binary mask indicating object support (N_c = nx_c*ny_c*nz_c)
-f0       [nx ny nz]         Fieldmap we wish to shim over (Hz)
-FOV      [3]                FOV (cm) corresponding to f0
-mask     [nx ny nz]         Logical/binary mask defining the desired shim region
-```
-Here, the subscript `_c` refers to the calibration data.
+    The variables contained in these files are:
+    ```
+    F   [nx_x ny_c nz_c nShim]  Fieldmaps (Hz) obtained by turning on/off individual shim coils
+                                N_c = number of voxels in calibration imaging volume (FOV_c)
+                                nShim = number of shim channels (e.g., 3 (linear) or 8 (2nd order))
+    S        [nShim nShim]      Applied shim currents (pairwise differences) used to obtain F
+    FOV_c    [3]                Field of view (cm) for the calibration data
+    mask_c   [nx_c ny_c nz_c]   Logical/binary mask indicating object support (N_c = nx_c*ny_c*nz_c)
+    f0       [nx ny nz]         Fieldmap we wish to shim over (Hz)
+    FOV      [3]                FOV (cm) corresponding to f0
+    mask     [nx ny nz]         Logical/binary mask defining the desired shim region
+    ```
+    Here, the subscript `_c` refers to the calibration data.
 
-We then calculate the optimal shim settings by running the Julia
+2. We then calculate the optimal shim settings by running the Julia
 script ../julia/shim.jl.
 
 
@@ -73,9 +75,9 @@ script ../julia/shim.jl.
     In addition, we acquire one **reference image volume** with all shim channels off.
 
     [NB! When testing we actually acquired two B0 maps for each shim channel:
-    first with amplitude 'a/2', then with '-a/2'. The shim amplitudes listed above
-    are the **difference** between these settings.
-    Not sure if we need to acquire in pairs?]
+    first with amplitude 'a/2', then with '-a/2'. 
+    The shim amplitudes listed above are the **difference** between these settings.
+    Let's refer to this as a 'balanced' acquisition. Not sure if we need to do this?]
     
 3. **Construct F and S, and write to file.**
     This involves reconstructing the B0 maps 

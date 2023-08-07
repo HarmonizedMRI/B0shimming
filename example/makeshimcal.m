@@ -1,19 +1,20 @@
 % Create the calibration data file shimcal.mat from GE P-file data.
-% 2nd order shim coils.
 %
 % Assumptions:
+%
+%  * 2nd order shim coils
 %
 %  * balanced acquisitions, i.e., two acquisitions are performed
 %    for each shim channel, with amplitudes 'a/2' and '-a/2', respectively.
 %
 %  * P-files are named 'P,<channel>,<amp>.7', where
 %      <channel> = 'x', 'y', 'z', 'z2', 'xy', 'zx', 'x2y2', or 'zy'
-%      <amp> = shim current setting
+%      <amp> = shim current amplitude
 %
 % F = [nx_c ny_c nz_c 8] (Hz), in order 'x', 'y', 'z', 'z2', 'xy', 'zx', 'x2y2', 'zy'
 % S = [8 8], shim amplitudes used to obtain F (hardware units)
-% mask_c = [nx_c ny_c nz_c] object support
-% FOV_c = [1 3]  cm
+% mask_c = [nx_c ny_c nz_c], object support
+% FOV_c = [1 3] cm
 
 % Development notes: See also github/jfnielsen/scanLog/20220907_UM3TMR750_B0shim.
 
@@ -21,7 +22,7 @@
 datDir = '~/myDataDir/';
 
 % Acquisition parameters. See writeB0.m.
-FOV_c = 24 * [1 1 1];  % cm  
+FOV_c = 24*[1 1 1];  % cm  
 nx_c = 60; ny_c = nx_c; nz_c = nx_c;
 deltaTE = 2.2369e-3;  % TE difference between the two echoes (sec)
 
@@ -45,10 +46,8 @@ for ii = 4:nShim
     end
 end
 
-% Initialize F
-F = zeros([nx_c ny_c nz_c nShim]);
-
 % get difference fieldmaps for each shim (and mask)
+F = zeros([nx_c ny_c nz_c nShim]);
 for ii = 1:nShim
     for jj = 1:2
         d = loaddata_ge(pfile{ii, jj});
@@ -57,5 +56,5 @@ for ii = 1:nShim
     F(:,:,:,ii) = diff(b0, 1, 4);
 end
 
-% save to file, to be used by B0shimming Julia code
+% save to file
 save shimcal.mat F S FOV_c mask_c
