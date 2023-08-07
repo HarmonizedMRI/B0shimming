@@ -1,78 +1,61 @@
-% Create the file shimcal.mat needed for B0 shimming.
+% Create the calibration data file shimcal.mat from GE P-file data.
+% 2nd order shim coils.
 %
-% shimcal.mat   Contains F, S, mask, FOV
-% 
-% F = [nx ny nz 8] (Hz), in order 'x', 'y', 'z', 'z2', 'xy', 'zx', 'x2y2', 'zy'
+% Assumptions:
+%
+%  * balanced acquisitions, i.e., two acquisitions are performed
+%    for each shim channel, with amplitudes 'a/2' and '-a/2', respectively.
+%
+%  * P-files are named 'P,<channel>,<amp>.7', where
+%      <channel> = 'x', 'y', 'z', 'z2', 'xy', 'zx', 'x2y2', or 'zy'
+%      <amp> = shim current setting
+%
+% F = [nx_c ny_c nz_c 8] (Hz), in order 'x', 'y', 'z', 'z2', 'xy', 'zx', 'x2y2', 'zy'
 % S = [8 8], shim amplitudes used to obtain F (hardware units)
-% mask = [nx ny nz] object support
-% FOV = [1 3]  cm
-%
-% This script reconstructs b0 scans acquired on a GE scanner with TOPPE, 
-% by running shimcal.pl. See github/jfnielsen/scanLog/20220907_UM3TMR750_B0shim.
+% mask_c = [nx_c ny_c nz_c] object support
+% FOV_c = [1 3]  cm
+
+% Development notes: See also github/jfnielsen/scanLog/20220907_UM3TMR750_B0shim.
 
 % location of data files 
-datDir = '/media/jon/USB/Data/20220907_UM3TMR750_B0shim';
+datDir = '~/myDataDir/';
 
-% readout module name
-readoutFile = [datDir '/readout_shimcal.mod'];;
+% Acquisition parameters. See writeB0.m.
+FOV_c = 24 * [1 1 1];  % cm  
+nx_c = 60; ny_c = nx_c; nz_c = nx_c;
+deltaTE = 2.2369e-3;  % TE difference between the two echoes (sec)
 
-% FOV and matrix size
-FOV = 24 * [1 1 1];  % cm  
-N = 60 * [1 1 1]; 
-
-flip = 5;           % excitation angle (degrees)
-deltaTE = [0 2.0];  % Change in TE (from minimum) for each scan (ms)
-
-Shims = {'x', 'y', 'z', 'z2', 'xy', 'zx', 'x2y2', 'zy'};   
+% Shim channel names and amplitude settings
+shims = {'x', 'y', 'z', 'z2', 'xy', 'zx', 'x2y2', 'zy'};   
 AmpLinear = [-10 10];  % see shimcal.pl
 AmpHO = [-500 500];    % see shimcal.pl
+nShim = length(shims);
 
 S = diag([repmat(diff(AmpLinear), [1 3]) repmat(diff(AmpHO), [1 5])]);
 
-clear pfile b0 th
-
-% get Pfile names
+% P-file names
 for ii = 1:3
     for jj = 1:length(AmpLinear)
-        pfile{ii,jj} = sprintf('%s/P,%s,%d.7', datDir, Shims{ii}, AmpLinear(jj));
+        pfile{ii,jj} = sprintf('%s/P,%s,%d.7', datDir, shims{ii}, AmpLinear(jj));
     end
 end
-
-for ii = 4:length(Shims)
+for ii = 4:nShim
     for jj = 1:length(AmpHO)
-        pfile{ii,jj} = sprintf('%s/P,%s,%d.7', datDir, Shims{ii}, AmpHO(jj));
+        pfile{ii,jj} = sprintf('%s/P,%s,%d.7', datDir, shims{ii}, AmpHO(jj));
     end
 end
 
-% get matrix size
-[~, imsos] = toppe.utils.recon3dft(pfile{1, 1}, ...
-    'echo', 1, 'readoutFile', readoutFile, 'alignWithUCS', true);
-   
-F = zeros([size(imsos) size(pfile,1)]);
+% Initialize F
+F = zeros([nx_c ny_c nz_c nShim]);
 
-% get difference fieldmaps for each shim
-for ii = 1:size(pfile,1)
+% get difference fieldmaps for each shim (and mask)
+for ii = 1:nShim
     for jj = 1:2
-        im1 = toppe.utils.recon3dft(pfile{ii, jj}, ...
-            'echo', 1, 'readoutFile', readoutFile, 'alignWithUCS', true);
-        im2 = toppe.utils.recon3dft(pfile{ii, jj}, ...
-            'echo', 2, 'readoutFile', readoutFile, 'alignWithUCS', true);
-        if size(im1, 4) > 1   % multicoil
-            th(:,:,:,jj) = toppe.utils.phasecontrastmulticoil(im2, im1);
-        else
-            th(:,:,:,jj) = angle(im2./im1);
-        end
-        b0(:,:,:,jj) = th(:,:,:,jj)/(2*pi)/(diff(deltaTE)*1e-3); % Hz
+        d = loaddata_ge(pfile{ii, jj});
+        [b0(:,:,:,jj), mask_c] = reconB0(d, deltaTE, 0.1);
     end
     F(:,:,:,ii) = diff(b0, 1, 4);
 end
 
-% mask
-mask = imsos > 0.2*max(imsos(:));
-
 % save to file, to be used by B0shimming Julia code
-FOVcal = FOV;
-[Xcal, Ycal, Zcal] = toppe.utils.grid2xyz(N, FOV);
-save shimcal.mat F S mask FOV
-%system('rsync -avz shimcal.mat ~/shimtmpfiles/');
-
+save shimcal.mat F S FOV_c mask_c
