@@ -1,6 +1,8 @@
 % writeB0.m
 %
-% 3D spoiled GRE B0 mapping sequence 
+% 3D spoiled GRE B0 mapping sequence.
+% Edit as desired.
+% For details, see the 'Pulseq on GE' manual.
 
 % RF/gradient delay (sec). 
 % Conservative choice that should work across all GE scanners.

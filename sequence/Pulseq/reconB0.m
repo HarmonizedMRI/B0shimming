@@ -1,7 +1,7 @@
 b0 = reconB0(d, deltaTE, thresh)
 % b0 = reconB0(d, deltaTE, [thresh=0.1])
 %
-% Reconstruct B0 field map from date obtained with b0.seq, 
+% Reconstruct B0 field map from data obtained with b0.seq, 
 % see writeB0.m.
 %
 % Inputs:
