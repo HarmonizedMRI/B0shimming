@@ -3,13 +3,11 @@
 [under construction. Jon 6-Aug-2023]
 
 TODO:
-* Make scripts vendor-agnostic
+* Update scripts, and make them vendor-agnostic
    * makeshimcal.m
    * getb0init.m
    * makef0.m  (and separate out regularized estimation part)
 * Comment on how to define shim region.
-
-The example scripts in this folder were written for GE data.
 
 
 ## Overview 
