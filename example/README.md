@@ -3,7 +3,7 @@
 [under construction. Jon 6-Aug-2023]
 
 TODO:
-* Streamline by calling Julia from MATLAB? Looks like not so straightforward.
+* Streamline workflow by calling Julia from MATLAB? Looks like not so straightforward.
 * How to streamline Julia unwrap step (awkward to go back to MATLAB before running shim.jl)
 * Creating f0.mat: Update scripts, and make them vendor-agnostic
    * getb0init.m: clean up, and separate out Julia unwrap step
