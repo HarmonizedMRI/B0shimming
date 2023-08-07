@@ -3,10 +3,13 @@
 [under construction. Jon 6-Aug-2023]
 
 TODO:
-* Step 0 is to load raw data. From there everything is vendor-agnostic.
-   * Write script to load P-file (GE). Separate script for Siemens etc.
+* Make scripts vendor-agnostic
+   * makeshimcal.m
+   * getb0init.m
+   * makef0.m  (and separate out regularized estimation part)
+* Comment on how to define shim region.
 
-[The example scripts in this folder were written for GE data]
+The example scripts in this folder were written for GE data.
 
 
 ## Overview 
