@@ -1,6 +1,6 @@
 # B0 shimming example from start to finish
 
-[under construction. Jon and Jayden 12-Aug-2023]
+[under construction. Jon and Jayden 11-Aug-2023]
 
 
 ## Overview 
@@ -50,36 +50,54 @@ script ../julia/shim.jl.
 2. **Acquire the data.**
     Run b0.seq multiple times using your vendor platform's Pulseq interpreter, 
     each with only one shim channel turned on.
-    For example, for GE scanners, the following settings may be used:
-    ```
-    # GE
-    S = diag([<x> <y> <z> <z2> <xy> <zx> <x2y2> <zy>])
-      = diag([20  20  20  1000 1000 1000 1000   1000])
-    ```
-    where each entry denotes the shim current amplitude for a particular channel.
-    These settings are chosen so as to avoid phase wraps in the individual B0 maps.
-    For Siemens, the following settings may be used:
-    ```
-    # Siemens
-    S = diag([<x> <y> <z> <z2> <xy> <zx> <x2y2> <zy>])
-      = diag([20  20  20  200  200  200  200    200 ])   
-    ```
-    In addition, we acquire one **reference image volume** with all shim channels off.
+    For each shim channel, acquire two B0 maps:
+    first with amplitude `s/2`, then with `-s/2`. 
+    `s` is chosen to avoid phase wraps in the individual B0 maps.
 
-    [**NB!** When testing we actually acquired two B0 maps for each shim channel:
-    first with amplitude 'a/2', then with '-a/2'. 
-    The shim amplitudes listed above are the **difference** between these settings.
-    Let's refer to this as a 'balanced' acquisition. Not sure if we need to do this?]
-    
+    1. **GE users:**
+        For GE scanners, you can use the following settings:
+        ```
+        # GE
+        s = 20       # x/y/z shims
+        s = 1000     # 2nd order shims
+        ```
+        The corresponding S matrix is:
+        ```
+        # GE
+        S = diag([<x> <y> <z> <z2> <xy> <zx> <x2y2> <zy>])
+          = diag([20  20  20  1000 1000 1000 1000   1000])
+        ```
+        The script *shimcal_ge.pl* shows how the calibration data can be obtained on GE scanners,
+        in an automated way and without having to manually set each shim channel amplitude.
+
+
+    2. **Siemens users:**
+        For Siemens, the following settings may be used:
+        ```
+        # Siemens
+        s = 20       # x/y/z shims
+        s = 200      # 2nd order shims
+        ```
+        The corresponding S matrix is:
+        ```
+        # Siemens
+        S = diag([<x> <y> <z> <z2> <xy> <zx> <x2y2> <zy>])
+          = diag([20  20  20  200  200  200  200    200 ])   
+        ```
+
 3. **Construct F and S, and write to file.**
-    This involves reconstructing the B0 maps 
-    (after subtracting the phase in the reference acquisition)
+    This involves reconstructing the (pairwise subtracted) B0 maps 
     and assembling the maps into the matrix `F`. 
     We also construct the shim amplitude matrix `S`, and define the object mask `mask_c`.
-    On GE, we perform these steps with the 'makeshimcal_ge.m' script in this folder:
-    ```
-    >> makeshimcal_ge;
-    ```
+
+    1. **GE users:**
+        On GE, we perform these steps with the *makeshimcal_ge.m* script in this folder:
+        ```
+        >> makeshimcal_ge;
+        ```
+
+    2. **Siemens users:**
+       [TBD]
     
 
 ## Create f0.mat
@@ -87,7 +105,7 @@ script ../julia/shim.jl.
 1. Run b0.seq in the object we wish to shim over.
 2. Reconstruct a B0 map and write to file:
     ```
-    [Jayden to update this section]
+    [TBD]
     ```
 <!--
     >> getb0init;  % b0init, mask, magraw. Phase unwrapping is done in unwrap/main.jl
@@ -98,7 +116,7 @@ script ../julia/shim.jl.
 ## Create shimvol.mat 
 
 ```
-[Jayden to update this section]
+[TBD]
 ```
 
 <!--
