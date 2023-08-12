@@ -1,7 +1,7 @@
 % writeB0.m
 %
-% 3D spoiled GRE B0 mapping sequence.
-% Edit as desired.
+% Create the file 'b0.seq', a 3D spoiled GRE B0 mapping sequence.
+% Edit this script as desired.
 % For details, see the 'Pulseq on GE' manual.
 
 % RF/gradient delay (sec). 
