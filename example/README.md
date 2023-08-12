@@ -1,15 +1,6 @@
 # B0 shimming example from start to finish
 
-[under construction. Jon 6-Aug-2023]
-
-TODO:
-* Streamline workflow by calling Julia from MATLAB? Looks like not so straightforward.
-* How to streamline Julia unwrap step (awkward to go back to MATLAB before running shim.jl)
-* Creating f0.mat: Update scripts, and make them vendor-agnostic
-   * getb0init.m: clean up, and separate out Julia unwrap step
-   * makef0.m  (and separate out regularized estimation part)
-* update makeshimvol.m
-* Comment on how to define shim region.
+[under construction. Jon and Jayden 12-Aug-2023]
 
 
 ## Overview 
@@ -42,7 +33,7 @@ script ../julia/shim.jl.
 
 ## Create shimcal.mat
 
-1. **Create the Pulseq sequence file.**
+1. **Create the Pulseq sequence file (b0.seq).**
     This step involves executing the MATLAB script writeB0.m 
     (in [../sequence/Pulseq/](../sequence/Pulseq/))
     to create the Pulseq file `b0.seq`.
@@ -55,6 +46,7 @@ script ../julia/shim.jl.
     >> addpath pulseq/matlab
     >> writeB0;
     ```
+
 2. **Acquire the data.**
     Run b0.seq multiple times using your vendor platform's Pulseq interpreter, 
     each with only one shim channel turned on.
@@ -74,7 +66,7 @@ script ../julia/shim.jl.
     ```
     In addition, we acquire one **reference image volume** with all shim channels off.
 
-    [NB! When testing we actually acquired two B0 maps for each shim channel:
+    [**NB!** When testing we actually acquired two B0 maps for each shim channel:
     first with amplitude 'a/2', then with '-a/2'. 
     The shim amplitudes listed above are the **difference** between these settings.
     Let's refer to this as a 'balanced' acquisition. Not sure if we need to do this?]
@@ -84,9 +76,9 @@ script ../julia/shim.jl.
     (after subtracting the phase in the reference acquisition)
     and assembling the maps into the matrix `F`. 
     We also construct the shim amplitude matrix `S`, and define the object mask `mask_c`.
-    In this example, we perform these steps with the 'makeshimcal.m' script in this folder:
+    On GE, we perform these steps with the 'makeshimcal_ge.m' script in this folder:
     ```
-    >> makeshimcal;
+    >> makeshimcal_ge;
     ```
     
 
@@ -94,16 +86,24 @@ script ../julia/shim.jl.
 
 1. Run b0.seq in the object we wish to shim over.
 2. Reconstruct a B0 map and write to file:
-```
->> getb0init;  % b0init, mask, magraw. Phase unwrapping is done in unwrap/main.jl
->> makef0;     % regularized B0 estimation done in Matlab or in b0reg/main.jl
-```
+    ```
+    [Jayden to update this section]
+    ```
+<!--
+    >> getb0init;  % b0init, mask, magraw. Phase unwrapping is done in unwrap/main.jl
+    << makef0;
+-->
 
 
 ## Create shimvol.mat 
+
 ```
->> makeshimvol;  % uses FSL (bet) to do skull stripping
+[Jayden to update this section]
 ```
+
+<!--
+    >> makeshimvol;  % uses FSL (bet) to do skull stripping
+-->
 
 
 ## Calculate new shim settings
