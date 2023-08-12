@@ -2,10 +2,6 @@
 
 [under construction. Jon and Jayden 11-Aug-2023]
 
-Conventions:
-* Variables enclosed in back ticks, e.g., `a`.
-* File names in italics, e.g., *b0.seq*.
-
 
 ## Overview 
 
