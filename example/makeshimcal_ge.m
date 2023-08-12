@@ -1,5 +1,7 @@
 % Create the calibration data file shimcal.mat from GE P-file data.
 %
+% The P-file data was acquired using the script shimcal_ge.pl
+%
 % Assumptions:
 %
 %  * 2nd order shim coils
@@ -21,7 +23,7 @@
 % location of data files 
 datDir = '~/myDataDir/';
 
-% Acquisition parameters. See writeB0.m.
+% Acquisition parameters. See ../sequence/Pulseq/writeB0.m.
 FOV_c = 24*[1 1 1];  % cm  
 nx_c = 60; ny_c = nx_c; nz_c = nx_c;
 deltaTE = 2.2369e-3;  % TE difference between the two echoes (sec)
