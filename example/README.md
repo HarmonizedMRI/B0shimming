@@ -2,6 +2,10 @@
 
 [under construction. Jon and Jayden 11-Aug-2023]
 
+Conventions:
+* Variables enclosed in back ticks, e.g., `a`.
+* File names in italics, e.g., *b0.seq*.
+
 
 ## Overview 
 
@@ -28,15 +32,15 @@
     Here, the subscript `_c` refers to the calibration data.
 
 2. We then calculate the optimal shim settings by running the Julia
-script ../julia/shim.jl.
+script *../julia/shim.jl*.
 
 
-## Create shimcal.mat
+## Create *shimcal.mat*
 
-1. **Create the Pulseq sequence file (b0.seq).**
-    This step involves executing the MATLAB script writeB0.m 
+1. **Create the Pulseq sequence file (*b0.seq*).**
+    This step involves executing the MATLAB script *writeB0.m*
     (in [../sequence/Pulseq/](../sequence/Pulseq/))
-    to create the Pulseq file `b0.seq`.
+    to create the Pulseq file *b0.seq*.
     For this you will need the Pulseq toolbox:
     ```
     $ git clone git@github.com:pulseq/pulseq.git
@@ -48,20 +52,20 @@ script ../julia/shim.jl.
     ```
 
 2. **Acquire the data.**
-    Run b0.seq multiple times using your vendor platform's Pulseq interpreter, 
+    Run *b0.seq* multiple times using your vendor platform's Pulseq interpreter, 
     each with only one shim channel turned on.
     For each shim channel, acquire two B0 maps:
-    first with amplitude `s/2`, then with `-s/2`. 
-    `s` is chosen to avoid phase wraps in the individual B0 maps.
+    first with amplitude `a/2`, then with `-a/2`. 
+    `a` is chosen to avoid phase wraps in the individual B0 maps.
+    This 'balanced' approach minimizes sensitivity to B0 drift.
 
-    1. **GE users:**
-        For GE scanners, you can use the following settings:
+    1. **GE users** may use the following settings:
         ```
         # GE
-        s = 20       # x/y/z shims
-        s = 1000     # 2nd order shims
+        a = 20       # x/y/z shims
+        a = 1000     # 2nd order shims
         ```
-        The corresponding S matrix is:
+        The corresponding matrix `S` is:
         ```
         # GE
         S = diag([<x> <y> <z> <z2> <xy> <zx> <x2y2> <zy>])
@@ -71,14 +75,13 @@ script ../julia/shim.jl.
         in an automated way and without having to manually set each shim channel amplitude.
 
 
-    2. **Siemens users:**
-        For Siemens, the following settings may be used:
+    2. **Siemens users** may use the following settings:
         ```
         # Siemens
-        s = 20       # x/y/z shims
-        s = 200      # 2nd order shims
+        a = 20       # x/y/z shims
+        a = 200      # 2nd order shims
         ```
-        The corresponding S matrix is:
+        The corresponding matrix `S` is:
         ```
         # Siemens
         S = diag([<x> <y> <z> <z2> <xy> <zx> <x2y2> <zy>])
@@ -90,19 +93,18 @@ script ../julia/shim.jl.
     and assembling the maps into the matrix `F`. 
     We also construct the shim amplitude matrix `S`, and define the object mask `mask_c`.
 
-    1. **GE users:**
-        On GE, we perform these steps with the *makeshimcal_ge.m* script in this folder:
+    1. **GE users** can perform these steps with the *makeshimcal_ge.m* script in this folder:
         ```
-        >> makeshimcal_ge;
+        >> makeshimcal_ge;    # Assumes P-files acquired with shimcal_ge.pl
         ```
 
-    2. **Siemens users:**
+    2. **Siemens users**...
        [TBD]
     
 
-## Create f0.mat
+## Create *f0.mat*
 
-1. Run b0.seq in the object we wish to shim over.
+1. Run *b0.seq* in the object we wish to shim over.
 2. Reconstruct a B0 map and write to file:
     ```
     [TBD]
@@ -113,7 +115,7 @@ script ../julia/shim.jl.
 -->
 
 
-## Create shimvol.mat 
+## Create *shimvol.mat*
 
 ```
 [TBD]
@@ -126,7 +128,7 @@ script ../julia/shim.jl.
 
 ## Calculate new shim settings
 
-1. cd into the folder containing the Julia code (main.jl)
+1. cd into the folder containing the Julia code.
 1. Make sure the files you created above are accessible from this folder, 
    e.g., create copies or symbolic links:
    ```
