@@ -1,5 +1,7 @@
 using MAT, MIRTjim, ROMEO
 
+# Unwrap phase map (in radians) using ROMEO
+
 # Load b0 map (radians) and magnitude image
 matf = matread("th.mat")
 th = matf["th"]    # wrapped 3D phase map (radians)
