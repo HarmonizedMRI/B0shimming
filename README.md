@@ -13,8 +13,8 @@ The entire workflow, from data acquisition to field map estimation, uses open-so
 that are designed to ensure consistent and reproducible B0 shimming across sites and MRI scanner vendors.
 Specifically, data acquisition is based on [Pulseq](https://pulseq.github.io/),
 which guarantees that low-level details of the acquisition sequence
-(e.g., the precise sequence timing, RF pulse shapes, etc)
-are identical across sites and vendor platforms.
+(sequence timing, RF/gradient pulse shapes, etc)
+are *identical* across sites and vendor platforms.
 In addition, all subsequent data processing is done using code provided in this repository,
 in a completely vendor-independent way.
 
