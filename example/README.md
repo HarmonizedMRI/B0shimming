@@ -1,6 +1,6 @@
 # B0 shimming example from start to finish
 
-[under construction, 11-Aug-2023]
+[under construction]
 
 
 ## Overview
