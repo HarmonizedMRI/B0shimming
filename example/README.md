@@ -23,7 +23,9 @@ Here you define the region(s) (within the B0 field map `f0`) that you wish
 to shim over, and save the corresponding (binary) mask to a file named *shimvol.mat*.
 
 4. **Calculate and apply the optimal shim current settings**.
-This involves running *shim.jl* to obtain the new shim settings;
+This involves running *shim.jl* 
+(see the [julia](./julia) folder)
+to obtain the new shim settings;
 That script loads the *.mat* files created in the previous steps, 
 and prints the reommended shim settings to the console.
 

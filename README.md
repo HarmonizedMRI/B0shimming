@@ -1,4 +1,4 @@
-# An open toolbox for vendor-neutral B0 shimming 
+# An open toolbox for vendor-neutral (harmonized) B0 shimming 
 
 This repository aims to provide an alternative to the scanner's built-in B0 shimming routine,
 so that the linear and high-order B0 shims can be set according to well-defined 
@@ -31,36 +31,28 @@ over a user-specified (and not necessarily contiguous) 3D subvolume.
 
 ## Overview and example usage
 
-At the heart of this toolbox is the Julia script *shim.jl* (in the [julia](julia) folder), that calculates
-optimal shim settings given the following inputs:
-```
-A        shim calibration matrix 
-f0       3D field map (Hz)
-mask     3D region over which to shim (logical).
-```
-This repository also contains MATLAB code for obtaining these matrix inputs.
-
-To see how these pieces fit together, see the [example](./example) folder
-that contains a complete workflow for harmonized B0 field mapping. 
-The workflow involves the following steps:
+The B0 shimming workflow proposed here involves the following steps:
 
 1. **Calibrating your scanner's B0 shimming channels**.
 This is done by scanning a uniform phantom with a Pulseq sequence that we provide 
 (see [sequence/Pulseq](sequence/Pulseq)). 
 This just needs to be done once for each scanner.
 
-2. **Acquiring and reconstructing a B0 field map in the object you wish to shim over**.
+2. **Acquiring and reconstructing a 3D B0 field map in the object you wish to shim over**.
 This involves running a Pulseq scan and calculating the field map.
 
-3. **Defining the shim region**.
-Here you define the region that you wish to shim over.
+3. **Defining the shim region you wish to shim over**.
 This can be done in a variety of ways, e.g., using the 
 FSL plugin from https://shimming-toolbox.org/.
 
 4. **Calculating and applying the optimal shim current settings**.
 This involves running the Julia script *shim.jl* that we provide
 (see the [julia](./julia) folder).
+This script calculates optimal shim settings based on the provided
+shim calibration data, 3D field map, and shim region.
 
+To see how these pieces fit together, see the [example](./example) folder
+that contains a complete, detailed workflow for harmonized B0 field mapping. 
 
 
 ## Code description
