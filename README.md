@@ -71,7 +71,7 @@ f(s) = H*A*s + f0
 f:  [N]          fieldmap (Hz), where N = number of voxels
 f0: [N]          observed 'baseline' field map, e.g., with your scanner's default shim setting.
 H:  [N nb]       spherical harmonic basis (see julia/getSHbasis.jl). nb = # of basis functions.
-A:  [nb nb]      shim coil expansion coefficients for basis in H (see julia/getcalmatrix.jl)
+A:  [nb nb]      shim channel expansion coefficients for basis in H (see julia/getcalmatrix.jl)
 s:  [nShim+1]    change in center frequency (cf) and shim currents from baseline (hardware units)
 ```
 For 2<sup>nd</sup> order shim systems, nShim = 8 (3 linear and 5 2<sup>nd</sup> order).  
@@ -89,7 +89,7 @@ which contains the basis expansion coefficients for a particular shim system.
 We do this by turning the shims on/off one-by-one and acquiring a 3D fieldmap for each shim setting,
 and assembling that data into a matrix `F`:
 ```
-F: [N_c nShim]     fieldmaps (Hz) obtained by turning on/off individual shim coils
+F: [N_c nShim]     fieldmaps (Hz) obtained by turning on/off individual shim channels 
 S: [nShim nShim]   applied shim currents (pairwise differences) used to obtain F
 ```
 `F` should be obtained in a stationary phantom, and only needs to be acquired once for each scanner.

@@ -41,7 +41,7 @@ shimvol.mat     mask                 Shim volume; logical/binary mask on grid de
 
 The variables contained in these files are:
 ```
-F   [nx_x ny_c nz_c nShim]  Fieldmaps (Hz) obtained by turning on/off individual shim coils
+F   [nx_x ny_c nz_c nShim]  Fieldmaps (Hz) obtained by turning on/off individual shim channels
                             N_c = number of voxels in calibration imaging volume (FOV_c)
                             nShim = number of shim channels (e.g., 3 (linear) or 8 (2nd order))
 S        [nShim nShim]      Applied shim currents (pairwise differences) used to obtain F
