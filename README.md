@@ -51,8 +51,7 @@ This involves running the Julia script *shim.jl* that we provide
 This script calculates optimal shim settings based on the provided
 shim calibration data, 3D field map, and shim region.
 
-To see how these pieces fit together, see the [example](./example) folder
-that contains a complete, detailed workflow for harmonized B0 field mapping. 
+To see precisely how these pieces fit together, see the [example](./example) folder.
 
 
 ## Code description
