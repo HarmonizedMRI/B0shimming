@@ -3,32 +3,54 @@
 [under construction, 11-Aug-2023]
 
 
-## Overview 
+## Overview
 
-1. We first create the following experimental files:
-    ```
-    <filename>      <variables>          <purpose>
-    shimcal.mat     F S FOV_c mask_c     Used to calculate the shim calibration matrix `A`
-    f0.mat          f0 FOV               Field map (Hz) and FOV (cm) we wish to shim over
-    shimvol.mat     mask                 Shim volume; logical/binary mask on grid defined by f0
-    ```
+This folder contains a complete workflow for harmonized B0 field mapping. 
+The workflow involves the following steps:
 
-    The variables contained in these files are:
-    ```
-    F   [nx_x ny_c nz_c nShim]  Fieldmaps (Hz) obtained by turning on/off individual shim coils
-                                N_c = number of voxels in calibration imaging volume (FOV_c)
-                                nShim = number of shim channels (e.g., 3 (linear) or 8 (2nd order))
-    S        [nShim nShim]      Applied shim currents (pairwise differences) used to obtain F
-    FOV_c    [3]                Field of view (cm) for the calibration data
-    mask_c   [nx_c ny_c nz_c]   Logical/binary mask indicating object support (N_c = nx_c*ny_c*nz_c)
-    f0       [nx ny nz]         Fieldmap we wish to shim over (Hz)
-    FOV      [3]                FOV (cm) corresponding to f0
-    mask     [nx ny nz]         Logical/binary mask defining the desired shim region
-    ```
-    Here, the subscript `_c` refers to the calibration data.
+1. **Calibrate your scanner's B0 shimming channels**.
+This is done by scanning a uniform phantom with a Pulseq sequence that we provide 
+(see the [sequence/Pulseq](sequence/Pulseq) folder), 
+and saving the acquired data to a file named *shimcal.mat*.
+This just needs to be done once for each scanner.
 
-2. We then calculate the optimal shim settings by running the Julia
-script *../julia/shim.jl*.
+2. **Acquire and reconstruct a B0 field map in the object you wish to shim over**.
+This involves running a Pulseq scan and calculating the B0 field map,
+and saving the field map to a file named *f0.mat*.
+
+3. **Define the shim region**.
+Here you define the region(s) (within the B0 field map `f0`) that you wish 
+to shim over, and save the corresponding (binary) mask to a file named *shimvol.mat*.
+
+4. **Calculate and apply the optimal shim current settings**.
+This involves running *shim.jl* to obtain the new shim settings;
+That script loads the *.mat* files created in the previous steps, 
+and prints the reommended shim settings to the console.
+
+
+The workflow just described involves creating the following experimental files:
+
+```
+<filename>      <variables>          <purpose>
+shimcal.mat     F S FOV_c mask_c     Used to calculate the shim calibration matrix `A`
+f0.mat          f0 FOV               Field map (Hz) and FOV (cm) we wish to shim over
+shimvol.mat     mask                 Shim volume; logical/binary mask on grid defined by f0
+```
+
+The variables contained in these files are:
+```
+F   [nx_x ny_c nz_c nShim]  Fieldmaps (Hz) obtained by turning on/off individual shim coils
+                            N_c = number of voxels in calibration imaging volume (FOV_c)
+                            nShim = number of shim channels (e.g., 3 (linear) or 8 (2nd order))
+S        [nShim nShim]      Applied shim currents (pairwise differences) used to obtain F
+FOV_c    [3]                Field of view (cm) for the calibration data
+mask_c   [nx_c ny_c nz_c]   Logical/binary mask indicating object support (N_c = nx_c*ny_c*nz_c)
+f0       [nx ny nz]         Fieldmap we wish to shim over (Hz)
+FOV      [3]                FOV (cm) corresponding to f0
+mask     [nx ny nz]         Logical/binary mask defining the desired shim region
+```
+Here, the subscript `_c` refers to the calibration data.
+
 
 
 ## Create *shimcal.mat*
@@ -146,7 +168,7 @@ script *../julia/shim.jl*.
     ```
       julia> include("shim.jl")
     ```
-    This script will load the various .mat files created above,
+    This script will load the various *.mat* files created above,
     and output the recommended shim settings.
 
 

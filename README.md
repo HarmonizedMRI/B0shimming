@@ -52,8 +52,15 @@ This just needs to be done once for each scanner.
 2. **Acquiring and reconstructing a B0 field map in the object you wish to shim over**.
 This involves running a Pulseq scan and calculating the field map.
 
-3. **Calculating and applying the optimal shim current settings**.
-This involves defining the shim region, and running *shim.jl* to obtain the new shim settings.
+3. **Defining the shim region**.
+Here you define the region that you wish to shim over.
+This can be done in a variety of ways, e.g., using the 
+FSL plugin from https://shimming-toolbox.org/.
+
+4. **Calculating and applying the optimal shim current settings**.
+This involves running the Julia script *shim.jl* that we provide
+(see the [julia](./julia) folder).
+
 
 
 ## Code description
