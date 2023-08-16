@@ -11,9 +11,9 @@ function d = loaddata_siemens(data_path)
 
 % load data from .dat-file
 % clear all
-twix = mapVBVD('/home/wehkamp/myDataDir/shim_test/2023-02-15-201930.dat')
-data_path
-% twix = mapVBVD(data_path);
+% twix = mapVBVD('/home/wehkamp/myDataDir/shim_test/2023-02-15-201930.dat');
+% data_path
+twix = mapVBVD(data_path);
 
 % twix.image.flagDoAverage = true; %???
 twix.image.flagRemoveOS  = true; %???

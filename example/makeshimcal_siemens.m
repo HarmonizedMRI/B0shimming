@@ -22,7 +22,7 @@
 
 % location of data files 
 % datDir = '~/myDataDir/';
-datDir = "/home/wehkamp/myDataDir/shim_test/";
+datDir = '/home/wehkamp/myDataDir/shim_test';
 
 % Acquisition parameters. See ../sequence/Pulseq/writeB0.m.
 FOV_c = 24*[1 1 1];  % cm  
@@ -42,8 +42,9 @@ S = diag([repmat(diff(AmpLinear), [1 3]) repmat(diff(AmpHO), [1 5])]);
 
 % .dat-file names
 %test
-file_name = "2023-02-15-201930.dat";
-d = loaddata_siemens(datDir + file_name);
+file_name = '/2023-02-15-201930.dat';
+dat_name = append(datDir, file_name);
+d = loaddata_siemens(dat_name);
 
 % % P-file names
 % for ii = 1:3
@@ -63,7 +64,7 @@ F = zeros([nx_c ny_c nz_c nShim]);
 for ii = 1:nShim
     for jj = 1:2
 %          d = loaddata_ge(datDir + file_name);
-        d = loaddata_siemens(datDir + file_name);
+        d = loaddata_siemens(dat_name);
 %         d = loaddata_siemens(pfile{ii, jj});
         [b0(:,:,:,jj), mask_c] = reconB0(d, deltaTE, 0.1);
     end
