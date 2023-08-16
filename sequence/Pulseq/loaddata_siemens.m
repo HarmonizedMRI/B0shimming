@@ -1,6 +1,6 @@
-d = loaddata_siemens(data_path)
+function d = loaddata_siemens(data_path)
 
-% Load data-file obtained with the b0.seq, 
+%% Load data-file obtained with the b0.seq, 
 % see writeB0.m.
 %
 % Input:
@@ -9,10 +9,11 @@ d = loaddata_siemens(data_path)
 % Output:
 %   d    [nx ny nz ncoils 2]    Complex coil data for the 2 echoes
 
-%% load data from .dat-file
+% load data from .dat-file
 % clear all
-% twix = mapVBVD('/home/wehkamp/git/shim_test/2023-02-15-201930.dat');
-twix = mapVBVD(data_path);
+twix = mapVBVD('/home/wehkamp/myDataDir/shim_test/2023-02-15-201930.dat')
+data_path
+% twix = mapVBVD(data_path);
 
 % twix.image.flagDoAverage = true; %???
 twix.image.flagRemoveOS  = true; %???
@@ -30,11 +31,11 @@ din = permute(data_unsorted, [1 3 2]);   % [nfid nview nslice ncoil]
 % %                 Col Cha Lin Par Sli Ave Phs Eco Rep Set Seg 
 % data = twix.image(  :,  :,  :,  1,  1,  1,  1,  1,  1,  1, :);
 
-%% discard data during receive gain calibration (see writeB0.m)
+% discard data during receive gain calibration (see writeB0.m)
 % din = din(:,:,2:end,:);  
 % """ remove dummy shots """
 nEcho = 2; %#length(deltaTE) #attention hard coded shit!!!:w
-nzDummy = 2; %# see b04ge.m
+nzDummy = 2; %# see b04ge.m %#attention hard coded shit!!!    should be reduced to 1 in future
 nx = 60;
 ny = 60; %#attention hard coded shit!!!
 nz = 60;
@@ -54,13 +55,13 @@ upb = nc+nx/2;
 din = din(lob:upb, :, :, :);
 
 
-
-
-%% construct output matrix
+% construct output matrix
 % [nx ny nz nCoils] = size(din(:,1:2:end,:,:));
 d = zeros(nx, ny, nz, nCoils, 2);
 d(:,:,:,:,1) = din(:,1:2:end,:,:);   % TE1 data, size [60 60 60]
 d(:,:,:,:,2) = din(:,2:2:end,:,:);   % TE2 data, size [60 60 60]
 
-%% And here's the k-space for the first coil and the first slice:
+% And here's the k-space for the first coil and the first slice:
 % figure,imagesc(abs(squeeze(d(:,1,:,1,2))).^0.2);
+
+end
