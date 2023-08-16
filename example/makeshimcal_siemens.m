@@ -28,7 +28,7 @@ datDir = "/home/wehkamp/myDataDir/shim_test/";
 FOV_c = 24*[1 1 1];  % cm  
 nx_c = 60; ny_c = nx_c; nz_c = nx_c;
 % deltaTE = 2.2369e-3;  % TE difference between the two echoes (sec)
-deltaTE = 1000/440 *1e-3; % NW from python script..
+deltaTE = 1000/440 *1e-3; % NW from python script.. !! Attention hard coded shit! 
 
 % Shim channel names and amplitude settings
 shims = {'x', 'y', 'z', 'z2', 'xy', 'zx', 'x2y2', 'zy'};   
