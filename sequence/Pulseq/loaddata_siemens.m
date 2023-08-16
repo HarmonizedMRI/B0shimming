@@ -1,20 +1,13 @@
 d = loaddata_siemens(data_path)
-% d = loaddata_ge(pfile)
-%
-% Load GE P-file obtained with the TOPPE version of b0.seq, 
-% see writeB0.m. See also the 'Pulseq on GE' manual.
+
+% Load data-file obtained with the b0.seq, 
+% see writeB0.m.
 %
 % Input:
-%   pfile   [string]    GE P-file name
+%   data_path   [string]    .dat-file name
 %
 % Output:
 %   d    [nx ny nz ncoils 2]    Complex coil data for the 2 echoes
-
-% % load data from P-file (set CV2 = 1 to save P-file)
-% din = toppe.utils.loadpfile(pfile);
-% din = flipdim(din, 1);   % TOPPE data is flipped along first dimension
-% [nfid,ncoil,nslice,necho,nview] = size(d);   % necho = 1 by construction
-% din = permute(din, [1 5 3 2 4]);   % [nfid nview nslice ncoil]
 
 %% load data from .dat-file
 % clear all
@@ -70,4 +63,4 @@ d(:,:,:,:,1) = din(:,1:2:end,:,:);   % TE1 data, size [60 60 60]
 d(:,:,:,:,2) = din(:,2:2:end,:,:);   % TE2 data, size [60 60 60]
 
 %% And here's the k-space for the first coil and the first slice:
-figure,imagesc(abs(squeeze(d(:,1,:,1,2))).^0.2);
+% figure,imagesc(abs(squeeze(d(:,1,:,1,2))).^0.2);
