@@ -1,4 +1,4 @@
-b0 = reconB0(d, deltaTE, thresh)
+function [b0,mask_c] = reconB0(d, deltaTE, thresh)
 % b0 = reconB0(d, deltaTE, [thresh=0.1])
 %
 % Reconstruct B0 field map from data obtained with b0.seq, 
@@ -26,7 +26,9 @@ end
 % reconstruct complex coil images
 d_te1 = d(:,:,:,:,1);   % TE1 data
 d_te2 = d(:,:,:,:,2);   % TE2 data
-for ic = 1:ncoil
+nCoil = size(d,4);  %NW dirty fix, is OK?
+
+for ic = 1:nCoil
     ims_te1(:,:,:,ic) = fftshift(ifftn(fftshift(d_te1(:,:,:,ic))));
     ims_te2(:,:,:,ic) = fftshift(ifftn(fftshift(d_te2(:,:,:,ic))));
 end
@@ -39,4 +41,5 @@ b0 = pc/(2*pi)/deltaTE;
 
 % object support
 I_te1 = sqrt(sum(abs(ims_te1).^2, ndims(d)));   % root sum of squares coil combination
-mask = I_te1 > thresh*max(I_te1(:));
+mask_c = I_te1 > thresh*max(I_te1(:));
+end
