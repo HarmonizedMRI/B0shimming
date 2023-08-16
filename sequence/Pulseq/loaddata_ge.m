@@ -1,5 +1,5 @@
-d = loaddata_ge(pfile)
-% d = loaddata_ge(pfile)
+function d = loaddata_ge(pfile)
+% function d = loaddata_ge(pfile)
 %
 % Load GE P-file obtained with the TOPPE version of b0.seq, 
 % see writeB0.m. See also the 'Pulseq on GE' manual.
