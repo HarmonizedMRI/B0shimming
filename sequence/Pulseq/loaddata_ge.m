@@ -13,7 +13,7 @@ function d = loaddata_ge(pfile)
 % load data from P-file (set CV2 = 1 to save P-file)
 din = toppe.utils.loadpfile(pfile);
 din = flipdim(din, 1);   % TOPPE data is flipped along first dimension
-[nfid,ncoil,nslice,necho,nview] = size(d);   % necho = 1 by construction
+[nfid,ncoil,nslice,necho,nview] = size(din);   % necho = 1 by construction
 din = permute(din, [1 5 3 2 4]);   % [nfid nview nslice ncoil]
 
 % discard data during receive gain calibration (see writeB0.m)
