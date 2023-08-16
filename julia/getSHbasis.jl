@@ -101,9 +101,9 @@ Test function
 function getSHbasis(str::String; L::Int = 2,
 	nx::Int=22, ny::Int=20, nz::Int=18, fov::NTuple{3,Real}=(20,20,20),
 )
-	rx = LinRange(-1,1,nx)*fov[1]/2
-	ry = LinRange(-1,1,ny)*fov[2]/2
-	rz = LinRange(-1,1,nz)*fov[3]/2
+	rx = LinRange(1,-1,nx)*fov[1]/2
+	ry = LinRange(1,-1,ny)*fov[2]/2
+	rz = LinRange(1,-1,nz)*fov[3]/2
 	@time H = getSHbasis(rx, ry, rz; L)
 	jim(H; ncol=numSH(L), color=:jet, gui=true, line3plot=false) # compare with >> evalspharm("test")
 	return H
