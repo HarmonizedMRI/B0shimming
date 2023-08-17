@@ -10,26 +10,16 @@ function d = loaddata_siemens(data_path)
 %   d    [nx ny nz ncoils 2]    Complex coil data for the 2 echoes
 
 % load data from .dat-file
-% clear all
 % twix = mapVBVD('/home/wehkamp/myDataDir/shim_test/2023-02-15-201930.dat');
-% data_path
 twix = mapVBVD(data_path);
 
 % twix.image.flagDoAverage = true; %???
 twix.image.flagRemoveOS  = true; %???
-% twix.image.flagIgnoreSeg = true;
-% twix.image.squeeze = true;
+
 % data = squeeze(twix.image());
 data_unsorted = twix.image.unsorted();
 din = permute(data_unsorted, [1 3 2]);   % [nfid nview nslice ncoil]
-% 
 % twix.image.dataSize()
-
-% din = flip(data, 1); %NW does this do anything???  % TOPPE data is flipped along first dimension
-% [nfid,ncoil,nslice,necho,nview] = size(d);   % necho = 1 by construction
-
-% %                 Col Cha Lin Par Sli Ave Phs Eco Rep Set Seg 
-% data = twix.image(  :,  :,  :,  1,  1,  1,  1,  1,  1,  1, :);
 
 % discard data during receive gain calibration (see writeB0.m)
 % din = din(:,:,2:end,:);  

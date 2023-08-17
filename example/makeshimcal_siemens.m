@@ -40,24 +40,25 @@ nShim = length(shims);
 
 S = diag([repmat(diff(AmpLinear), [1 3]) repmat(diff(AmpHO), [1 5])]);
 
-% .dat-file names
+
+
 %test
 file_name = '/2023-02-15-201930.dat';
 dat_name = append(datDir, file_name);
-d = loaddata_siemens(dat_name);
+% .dat-file names
 
-% % P-file names
-% for ii = 1:3
-%     for jj = 1:length(AmpLinear)
-%         pfile{ii,jj} = sprintf('%s/P,%s,%d.7', datDir, shims{ii}, AmpLinear(jj));
-%     end
-% end
-% 
-% for ii = 4:nShim
-%     for jj = 1:length(AmpHO)
-%         pfile{ii,jj} = sprintf('%s/P,%s,%d.7', datDir, shims{ii}, AmpHO(jj));
-%     end
-% end
+% P-file names
+for ii = 1:3
+    for jj = 1:length(AmpLinear)
+        pfile{ii,jj} = sprintf('%s/P,%s,%d.7', datDir, shims{ii}, AmpLinear(jj));
+    end
+end
+
+for ii = 4:nShim
+    for jj = 1:length(AmpHO)
+        pfile{ii,jj} = sprintf('%s/P,%s,%d.7', datDir, shims{ii}, AmpHO(jj));
+    end
+end
 
 % get difference fieldmaps for each shim (and mask)
 F = zeros([nx_c ny_c nz_c nShim]);
