@@ -18,8 +18,6 @@
 % mask_c = [nx_c ny_c nz_c], object support
 % FOV_c = [1 3] cm
 
-% Development notes: See also github/jfnielsen/scanLog/20220907_UM3TMR750_B0shim.
-
 % location of data files 
 % datDir = '~/myDataDir/';
 datDir = '~/myDataDir/shim_test';
@@ -32,8 +30,6 @@ deltaTE = 1000/440 *1e-3; % NW from python script.. !! Attention hard coded shit
 
 % Shim channel names and amplitude settings
 shims = {'x', 'y', 'z', 'z2', 'xy', 'zx', 'x2y2', 'zy'};   
-% AmpLinear = [-10 10];  % see shimcal.pl   %NW GE
-% AmpHO = [-500 500];    % see shimcal.pl   %NW GE
 AmpLinear = [-20 20];  % see shimcal??   !!!Attention change to 10 ??
 AmpHO = [-200 200];    % see shimcal??     !!!Attention change to 100 ???
 nShim = length(shims);
@@ -47,6 +43,7 @@ pattern='*.dat';
 D=dir([datDir filesep pattern]);
 [~,I]=sort(string({D(:).name}));
 
+% b0 = zeros();
 for ii = 1:nShim
     for jj = 1:2
         nF = nF + 1;

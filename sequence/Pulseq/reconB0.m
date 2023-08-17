@@ -35,6 +35,8 @@ end
 
 % phase difference map, radians. Magnitude-squared coil weighting.
 pc = toppe.utils.phasecontrastmulticoil(ims_te2, ims_te1);
+sliceZ = pc(:,:,30);
+imshow(sliceZ,[],Colormap=gray)
 
 % field map in Hz
 b0 = pc/(2*pi)/deltaTE;
