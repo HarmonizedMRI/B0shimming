@@ -26,9 +26,9 @@ end
 % reconstruct complex coil images
 d_te1 = d(:,:,:,:,1);   % TE1 data
 d_te2 = d(:,:,:,:,2);   % TE2 data
-nCoil = size(d,4);  %NW dirty fix, is OK?
+nCoils = size(d,4);  %NW dirty fix, is OK?
 
-for ic = 1:nCoil
+for ic = 1:nCoils
     ims_te1(:,:,:,ic) = fftshift(ifftn(fftshift(d_te1(:,:,:,ic))));
     ims_te2(:,:,:,ic) = fftshift(ifftn(fftshift(d_te2(:,:,:,ic))));
 end

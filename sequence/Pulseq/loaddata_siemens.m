@@ -24,17 +24,16 @@ din = permute(data_unsorted, [1 3 2]);   % [nfid nview nslice ncoil]
 % discard data during receive gain calibration (see writeB0.m)
 % din = din(:,:,2:end,:);  
 % """ remove dummy shots """
-nEcho = 2; %#length(deltaTE) #attention hard coded shit!!!:w
 nzDummy = 2; %# see b04ge.m %#attention hard coded shit!!!    should be reduced to 1 in future
 nx = 60;
 ny = 60; %#attention hard coded shit!!!
 nz = 60;
-nCoils = 2; %#attention hard coded shit!!!
-nRead = 2*nx;
+nCoils = size(din,3);
+nRead = 2*nx; %#attention hard coded shit!!!
 
 nDummyShots = nzDummy * ny * nCoils +1; %???+1
 data = din(:, nDummyShots:end, :); %# [nFid nCoils 2*ny*nz]
-data = reshape(data,[120,120,60,2]); %???? %#attention hard coded shit!!!
+data = reshape(data,[2*nx,2*ny,nz,2]); %???? %#attention hard coded shit!!!
 din = data;
 
 %""" crop fov in x to account for Dwell time being fixed to 4us """
