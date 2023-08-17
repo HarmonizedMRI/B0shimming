@@ -13,7 +13,7 @@ function d = loaddata_siemens(data_path)
 twix = mapVBVD(data_path);
 
 % twix.image.flagDoAverage = true; %???
-twix.image.flagRemoveOS  = false;%true; % remove OverSampling
+twix.image.flagRemoveOS  = true; % remove OverSampling
 
 % data = squeeze(twix.image());
 data_unsorted = twix.image.unsorted();
@@ -34,25 +34,27 @@ nRead = 2*nx; %#attention hard coded shit!!!
 
 nDummyShots = nzDummy * ny * nCoils +1; %???+1
 data = din(:, nDummyShots:end, :); %# [nFid nCoils 2*ny*nz]
-data = reshape(data,[4*nx,2*ny,nz,2]); %???? %#attention hard coded shit!!!
+data = reshape(data,[nRead,2*ny,nz,2]); %???? %#attention hard coded shit!!!
 din = data;
 
-% And here's the k-space for the first coil and the first slice:
-figure,imagesc(abs(squeeze(data(:,:,30,1))).^0.2);
+% % And here's the k-space for the first coil and the first slice:
+% figure,imagesc(abs(squeeze(data(:,:,30,1))).^0.2);
 
-%""" crop fov in x to account for Dwell time being fixed to 4us """
-nc = round(nRead/2);  % center of image
-% print('nc',nc)
-lob = nc-nx/2 +1;
-upb = nc+nx/2;
-din = din(lob:upb, :, :, :);
+% %""" crop fov in x to account for Dwell time being fixed to 4us """
+% nc = round(nRead/2);  % center of image
+% % print('nc',nc)
+% lob = nc-nx/2 +1;
+% upb = nc+nx/2;
+% din = din(lob:upb, :, :, :);
 
 % construct output matrix
 % [nx ny nz nCoils] = size(din(:,1:2:end,:,:));
 d = zeros(nx, ny, nz, nCoils, 2);
-d(:,:,:,:,1) = din(:,1:2:end,:,:);   % TE1 data, size [60 60 60]
-d(:,:,:,:,2) = din(:,2:2:end,:,:);   % TE2 data, size [60 60 60]
+% d(:,:,:,:,1) = din(:,1:2:end,:,:);   % TE1 data, size [60 60 60]
+% d(:,:,:,:,2) = din(:,2:2:end,:,:);   % TE2 data, size [60 60 60]
+d(:,:,:,:,1) = din(1:2:end,1:2:end,:,:);   % TE1 data, size [60 60 60]???
+d(:,:,:,:,2) = din(2:2:end,2:2:end,:,:);   % TE2 data, size [60 60 60]???
 
-% And here's the k-space for the first coil, the first slice and TE1:
-figure,imagesc(abs(squeeze(d(:,:,30,1,1))).^0.2);
+% % And here's the k-space for the first coil, the first slice and TE1:
+% figure,imagesc(abs(squeeze(d(:,:,30,1,1))).^0.2);
 end

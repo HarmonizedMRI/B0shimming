@@ -3,7 +3,7 @@
 % The data was acquired using the script ???
 %
 % Assumptions:
-%
+%InitialMagnification', 800
 %  * 2nd order shim coils
 %
 %  * balanced acquisitions, i.e., two acquisitions are performed
