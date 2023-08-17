@@ -50,8 +50,4 @@ din = din(lob:upb, :, :, :);
 d = zeros(nx, ny, nz, nCoils, 2);
 d(:,:,:,:,1) = din(:,1:2:end,:,:);   % TE1 data, size [60 60 60]
 d(:,:,:,:,2) = din(:,2:2:end,:,:);   % TE2 data, size [60 60 60]
-
-% And here's the k-space for the first coil and the first slice:
-% figure,imagesc(abs(squeeze(d(:,1,:,1,2))).^0.2);
-
 end
