@@ -38,12 +38,11 @@ data = reshape(data,[120,120,60,2]); %???? %#attention hard coded shit!!!
 din = data;
 
 %""" crop fov in x to account for Dwell time being fixed to 4us """
-nc = round(nRead/2);  %# center of image
+nc = round(nRead/2);  % center of image
 % print('nc',nc)
 lob = nc-nx/2 +1;
 upb = nc+nx/2;
 din = din(lob:upb, :, :, :);
-
 
 % construct output matrix
 % [nx ny nz nCoils] = size(din(:,1:2:end,:,:));
