@@ -40,26 +40,45 @@ nShim = length(shims);
 
 S = diag([repmat(diff(AmpLinear), [1 3]) repmat(diff(AmpHO), [1 5])]);
 
-
-
-%test
-file_name = '/2023-02-15-201930.dat';
-dat_name = append(datDir, file_name);
+%% test
+% file_name = '/2023-02-15-201930.dat';
+% data_file_path = append(datDir, file_name);
 % .dat-file names (Assuming they were measured in order)
 
 %% Load data from the given directory sorted by name
 % path='../data'; % directory to be scanned for data files
-nF=1; % the number of the file / data set to load
+% nF=1; % the number of the file / data set to load
 
+% pattern='*.dat';
+% D=dir([datDir filesep pattern]);
+% [~,I]=sort(string({D(:).name}));
+% data_file_path=[datDir filesep D(I(nF)).name];
+
+% fprintf(['loading `' data_file_path '´ ...\n']);
+% twix_obj = mapVBVD(data_file_path);
+
+%% get difference fieldmaps for each shim (and mask)
+F = zeros([nx_c ny_c nz_c nShim]);
+nF = 0;
 pattern='*.dat';
 D=dir([datDir filesep pattern]);
 [~,I]=sort(string({D(:).name}));
-data_file_path=[datDir filesep D(I(nF)).name];
 
-fprintf(['loading `' data_file_path '´ ...\n']);
-% twix_obj = mapVBVD(data_file_path);
+for ii = 1:nShim
+    for jj = 1:2
+        nF = nF + 1;
+        data_file_path=[datDir filesep D(I(nF)).name];
+        d = loaddata_siemens(data_file_path);
+        [b0(:,:,:,jj), mask_c] = reconB0(d, deltaTE, 0.1);
+    end
+    F(:,:,:,ii) = diff(b0, 1, 4);
+end
 
-%% Load the latest file from a dir
+% % save to file
+save shimcal.mat F S FOV_c mask_c
+
+
+%% Load the latest fildat_namee from a dir
 %path='../IceNIH_RawSend/'; % directory to be scanned for data files
 %pattern='*.dat';
 %D=dir([path filesep pattern]);
@@ -78,18 +97,3 @@ fprintf(['loading `' data_file_path '´ ...\n']);
 %         pfile{ii,jj} = sprintf('%s/P,%s,%d.7', datDir, shims{ii}, AmpHO(jj));
 %     end
 % end
-
-%% get difference fieldmaps for each shim (and mask)
-F = zeros([nx_c ny_c nz_c nShim]);
-for ii = 1:nShim
-    for jj = 1:2
-%          d = loaddata_ge(datDir + file_name);
-        d = loaddata_siemens(dat_name);
-%         d = loaddata_siemens(pfile{ii, jj});
-        [b0(:,:,:,jj), mask_c] = reconB0(d, deltaTE, 0.1);
-    end
-    F(:,:,:,ii) = diff(b0, 1, 4);
-end
-
-% % save to file
-% save shimcal.mat F S FOV_c mask_c
