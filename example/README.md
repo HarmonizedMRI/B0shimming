@@ -55,7 +55,7 @@ Here, the subscript `_c` refers to the calibration data.
 
 
 
-## Create *shimcal.mat*
+## 1. Calibrate and create *shimcal.mat*
 
 1. **Create the Pulseq sequence file (*b0.seq*).**
     This step involves executing the MATLAB script *writeB0.m*
@@ -118,8 +118,10 @@ Here, the subscript `_c` refers to the calibration data.
         >> makeshimcal_ge;    # Assumes P-files acquired with shimcal_ge.pl
         ```
 
-    2. **Siemens users**...
-       [TBD]
+    2. **Siemens users** can perform these steps with the *makeshimcal_siemens.m* script in this folder:
+        ```
+        >> makeshimcal_siemens;    # Assumes .dat-files acquired with ???
+        ```
     
 
 ## Create *f0.mat*
@@ -146,7 +148,7 @@ Here, the subscript `_c` refers to the calibration data.
 -->
 
 
-## Calculate new shim settings
+## 4. Calculate new shim settings
 
 1. cd into the folder containing the Julia code.
 1. Make sure the files you created above are accessible from this folder, 
