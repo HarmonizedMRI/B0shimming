@@ -26,9 +26,7 @@ din = permute(data_unsorted, [1 3 2]);   % [nfid nview nslice ncoil]
 % din = din(:,:,2:end,:);  
 % """ remove dummy shots """
 nzDummy = 2; %# see b04ge.m %#attention hard coded shit!!!    should be reduced to 1 in future
-nx = 60;
-ny = 60; %#attention hard coded shit!!!
-nz = 60;
+nx = 60; ny = 60; nz = 60; %#attention hard coded shit!!!
 nCoils = size(din,3);
 nRead = 2*nx; %#attention hard coded shit!!!
 
