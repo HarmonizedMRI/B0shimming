@@ -10,11 +10,10 @@ function d = loaddata_siemens(data_path)
 %   d    [nx ny nz ncoils 2]    Complex coil data for the 2 echoes
 
 % load data from .dat-file
-% twix = mapVBVD('/home/wehkamp/myDataDir/shim_test/2023-02-15-201930.dat');
 twix = mapVBVD(data_path);
 
 % twix.image.flagDoAverage = true; %???
-twix.image.flagRemoveOS  = true; %???
+twix.image.flagRemoveOS  = true; % remove OverSampling
 
 % data = squeeze(twix.image());
 data_unsorted = twix.image.unsorted();
