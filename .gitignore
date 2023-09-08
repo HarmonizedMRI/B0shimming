@@ -5,6 +5,7 @@
 !*.jl
 !*.m
 !*.md
+!*.py
 
 # even if in sub-dirs
 !*/
