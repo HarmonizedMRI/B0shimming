@@ -153,7 +153,7 @@ end
 % Output for execution
 seq.setDefinition('FOV', fov);
 seq.setDefinition('Name', 'b0');
-seq.write('b0.seq', false);
+seq.write('b0.seq');
 
 % Plot sequence
 Noffset = length(TE)*Ny*(nDummyZLoops+1);
