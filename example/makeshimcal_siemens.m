@@ -20,7 +20,8 @@
 
 % location of data files 
 % datDir = '~/myDataDir/';
-datDir = '~/myDataDir/shim_test';
+% datDir = '~/myDataDir/shim_test';
+ datDir = '~/myDataDir/calib_data';
 
 % Acquisition parameters. See ../sequence/Pulseq/writeB0.m.
 FOV_c = 24*[1 1 1];  % cm  
@@ -30,8 +31,8 @@ deltaTE = 1000/440 *1e-3; % NW from python script.. !! Attention hard coded shit
 
 % Shim channel names and amplitude settings
 shims = {'x', 'y', 'z', 'z2', 'xy', 'zx', 'x2y2', 'zy'};   
-AmpLinear = [-20 20];  % see shimcal??   !!!Attention change to 10 ??
-AmpHO = [-200 200];    % see shimcal??     !!!Attention change to 100 ???
+AmpLinear = [-10 10];  % see shimcal??
+AmpHO = [-100 100];    % see shimcal??
 nShim = length(shims);
 
 S = diag([repmat(diff(AmpLinear), [1 3]) repmat(diff(AmpHO), [1 5])]);
