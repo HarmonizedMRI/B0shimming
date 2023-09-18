@@ -1,6 +1,7 @@
 function d = loaddata_siemens(data_path)
 
 %% Load data-file obtained with the b0.seq, 
+
 % see writeB0.m.
 %
 % Input:
@@ -28,7 +29,7 @@ din = permute(data_unsorted, [1 3 2]);   % [nfid nview nslice ncoil]
 % """ remove dummy shots """
 nzDummy = 1; %2; %# should be reduced to 1 in future
 nx = size(din,1); 
-ny = nx; 
+ny = nx; %twix.hdr.Meas.ImageColumns, twix.hdr.Meas.ImageLines
 nz = nx; %#attention hard coded shit!!!
 nCoils = size(din,3);
 
@@ -37,34 +38,54 @@ nCoils = size(din,3);
 % nRead = 2*nx; %#attention hard coded shit!!!
 % nRead = 2*nx/2; %#attention hard coded shit!!!
 
+% %% first delete Dummy then reshape as is loaddata_ge...
 % nDummyShots = nzDummy * (nx + ny)+1; %???+1 hm probably not *nCoils
-% nDummyShots = nzDummy * ny * nCoils +1; %???+1 hm probably not *nCoils
-% data = din(:, nDummyShots:end, :); %# [nFid nCoils 2*ny*nz]
-% data = reshape(data,[nx,ny*2,nz,nCoils]); %???? %
-
-% % % data = reshape(data,[nRead,2*ny,nz,2]); %???? %
-% % din = data;
-
-% % And here's the k-space for the first coil and the first slice:
-% figure,imagesc(abs(squeeze(data(:,:,30,1))).^0.2);
-
-% din = flipdim(din, 1);   % TOPPE data is flipped along first dimension
-din = reshape(din,[nx,ny,2*(nz+1),nCoils]); %???? %
-
-% din = permute(din, [1 5 3 2 4]);   % [nfid nview nslice ncoil]
+% din = din(:, nDummyShots:end, :); %# [nFid 2*ny*nz nCoils]
+% din = reshape(din,[nx,nz,2*ny,nCoils]); %???? %
+% d(:,:,:,:,1) = din(:,:,1:2:end,:);   % TE1 data, size [60 60 60]???
+% d(:,:,:,:,2) = din(:,:,2:2:end,:);   % TE2 data, size [60 60 60]???
+%% last week
+% % data = reshape(data,[nx,ny*2,nz,nCoils]); %???? %
 % 
-% % discard data during receive gain calibration (see writeB0.m)
-din = din(:,:,3:end,:); 
-% din = din(:,:,2:end,:); ????
+% % % % data = reshape(data,[nRead,2*ny,nz,2]); %???? %
+% % % din = data;
+% 
+% % And here's the k-space for the first coil and the first slice:
+% % figure,imagesc(abs(squeeze(data(:,:,30,1))).^0.2);
+% 
+% % din = flipdim(din, 1);   % TOPPE data is flipped along first dimension
+% % din = flipdim(din, 1);   % TOPPE data is flipped along first dimension
+% 
+% % din = reshape(din,[nx,ny,2*(nz+1),nCoils]); %???? %
+% din = reshape(din,[nx,nz+1,2*ny,nCoils]); %???? %
+% 
+% % din = reshape(din,[nx,2*(nz+nzDummy),ny,nCoils]); %???? %
+% 
+% % din = permute(din, [1 5 3 2 4]);   % [nfid nview nslice ncoil]
+% % 
+% % % discard data during receive gain calibration (see writeB0.m)
+% % din = din(:,:,2:end,:);  %at GE
+% % din = din(:,:,3:end,:); 
+% din = din(:,2:end,:,:); 
+% % din = din(:,3:end,:,:); 
+% 
+% % din = din(:,:,2:end,:); ????
+% 
+% % construct output matrix
+% % [nx ny nz nCoils] = size(din(:,1:2:end,:,:));
+% % d = zeros(nx, ny, nz, nCoils, 2);
+% % d(:,:,:,:,1) = din(:,1:2:end,:,:);   % TE1 data, size [60 60 60]???
+% % d(:,:,:,:,2) = din(:,2:2:end,:,:);   % TE2 data, size [60 60 60]???
+% d(:,:,:,:,1) = din(:,:,1:2:end,:);   % TE1 data, size [60 60 60]???
+% d(:,:,:,:,2) = din(:,:,2:2:end,:);   % TE2 data, size [60 60 60]???
 
-% construct output matrix
-% [nx ny nz nCoils] = size(din(:,1:2:end,:,:));
-d = zeros(nx, ny, nz, nCoils, 2);
-% d(:,:,:,:,1) = din(:,1:2:end,:,:);   % TE1 data, size [60 60 60]???
-% d(:,:,:,:,2) = din(:,2:2:end,:,:);   % TE2 data, size [60 60 60]???
-d(:,:,:,:,1) = din(:,:,1:2:end,:);   % TE1 data, size [60 60 60]???
-d(:,:,:,:,2) = din(:,:,2:2:end,:);   % TE2 data, size [60 60 60]???
+% d = permute(din, [1,3,4,5,2]);
+% d = permute(din, [1,2,4,5,3]);
 
+
+din = reshape(din,[nx,nz,2,ny+1,nCoils]); %???? %
+din = din(:,:,:,2:end,:); 
+d = permute(din, [1,2,4,5,3]);
 % % % And here's the k-space for the first coil, the first slice and TE1:
-figure,imagesc(abs(squeeze(d(:,:,30,1,1))).^0.2);
+figure,imagesc(abs(squeeze(d(30,:,:,1,1))).^0.2);
 end
