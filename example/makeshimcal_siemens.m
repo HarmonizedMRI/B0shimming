@@ -20,8 +20,8 @@
 
 % location of data files 
 % datDir = '~/myDataDir/';
-% datDir = '~/myDataDir/shim_test';
-datDir = '~/myDataDir/calib_data/';
+datDir = '~/myDataDir/shim_test2';
+% datDir = '~/myDataDir/calib_data';
 
 % Acquisition parameters. See ../sequence/Pulseq/writeB0.m.
 FOV_c = 24*[1 1 1];  % cm  
