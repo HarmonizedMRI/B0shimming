@@ -33,6 +33,19 @@ ny = nx; %twix.hdr.Meas.ImageColumns, twix.hdr.Meas.ImageLines
 nz = nx; %#attention hard coded shit!!!
 nCoils = size(din,3);
 
+nTE = 2;   % number of echo times (interleaved)
+din = din(:, (nzDummy*ny*nTE+1):end, :);   % [nx ny*nz*nTE nCoils]
+%din = reshape(din,[nx,nz,2,ny+1,nCoils]); %???? %
+d = zeros(nx, ny*nz, nCoils, nTE);
+for iTE = 1:nTE
+    d(:, :, :, iTE) = din(:, iTE:nTE:end, :);
+end
+d = reshape(d, [nx ny nz nCoils nTE]);
+
+% display center kz encode
+figure,imagesc(abs(squeeze(d(:,:,30,1,1))).^0.2);
+
+% im(abs(d(:,:,end/2,1,1)).^0.2)
 % [nfid,ncoil,nslice,necho,nview] = size(din);   % necho = 1 by construction
 
 % nRead = 2*nx; %#attention hard coded shit!!!
@@ -81,11 +94,3 @@ nCoils = size(din,3);
 
 % d = permute(din, [1,3,4,5,2]);
 % d = permute(din, [1,2,4,5,3]);
-
-
-din = reshape(din,[nx,nz,2,ny+1,nCoils]); %???? %
-din = din(:,:,:,2:end,:); 
-d = permute(din, [1,2,4,5,3]);
-% % % And here's the k-space for the first coil, the first slice and TE1:
-figure,imagesc(abs(squeeze(d(30,:,:,1,1))).^0.2);
-end
