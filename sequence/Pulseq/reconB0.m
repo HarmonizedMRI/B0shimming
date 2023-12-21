@@ -43,6 +43,8 @@ b0 = pc/(2*pi)/deltaTE;
 % figure, imshow(b0(:,:,30),[],'InitialMagnification', 800)
 
 % object support
-I_te1 = sqrt(sum(abs(ims_te1).^2, ndims(d)));   % root sum of squares coil combination
+% I_te1 = sqrt(sum(abs(ims_te1).^2, ndims(d)));   % root sum of squares coil combination
+I_te1 = sqrt(sum(abs(ims_te1).^2, ndims(ims_te1))); 
+
 mask_c = I_te1 > thresh*max(I_te1(:));
 end
