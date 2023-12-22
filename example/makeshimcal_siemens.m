@@ -58,16 +58,3 @@ end
 
 % % save to file
 save shimcal.mat F S FOV_c mask_c
-
-%% P-file names
-% for ii = 1:3
-%     for jj = 1:length(AmpLinear)
-%         pfile{ii,jj} = sprintf('%s/P,%s,%d.7', datDir, shims{ii}, AmpLinear(jj));
-%     end
-% end
-% 
-% for ii = 4:nShim
-%     for jj = 1:length(AmpHO)
-%         pfile{ii,jj} = sprintf('%s/P,%s,%d.7', datDir, shims{ii}, AmpHO(jj));
-%     end
-% end
