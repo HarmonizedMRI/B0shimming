@@ -117,7 +117,7 @@ for iZ = -nDummyZLoops:Nz
             % Excitation
             % Mark start of segment (block group) by adding label.
             % Subsequent blocks in block group are NOT labelled.
-            seq.addBlock(rf, mr.makeLabel('SET', 'LIN', 2-isDummyTR));
+            seq.addBlock(rf, mr.makeLabel('SET', 'TRID', 2-isDummyTR));
             
             % Encoding
             seq.addBlock(mr.makeDelay(delayTE(c)));
