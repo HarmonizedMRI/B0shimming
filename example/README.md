@@ -108,7 +108,8 @@ Here, the subscript `_c` refers to the calibration data.
           = diag([20      20    20   200   200   200   200   200 ])   
         ```
        Currently, the calibration data has to be aquired manually on Siemens scanners.
-       The 16 can Changing
+       The 16 calibration measurements need to be aquired ordered in time, changing the shim channel settings from left to right.
+       First subtracting 10 [mikroT/m] then adding 10 [mikroT/m] to the baseline shim setting.  
        : adjvalidate -fre -get
        -> "centerfreq"
        : adjvalidate -tra -get
@@ -117,7 +118,8 @@ Here, the subscript `_c` refers to the calibration data.
        -> "current shim values"
        : adjvalidate -shim -set -mp ["current shim values"]+[-10 0 0 0 0 0 0 0]
        : adjvalidate -tra -set "transV"
-       : adjvalidate -fre -set "centerfreq" 
+       : adjvalidate -fre -set "centerfreq"
+       
 
 3. **Construct F and S, and write to file.**
     This involves reconstructing the (pairwise subtracted) B0 maps 
