@@ -72,7 +72,7 @@ Here, the subscript `_c` refers to the calibration data.
     ```
 
 2. **Acquire the data.**
-    Run *b0.seq* multiple times using your vendor platform's Pulseq interpreter, 
+    Run *b0.seq* 16 times using your vendor platform's Pulseq interpreter, 
     each with only one shim channel turned on.
     For each shim channel, acquire two B0 maps:
     first with amplitude `a/2`, then with `-a/2`. 
@@ -104,9 +104,20 @@ Here, the subscript `_c` refers to the calibration data.
         The corresponding matrix `S` is:
         ```
         # Siemens
-        S = diag([<x> <y> <z> <z2> <xy> <zx> <x2y2> <zy>])
-          = diag([20  20  20  200  200  200  200    200 ])   
+        S = diag([<A11> <B11> <A10> <A20> <A21> <B21> <A22> <B22>])
+          = diag([20      20    20   200   200   200   200   200 ])   
         ```
+       Currently, the calibration data has to be aquired manually on Siemens scanners.
+       The 16 can Changing
+       : adjvalidate -fre -get
+       -> "centerfreq"
+       : adjvalidate -tra -get
+       -> "transV"
+       : adjvalidate -shim -get
+       -> "current shim values"
+       : adjvalidate -shim -set -mp ["current shim values"]+[-10 0 0 0 0 0 0 0]
+       : adjvalidate -tra -set "transV"
+       : adjvalidate -fre -set "centerfreq" 
 
 3. **Construct F and S, and write to file.**
     This involves reconstructing the (pairwise subtracted) B0 maps 
