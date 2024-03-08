@@ -109,7 +109,13 @@ Here, the subscript `_c` refers to the calibration data.
         ```
        Currently, the calibration data has to be aquired manually on Siemens scanners.
        The 16 calibration measurements need to be aquired ordered in time, changing the shim channel settings from left to right.
-       First subtracting 10 [mikroT/m] then adding 10 [mikroT/m] to the baseline shim setting.  
+       This means prior to the first measurement subtracting a/2 = 10 [mikroT/m] from the first shim channel, then for the second measurement adding a/2 = 10 [mikroT/m] to the first shim channel.
+       Attention for the 7. measurement and all consequtive measurements a/2 = 100! 
+       Avoid phase wraps in the calibration data by prior shimming with the manual shimming routine several times until only small changes are suggested.
+
+       On Siemens only updating the shim settings leaves the center frequency in an unclear condition. 
+       Run 'adjvalidate -fre -set "centerfreq"' after each shim update to avoid automatic center frequency manipulation by the system. The center frequency can be optained by running 'adjvalidate -fre -get' prior to the shim update. 
+
        : adjvalidate -fre -get
        -> "centerfreq"
        : adjvalidate -tra -get
