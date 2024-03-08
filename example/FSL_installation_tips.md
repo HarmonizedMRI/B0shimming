@@ -1,7 +1,7 @@
 For those who would like to use the FSL brain extraction tool as in this example,
 here are some installation notes.
 
-Note that you will need about 12 Gb of hard drive space.
+Note that you will need about 10 Gb of hard drive space.
 
 Please also note that you need to configure your shell as described here:
 https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation/ShellSetup
