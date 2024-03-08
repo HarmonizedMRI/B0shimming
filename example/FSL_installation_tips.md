@@ -3,12 +3,8 @@ here are some installation notes.
 
 Note that you will need about 12 Gb of hard drive space.
 
-When installing using python that was installed by conda, python might not work with root privileges.
-
-
-Please also note that  adding a few lines to my .bashrc file.
-How to do it is already described on:
+Please also note that you need to configure your shell as described here:
 https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation/ShellSetup
+depending on what shell you use the changes might have to be done in ~/.bashrc
 
-
-
+Then log out and back in to test the installation
