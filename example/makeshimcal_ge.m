@@ -7,21 +7,22 @@
 %  * 2nd order shim coils
 %
 %  * balanced acquisitions, i.e., two acquisitions are performed
-%    for each shim channel, with amplitudes 'a/2' and '-a/2', respectively.
+%    for each shim channel, with amplitude500s 'a/2' and '-a/2', respectively.
 %
 %  * P-files are named 'P,<channel>,<amp>.7', where
 %      <channel> = 'x', 'y', 'z', 'z2', 'xy', 'zx', 'x2y2', or 'zy'
 %      <amp> = shim current amplitude
 %
 % F = [nx_c ny_c nz_c 8] (Hz), in order 'x', 'y', 'z', 'z2', 'xy', 'zx', 'x2y2', 'zy'
-% S = [8 8], shim amplitudes used to obtain F (hardware units)
+% S = [8 8], shim amplitudeouts used to obtain F (hardware units)
 % mask_c = [nx_c ny_c nz_c], object support
 % FOV_c = [1 3] cm
 
 % Development notes: See also github/jfnielsen/scanLog/20220907_UM3TMR750_B0shim.
-
+addpath(genpath("B0shimming"))
+addpath(genpath("toppe"))
 % location of data files 
-datDir = '~/myDataDir/';
+datDir = '~/shimcal0425in';
 
 % Acquisition parameters. See ../sequence/Pulseq/writeB0.m.
 FOV_c = 24*[1 1 1];  % cm  
@@ -31,7 +32,7 @@ deltaTE = 2.2369e-3;  % TE difference between the two echoes (sec)
 % Shim channel names and amplitude settings
 shims = {'x', 'y', 'z', 'z2', 'xy', 'zx', 'x2y2', 'zy'};   
 AmpLinear = [-10 10];  % see shimcal.pl
-AmpHO = [-500 500];    % see shimcal.pl
+AmpHO = [-200 200];    % see shimcal.pl
 nShim = length(shims);
 
 S = diag([repmat(diff(AmpLinear), [1 3]) repmat(diff(AmpHO), [1 5])]);
@@ -59,4 +60,4 @@ for ii = 1:nShim
 end
 
 % save to file
-save shimcal.mat F S FOV_c mask_c
+%save shimcal0425_out.mat F S FOV_c mask_c

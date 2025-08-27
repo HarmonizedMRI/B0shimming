@@ -13,7 +13,7 @@
 # acquisition loop parameters
 @Shims = ('x', 'y', 'z', 'z2', 'xy', 'zx', 'x2y2', 'zy');
 @AmpLinear = (-10, 10);       # loop over these (integer) hardware amplitudes for each linear shim
-@AmpHO = (-500, 500);         # loop over these (integer) hardware amplitudes for each higher-order shim
+@AmpHO = (-200, 200);         # loop over these (integer) hardware amplitudes for each higher-order shim
 
 $atpfile = 'tmp.atp';
 

@@ -7,7 +7,8 @@
 % RF/gradient delay (sec). 
 % Conservative choice that should work across all GE scanners.
 psd_rf_wait = 200e-6;  
-
+addpath(genpath("pulseq/"))
+addpath(genpath("B0shimming/"))
 % System/design parameters.
 % Here we extend rfRingdownTime by psd_rf_wait to ensure that 
 % the subsequent wait pulse (delay block) doesn't overlap with
@@ -17,6 +18,12 @@ sys = mr.opts('maxGrad', 40, 'gradUnit','mT/m', ...
               'rfDeadTime', 100e-6, ...
               'rfRingdownTime', 60e-6 + psd_rf_wait, ...
               'adcDeadTime', 40e-6, ...
+              ...
+              ...
+              ...
+              ...
+              ...
+              ...
               'adcRasterTime', 2e-6, ...
               'blockDurationRaster', 10e-6, ...
               'B0', 3.0);
@@ -38,7 +45,7 @@ rfSpoilingInc = 117;            % RF spoiling increment
 seq = mr.Sequence(sys);           
 
 % Create non-selective pulse
-[rf] = mr.makeBlockPulse(alpha/180*pi, sys, 'Duration', 0.2e-3);
+[rf] = mr.makeBlockPulse(alpha/180*pi, sys, 'Duration', 0.2e-3, 'use', 'excitation');
 
 % Define other gradients and ADC events
 % Cut the redaout gradient into two parts for optimal spoiler timing
@@ -153,7 +160,7 @@ end
 % Output for execution
 seq.setDefinition('FOV', fov);
 seq.setDefinition('Name', 'b0');
-seq.write('b0.seq');
+seq.write('b0_jp25.seq');
 
 % Plot sequence
 Noffset = length(TE)*Ny*(nDummyZLoops+1);
