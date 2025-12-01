@@ -19,7 +19,7 @@ include("Shimming/shimoptim.jl")      # shimoptim()
 include("phant_mask.jl")     # phant_mask()
 
 #""" prepare fieldmap data sball.mat """
-run(`python3 fieldmap_prep.py 'path/to/file'`) 
+run(`python3 fieldmap_prep.py 'Example_Data/meas_MID00183_FID231856_baseb0.dat'`) 
 
 clim = (-60, 60).*Hz
 # Open Recontructed Data
