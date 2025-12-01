@@ -27,7 +27,8 @@ end
 d_te1 = d(:,:,:,:,1);   % TE1 data
 d_te2 = d(:,:,:,:,2);   % TE2 data
 nCoils = size(d,4);  %NW dirty fix, is OK?
-
+d_te1 = reshape(d_te1, [60 60 60 nCoils]);
+d_te2 = reshape(d_te2, [60 60 60 nCoils]);
 for ic = 1:nCoils
     ims_te1(:,:,:,ic) = fftshift(ifftn(fftshift(d_te1(:,:,:,ic))));
     ims_te2(:,:,:,ic) = fftshift(ifftn(fftshift(d_te2(:,:,:,ic))));

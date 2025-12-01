@@ -17,11 +17,12 @@
 % S = [8 8], shim amplitudes used to obtain F (hardware units)
 % mask_c = [nx_c ny_c nz_c], object support
 % FOV_c = [1 3] cm
-
+addpath("toppe/")
+addpath("B0shimming/sequence/Pulseq/")
 % location of data files 
 % datDir = '~/myDataDir/';
 % datDir = '~/myDataDir/shim_test4';
-datDir ='~/myDataDir/shim_test_8/'
+datDir ='/home/jpothoof/9.16.25/Calibration';
 % datDir = '~/myDataDir/calib_data';
 
 % Acquisition parameters. See ../sequence/Pulseq/writeB0.m.
@@ -32,8 +33,8 @@ deltaTE = 2.2369e-3;  % TE difference between the two echoes (sec)
 
 % Shim channel names and amplitude settings
 shims = {'x', 'y', 'z', 'z2', 'xy', 'zx', 'x2y2', 'zy'};   
-AmpLinear = [-10 10];  % see shimcal??
-AmpHO = [-100 100];    % see shimcal??
+AmpLinear = [-20 20];  % see shimcal??
+AmpHO = [-200 200];    % see shimcal??
 nShim = length(shims);
 
 S = diag([repmat(diff(AmpLinear), [1 3]) repmat(diff(AmpHO), [1 5])]);
@@ -57,4 +58,4 @@ for ii = 1:nShim
 end
 
 % % save to file
-save shimcal.mat F S FOV_c mask_c
+%save shimcal_vida.mat F S FOV_c mask_c
