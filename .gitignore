@@ -6,8 +6,8 @@
 !*.m
 !*.md
 !*.py
-meas_MID00183_FID231856_baseb0.dat
-shimbase_0305.data
+!meas_MID00183_FID231856_baseb0.dat
+!shimbase_0305.data
 
 # even if in sub-dirs
 !*/
