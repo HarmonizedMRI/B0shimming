@@ -19,7 +19,7 @@ include("Shimming/shimoptim.jl")      # shimoptim()
 include("phant_mask.jl")     # phant_mask()
 
 #""" prepare fieldmap data sball.mat """
-run(`python3 fieldmap_prep.py '/path/to/file'`) 
+run(`python3 fieldmap_prep.py 'path/to/file'`) 
 
 clim = (-60, 60).*Hz
 # Open Recontructed Data
@@ -43,7 +43,7 @@ l = 2                   # 1 for linear shims, 2 for second order
 TH = 0.4                # Default threshold for mask
 mask_flag = 0           # Initalization of mask flag
 fov = [24 24 24]        # Field of view in cm
-calibration_file = "shimcal_vidaSiem.mat"
+calibration_file = "shimcal0725_vidaSiem.mat"
 img1 = sqrt.(sum(abs.(img1r),dims = 4));
 
 niii = NIVolume(img1)
