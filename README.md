@@ -46,12 +46,12 @@ This can be done in a variety of ways, e.g., using the
 FSL plugin from https://shimming-toolbox.org/.
 
 4. **Calculating and applying the optimal shim current settings**.
-This involves running the Julia script *shim.jl* that we provide
+This involves running the Julia script *shimtool.jl* or *brain_shim_siem.jl* that we provide
 (see the [julia](./julia) folder).
 This script calculates optimal shim settings based on the provided
 shim calibration data, 3D field map, and shim region.
 
-To see precisely how these pieces fit together, see shimtool.jl in the [julia](./julia) folder.
+To see precisely how these pieces fit together, see *shimtool.jl* in the [julia](./julia) folder.
 
 
 ## Code description
