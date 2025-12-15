@@ -51,7 +51,7 @@ This involves running the Julia script *shim.jl* that we provide
 This script calculates optimal shim settings based on the provided
 shim calibration data, 3D field map, and shim region.
 
-To see precisely how these pieces fit together, see the [example](./example) folder.
+To see precisely how these pieces fit together, see shimtool.jl in the [julia](./julia) folder.
 
 
 ## Code description
