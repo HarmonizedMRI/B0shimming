@@ -26,7 +26,11 @@ julia> cd("julia")
 
 6. Run the example:
 ```
-julia> include("example.jl")
+julia> include("shimtool.jl")
+```
+or
+```
+julia> include("brain_shim_siem.jl")
 ```
 
 Each panel in the output image shows the field map (in Hz) before (left) and 
