@@ -143,13 +143,19 @@ Here, the subscript `_c` refers to the calibration data.
         ```
     
 
-## Create *f0.mat*
+## Shim Over Desired Volume
 
 1. Run *b0.seq* in the object we wish to shim over.
-2. Reconstruct a B0 map and write to file:
+3. Load B0 map and write to file:
+   For GE's RDS file: Replace data_file variable in shimtool.jl.
     ```
-    [TBD]
+    julia> include("shimtool.jl")
+    
     ```
+    For Siemens Twix file: In brain_shim_siem.jl change "run(`python3 fieldmap_prep.py 'path/to/file')" to twix file location
+   ```
+   julia> include("brain_shim_siem.jl")
+   ```
 <!--
     >> getb0init;  % b0init, mask, magraw. Phase unwrapping is done in unwrap/main.jl
     << makef0;
