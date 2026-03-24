@@ -83,13 +83,13 @@ Here, the subscript `_c` refers to the calibration data.
         ```
         # GE
         a = 20       # x/y/z shims
-        a = 1000     # 2nd order shims
+        a = 100     # 2nd order shims
         ```
         The corresponding matrix `S` is:
         ```
         # GE
         S = diag([<x> <y> <z> <z2> <xy> <zx> <x2y2> <zy>])
-          = diag([20  20  20  1000 1000 1000 1000   1000])
+          = diag([20  20  20  100 100 100 100   100])
         ```
         The script *shimcal_ge.pl* shows how the calibration data can be obtained on GE scanners,
         in an automated way and without having to manually set each shim channel amplitude.
