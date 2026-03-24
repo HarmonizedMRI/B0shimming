@@ -139,7 +139,7 @@ Here, the subscript `_c` refers to the calibration data.
 
     2. **Siemens users** can perform these steps with the *makeshimcal_siemens.m* script in this folder:
         ```
-        >> makeshimcal_siemens;    # Assumes .dat-files acquired with ???
+        >> makeshimcal_siemens;    # Assumes .dat-files acquired in order (see makeshimcalsiemens.m)
         ```
     
 
