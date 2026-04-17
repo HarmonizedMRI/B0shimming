@@ -83,13 +83,13 @@ Here, the subscript `_c` refers to the calibration data.
         ```
         # GE
         a = 20       # x/y/z shims
-        a = 1000     # 2nd order shims
+        a = 100     # 2nd order shims
         ```
         The corresponding matrix `S` is:
         ```
         # GE
         S = diag([<x> <y> <z> <z2> <xy> <zx> <x2y2> <zy>])
-          = diag([20  20  20  1000 1000 1000 1000   1000])
+          = diag([20  20  20  100 100 100 100   100])
         ```
         The script *shimcal_ge.pl* shows how the calibration data can be obtained on GE scanners,
         in an automated way and without having to manually set each shim channel amplitude.
@@ -139,17 +139,23 @@ Here, the subscript `_c` refers to the calibration data.
 
     2. **Siemens users** can perform these steps with the *makeshimcal_siemens.m* script in this folder:
         ```
-        >> makeshimcal_siemens;    # Assumes .dat-files acquired with ???
+        >> makeshimcal_siemens;    # Assumes .dat-files acquired in order (see makeshimcalsiemens.m)
         ```
     
 
-## Create *f0.mat*
+## Shim Over Desired Volume
 
 1. Run *b0.seq* in the object we wish to shim over.
-2. Reconstruct a B0 map and write to file:
+3. Load B0 map and write to file:
+   For GE's RDS file: Replace data_file variable in shimtool.jl.
     ```
-    [TBD]
+    julia> include("shimtool.jl")
+    
     ```
+    For Siemens Twix file: In brain_shim_siem.jl change "run(`python3 fieldmap_prep.py 'path/to/file')" to twix file location
+   ```
+   julia> include("brain_shim_siem.jl")
+   ```
 <!--
     >> getb0init;  % b0init, mask, magraw. Phase unwrapping is done in unwrap/main.jl
     << makef0;
