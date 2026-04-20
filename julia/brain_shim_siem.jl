@@ -24,7 +24,7 @@ run(`python3 fieldmap_prep.py 'Example_Data/meas_MID00183_FID231856_baseb0.dat'`
 clim = (-60, 60).*Hz
 # Open Recontructed Data
 
-data = matopen("/home/jpothoof/Julia_Files/sball.mat")
+data = matopen("sball.mat")
 
 #data = matopen("nov10_1.mat")
 img1r = read(data, "im_te1")

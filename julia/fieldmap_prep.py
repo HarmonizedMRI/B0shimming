@@ -46,7 +46,7 @@ def loaddata_siemens(data_path):
     n_te = 2  # Number of echo times (interleaved)
     din = din[:, (nz_dummy * ny * n_te):, :]  # [nx, ny * nz * n_te, ncoils]
 
-    d = np.zeros((nx, ny * nz, n_coils, n_te), dtype=np.complex_)
+    d = np.zeros((nx, ny * nz, n_coils, n_te), dtype=np.complex128)
     for i_te in range(n_te):
         d[:, :, :, i_te] = din[:, i_te::n_te, :]
 
@@ -73,8 +73,8 @@ im_t1 = data[..., 0]
 im_t2 = data[..., 1]
 
 # Perform FFT operations
-im_te1 = np.zeros_like(im_t1, dtype=np.complex_)
-im_te2 = np.zeros_like(im_t2, dtype=np.complex_)
+im_te1 = np.zeros_like(im_t1, dtype=np.complex128)
+im_te2 = np.zeros_like(im_t2, dtype=np.complex128)
 
 for ic in range(n_coil):
     im_te1[..., ic] = np.fft.ifftshift(np.fft.ifftn(np.fft.fftshift(im_t1[..., ic])))
@@ -96,6 +96,6 @@ img2 = np.sqrt(np.sum(np.abs(im_te2), axis=3))
 
 # Save the .mat file
 #sio.savemat(data_path + 'sball.mat', {'im_te1': im_te1, 'im_te2': im_te2, 'echotimes': echo_times})
-sio.savemat('/home/jpothoof/Julia_Files/sball.mat', {'im_te1': im_te1, 'im_te2': im_te2, 'echotimes': echo_times})
+sio.savemat('sball.mat', {'im_te1': im_te1, 'im_te2': im_te2, 'echotimes': echo_times})
 
 print('fieldmap prep done!')
