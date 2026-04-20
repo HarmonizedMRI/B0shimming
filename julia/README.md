@@ -35,5 +35,4 @@ julia> include("brain_shim_siem.jl")
 7. Answer 'y' through prompts
 
 Each panel in the output image shows the field map (in Hz) before (left) and 
-after (right) 2<sup>nd</sup> order shimming of a cylindrical jar phantom:  
-![output of examples.jl](resources/out30.png "Example")
+after (right) 2<sup>nd</sup> order shimming.
