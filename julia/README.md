@@ -1,6 +1,5 @@
 # Code for estimating optimal B0 shim settings
 
-[more here]
 
 ## Using the Julia code: Quick start
 
@@ -14,7 +13,7 @@ $ git clone git@github.com:HarmonizedMRI/B0shimming.git
 julia> cd("julia")
 ```
 
-3. Start Julia (download from https://julialang.org/). Current version is 1.6.0.
+3. Start Julia (download from https://julialang.org/). Current version is 1.12.6.
 
 4. Press `]` to enter the Julia package manager and do:
 ```

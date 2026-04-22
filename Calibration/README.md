@@ -1,6 +1,5 @@
-# B0 shimming example from start to finish
+# B0 shimming Calibration
 
-[under construction]
 
 
 ## Overview
@@ -13,46 +12,6 @@ This is done by scanning a uniform phantom with a Pulseq sequence that we provid
 (see the [sequence/Pulseq](sequence/Pulseq) folder), 
 and saving the acquired data to a file named *shimcal.mat*.
 This just needs to be done once for each scanner.
-
-2. **Acquire and reconstruct a B0 field map in the object you wish to shim over**.
-This involves running a Pulseq scan and calculating the B0 field map,
-and saving the field map to a file named *f0.mat*.
-
-3. **Define the shim region**.
-Here you define the region(s) (within the B0 field map `f0`) that you wish 
-to shim over, and save the corresponding (binary) mask to a file named *shimvol.mat*.
-
-4. **Calculate and apply the optimal shim current settings**.
-This involves running *shim.jl* 
-(see the [julia](./julia) folder)
-to obtain the new shim settings;
-That script loads the *.mat* files created in the previous steps, 
-and prints the reommended shim settings to the console.
-
-
-The workflow just described involves creating the following experimental files:
-
-```
-<filename>      <variables>          <purpose>
-shimcal.mat     F S FOV_c mask_c     Used to calculate the shim calibration matrix `A`
-f0.mat          f0 FOV               Field map (Hz) and FOV (cm) we wish to shim over
-shimvol.mat     mask                 Shim volume; logical/binary mask on grid defined by f0
-```
-
-The variables contained in these files are:
-```
-F   [nx_x ny_c nz_c nShim]  Fieldmaps (Hz) obtained by turning on/off individual shim channels
-                            N_c = number of voxels in calibration imaging volume (FOV_c)
-                            nShim = number of shim channels (e.g., 3 (linear) or 8 (2nd order))
-S        [nShim nShim]      Applied shim currents (pairwise differences) used to obtain F
-FOV_c    [3]                Field of view (cm) for the calibration data
-mask_c   [nx_c ny_c nz_c]   Logical/binary mask indicating object support (N_c = nx_c*ny_c*nz_c)
-f0       [nx ny nz]         Fieldmap we wish to shim over (Hz)
-FOV      [3]                FOV (cm) corresponding to f0
-mask     [nx ny nz]         Logical/binary mask defining the desired shim region
-```
-Here, the subscript `_c` refers to the calibration data.
-
 
 
 ## 1. Calibrate and create *shimcal.mat*
@@ -89,29 +48,29 @@ Here, the subscript `_c` refers to the calibration data.
         ```
         # GE
         S = diag([<x> <y> <z> <z2> <xy> <zx> <x2y2> <zy>])
-          = diag([20  20  20  100 100 100 100   100])
+          = diag([20  20  20  100  100  100  100   100])
         ```
         The script *shimcal_ge.pl* shows how the calibration data can be obtained on GE scanners,
-        in an automated way and without having to manually set each shim channel amplitude.
+        in an automated way and without having to manually set each shim channel amplitude. This script contains GE private commands, so it is available upon request.
 
 
     2. **Siemens users** may use the following settings:
         ```
         # Siemens
         a = 20       # x/y/z shims
-        a = 200      # 2nd order shims
+        a = 100      # 2nd order shims
         ```
         The corresponding matrix `S` is:
         ```
         # Siemens
         S = diag([<A11> <B11> <A10> <A20> <A21> <B21> <A22> <B22>])
-          = diag([20      20    20   200   200   200   200   200 ])   
+          = diag([20      20    20   100   100   100   100   100 ])   
         ```
        Currently, the calibration data has to be aquired manually on Siemens scanners.
        The 16 calibration measurements need to be aquired ordered in time, changing the shim channel settings from left to right.
-       This means prior to the first measurement subtracting a/2 = 10 [mikroT/m] from the first shim channel, then for the second measurement adding a/2 = 10 [mikroT/m] to the first shim channel.
-       Attention for the 7. measurement and all consequtive measurements a/2 = 100! 
-       Avoid phase wraps in the calibration data by prior shimming with the manual shimming routine several times until only small changes are suggested.
+       This means prior to the first measurement subtracting a = 20 [mikroT/m] from the first shim channel, then for the second measurement adding a = 20 [mikroT/m] to the first shim channel.
+       Attention for the 7. measurement and all consequtive measurements a = 100! 
+       These values are suggested as larger values can cause phase wraps in the calibration data.
 
        On Siemens only updating the shim settings leaves the center frequency in an unclear condition. 
        Run 'adjvalidate -fre -set "centerfreq"' after each shim update to avoid automatic center frequency manipulation by the system. The center frequency can be optained by running 'adjvalidate -fre -get' prior to the shim update. 
@@ -141,63 +100,7 @@ Here, the subscript `_c` refers to the calibration data.
         ```
         >> makeshimcal_siemens;    # Assumes .dat-files acquired in order (see makeshimcalsiemens.m)
         ```
+    3. Move shimcal.mat to a folder accessible by the shimming Julia script ("shimtoo.jl" or brain_shimsiem.jl").
     
-
-## Shim Over Desired Volume
-
-1. Run *b0.seq* in the object we wish to shim over.
-3. Load B0 map and write to file:
-   For GE's RDS file: Replace data_file variable in shimtool.jl.
-    ```
-    julia> include("shimtool.jl")
-    
-    ```
-    For Siemens Twix file: In brain_shim_siem.jl change "run(`python3 fieldmap_prep.py 'path/to/file')" to twix file location
-   ```
-   julia> include("brain_shim_siem.jl")
-   ```
-<!--
-    >> getb0init;  % b0init, mask, magraw. Phase unwrapping is done in unwrap/main.jl
-    << makef0;
--->
-
-
-## Create *shimvol.mat*
-
-```
-[TBD]
-```
-
-<!--
-    >> makeshimvol;  % uses FSL (bet) to do skull stripping
--->
-
-
-## 4. Calculate new shim settings
-
-1. cd into the folder containing the Julia code.
-1. Make sure the files you created above are accessible from this folder, 
-   e.g., create copies or symbolic links:
-   ```
-   $ ln -s ~/mydata/shimcal.mat .
-   $ ln -s ~/mydata/f0.mat .
-   $ ln -s ~/mydata/shimvol.mat .
-   ```
-1. Start a Julia session 
-    ```
-    $ julia
-    ```
-1. Press `]` to enter the Julia package manager, then do:
-    ```
-    (@v1.7) pkg> activate .
-    (julia) pkg> instantiate
-    ```
-1. Press backspace to get back to the Julia prompt.
-1. Run the script:
-    ```
-      julia> include("shim.jl")
-    ```
-    This script will load the various *.mat* files created above,
-    and output the recommended shim settings.
 
 
