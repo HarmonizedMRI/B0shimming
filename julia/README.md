@@ -17,21 +17,26 @@ julia> cd("julia")
 
 4. Press `]` to enter the Julia package manager and do:
 ```
-(@v1.6) pkg> activate .
+(@v1.12) pkg> activate .
 (julia) pkg> instantiate
 ```
 
 5. Press `backspace` to get back to the Julia prompt.
 
-6. Run the example:
+6. If you are using the Siemens example, install the Python implementation of mapVBVD to load in twix files. In the terminal
+```
+python3 pip install pymapvbvd
+```
+
+8. Run the example:
 ```
 julia> include("shimtool.jl")
 ```
-or
+  or
 ```
 julia> include("brain_shim_siem.jl")
 ```
-7. Answer 'y' through prompts
+8. Answer 'y' through prompts
 
 Each panel in the output image shows the field map (in Hz) before (left) and 
 after (right) 2<sup>nd</sup> order shimming.
