@@ -28,7 +28,7 @@ julia> cd("julia")
 python3 pip install pymapvbvd
 ```
 
-8. Run the example:
+7. Run the example:
 ```
 julia> include("shimtool.jl")
 ```
