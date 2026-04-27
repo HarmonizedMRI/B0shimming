@@ -10,11 +10,13 @@ $ git clone git@github.com:HarmonizedMRI/B0shimming.git
 
 2. Change into the 'julia' subdirectory
 ```
-julia> cd("julia")
+cd julia
 ```
 
 3. Start Julia (download from https://julialang.org/). Current version is 1.12.6.
-
+```
+julia
+```
 4. Press `]` to enter the Julia package manager and do:
 ```
 (@v1.12) pkg> activate .
