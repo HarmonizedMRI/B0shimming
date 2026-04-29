@@ -36,7 +36,7 @@ nx = 60                 # Matrix Size
 ny = 60                 # Matrix Size
 nz = 60                 # Matrix Size
 nz_dummy = 1            # Number of Dummy slices
-mask_type = 2           # Mask type: 1. Threshold   2. Brain Extraction Tool  3. Brainstem  4. Weighted BS  5. Custom
+mask_type = 1           # Mask type: 1. Threshold   2. Brain Extraction Tool  3. Brainstem  4. Weighted BS  5. Custom
 fieldmatch = 0			# 1 To turn on image registration with previous data for field map matching
 calibration_file = "shimcal1025_outGE.mat"
 data_file = "Example_Data/shimbase_0305.data"
@@ -252,8 +252,8 @@ fpnmv = H1*A*shat;
 embed!(fpnm, fpnmv, BitArray(ones(nx,ny,nz)));
 fpnm = fpnm + fmap;                                 # Predicted fieldmap no mask 
 
-rm_bet = (`rm bet_term_mask.nii`)
-run(rm_bet)
+#rm_bet = (`rm bet_term_mask.nii`)
+#run(rm_bet)
 println("Done")
 
 # Output shims in text file
