@@ -104,9 +104,5 @@ See `julia/example.jl` for a complete example, and additional information for ho
 
 ## Cite
 
-[Jon-Fredrik Nielsen, Berkin Bilgic, Jason P. Stockmann, Borjan Gagoski, 
-Jr-Yuan George Chiou, Jr, Lipeng Ning, Yang Ji, Yogesh Rathi, 
-Jeffrey A. Fessler, Douglas C. Noll, and Maxim Zaitsev.
-An open toolbox for harmonized B0 shimming.
-Proc. Intl. Soc. Mag. Reson. Med. 2021; 3772.](https://index.mirasmart.com/ISMRM2021/PDFfiles/3772.html)
+Pothoof J, Wehkamp N, Egan M, Peltier S, Jiang Y, Fessler J, Noll D, Zaitsev M, Nielsen J. Evaluating Field Map Reproducibility Utilizing an Open Source, Vendor Independent B0 Shimming Tool. In: Proc. Intl. Soc. Mag. Reson. Med. 2026; 466-04-004
 
