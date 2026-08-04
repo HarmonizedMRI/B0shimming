@@ -1,0 +1,16 @@
+name = "B0Reconstruction"
+uuid = "7050ca9a-ff76-4fa1-a732-24e271096129"
+version = "0.1.0"
+authors = ["HarmonizedMRI contributors"]
+
+[deps]
+FFTW = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
+MAT = "23992714-dd62-5051-b70f-ba57cb901cac"
+MRIFieldmaps = "5af58b90-8a55-4daf-adb4-2008a66a38cf"
+ROMEO = "1ea8258b-a15d-4adb-ad20-01632f467a84"
+
+[compat]
+FFTW = "1.10.0"
+MAT = "0.12.1"
+MRIFieldmaps = "0.0.4"
+ROMEO = "1.4.0"
