@@ -1,10 +1,15 @@
+% Load ScanArchive data file acquired with b0.seq,
+% and save to .mat file for further processing in ../julia/.
+% Also calculate field map here (b0) for comparing with julia output.
 
-% TE difference between the two images
+% TE difference between the two images.
+% See writeB0.m
 sys = mr.opts('B0', 3.0);
 fatChemShift = 3.5e-6;          % 3.5 ppm
 fatOffresFreq = sys.gamma*sys.B0*fatChemShift;  % Hz
 TE = 1/fatOffresFreq*[1 2];     % fat and water in phase for both echoes
 n_TE = length(TE);                 
+
 assert(n_TE == 2, 'acquisition must have 2 echoes');
 delta_TE = diff(TE);        % sec 
 
@@ -44,23 +49,26 @@ saveReconstructionInput('reconstruction_input', d, TE, 'MaskThreshold', 0.1);
 
 return
 
-%
-d_te1 = d(:,1:2:end,:,:);
-d_te2 = d(:,2:2:end,:,:);
+% -----------------------------------------------------------------------------
+% calculate fieldmap directly using multi-coil phase-contrast (for comparision)
+% -----------------------------------------------------------------------------
+
+% get mask, fieldmap_hz, initial_fieldmap_hz
+load reconstruction_input 
 
 % reconstruct coil images
+d_te1 = d(:,1:2:end,:,:);
+d_te2 = d(:,2:2:end,:,:);
 [im_te1, mag_te1] = hmriutils.recon.ift3(d_te1);
 [im_te2, mag_te2] = hmriutils.recon.ift3(d_te2);
 
-% direct field map calculation
-pc = hmriutils.recon.phasecontrastmulticoil(im_te1, im_te2);
+% coil-combined field map calculation
+pc = hmriutils.recon.phasecontrastmulticoil(im_te2, im_te1);
 b0 = pc/2/pi/delta_TE;     % Hz
 
 % crop to match SMS-EPI matrix size
 %b0.raw = imcropmatrix(b0.raw, [nx ny nz]);
 %b0.mag = imcropmatrix(b0.mag, [nx ny nz]);
 
-% direct multi-coil phase-cont
-im(b0)
 
 %save reconstruction im_te1 im_te2
