@@ -4,8 +4,8 @@ This folder contains the reconstruction pipeline for the vendor-neutral B0 shimm
 
 The pipeline is split between **MATLAB** and **Julia**:
 
-* **MATLAB** loads the raw scanner data 
-* **Julia** estimates an unwrapped and regularized B0 field map using modern open-source packages, including **ROMEO** for phase unwrapping and **MRIFieldmaps.jl** for regularized field map estimation.
+* **MATLAB** loads the raw scanner data and performs any vendor-specific reconstruction steps.
+* **Julia** estimates an unwrapped and regularized B0 field map using modern open-source packages, including **ROMEO** for phase unwrapping and **MRIFieldmaps.jl** for regularized field map estimation. The results can be saved as both MATLAB (`.mat`) and NIfTI (`.nii`/`.nii.gz`) files.
 
 ## Workflow
 
@@ -21,9 +21,10 @@ MATLAB
         ▼
 Julia
   - Load reconstruction_input.mat
-  - Estimate unwrapped B₀ field map
+  - Estimate unwrapped B0 field map
   - Regularize field map
   - Save fieldmap.mat
+  - (Optional) Write NIfTI images
 ```
 
 ## MATLAB
@@ -50,9 +51,10 @@ Pkg.instantiate()
 include("estimateFieldMap.jl")
 ```
 
-For a description of the required input file, output file, package setup, and usage, see:
+For a description of the required input file, output files, package setup, and usage, see:
 
 ```text
 julia/README.md
 ```
+
 

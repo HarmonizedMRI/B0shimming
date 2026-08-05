@@ -29,7 +29,7 @@ a simple relative magnitude threshold is used.
 
 ## Run
 
-### Interactive Julia session 
+### Interactive Julia session (recommended)
 
 From this directory:
 
@@ -56,18 +56,11 @@ using .B0Reconstruction
 Estimate the field map:
 
 ```julia
-restul = estimate_fieldmap_file(
+estimate_fieldmap_file(
     "reconstruction_input.mat",
-    "fieldmap.mat",
-)
-```
-
-Write to NIfTI file:
-
-```julia
-write_fieldmap_nifti(
-    result.fieldmap_hz,
-    "fieldmap_hz.nii.gz",
+    "fieldmap.mat";
+    fieldmap_nifti="fieldmap_hz.nii.gz",
+    magnitude_nifti="magnitude_echo1.nii.gz",
 )
 ```
 
@@ -82,25 +75,25 @@ julia --project=. estimateFieldMap.jl \
 
 The first run will automatically install the packages listed in `Project.toml`.
 
-
 ## Output
 
 `fieldmap.mat` contains:
 
-- `fieldmap_hz`: regularized field map from `MRIFieldmaps.jl`
-- `unwrapped_fieldmap_hz`: ROMEO-unwrapped initialization
-- `initial_fieldmap_hz`: wrapped initialization from `b0init`
-- `magnitude`: root-sum-of-squares magnitude of the first echo
-- `mask`: processing mask
-- `echo_times`: echo times in seconds
+* `fieldmap_hz`: regularized field map from `MRIFieldmaps.jl`
+* `unwrapped_fieldmap_hz`: ROMEO-unwrapped initialization
+* `initial_fieldmap_hz`: wrapped initialization from `b0init`
+* `magnitude_echo1`: first-echo magnitude image
+* `mask`: processing mask
+* `echo_times`: echo times in seconds
+
+If the optional `fieldmap_nifti` and/or `magnitude_nifti` arguments are specified, the corresponding images are also written as NIfTI files (`.nii` or `.nii.gz`) using the acquisition geometry provided by the reconstruction.
 
 ## Notes
 
 The current implementation:
 
-- requires exactly two echoes;
-- reconstructs each coil independently using a centered 3D inverse FFT;
-- preserves the existing `shimtool.jl` complex-sum coil combination for field
-  map estimation;
-- uses a deliberately simple default mask that can later be replaced by the
-  repository's application-specific masking workflow.
+* requires exactly two echoes;
+* reconstructs each coil independently using a centered 3D inverse FFT;
+* preserves the existing `shimtool.jl` complex-sum coil combination for field map estimation;
+* uses a deliberately simple default mask that can later be replaced by the repository's application-specific masking workflow.
+
