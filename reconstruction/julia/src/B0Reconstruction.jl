@@ -226,8 +226,11 @@ the field map, and write the results to another MATLAB file.
 function estimate_fieldmap_file(
     input_filename::AbstractString,
     output_filename::AbstractString;
-    l2b::Real = -3,
-    precon::Symbol = :diag,
+    fieldmap_nifti::Union{Nothing,AbstractString}=nothing,
+    magnitude_nifti::Union{Nothing,AbstractString}=nothing,
+    fov_mm::NTuple{3,<:Real}=(240.0,240.0,240.0),
+    l2b::Real=-3,
+    precon::Symbol=:diag,
 )
     isfile(input_filename) ||
         throw(ArgumentError("Input file does not exist: $input_filename"))
@@ -273,7 +276,26 @@ function estimate_fieldmap_file(
         "mask" => UInt8.(result.mask),
         "echo_times" => result.echo_times,
     )
+
     matwrite(output_filename, output; compress=true)
+
+    if !isnothing(fieldmap_nifti)
+        write_nifti(
+            result.fieldmap_hz,
+            fieldmap_nifti;
+            fov_mm=fov_mm,
+            description="B0 field map (Hz)",
+        )
+    end
+
+    if !isnothing(magnitude_nifti)
+        write_nifti(
+            result.magnitude_echo1,
+            magnitude_nifti;
+            fov_mm=fov_mm,
+            description="Magnitude image (echo 1)",
+        )
+    end
 
     return result
 end
