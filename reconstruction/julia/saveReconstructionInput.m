@@ -19,7 +19,7 @@ arguments
     d {mustBeNumeric}
     TE double
     options.Mask = []
-    options.MaskThreshold (1,1) double {mustBeInRange(options.MaskThreshold,0,1)} = 0.4
+    options.MaskThreshold (1,1) double {mustBeInRange(options.MaskThreshold,0,1)} = 0.1
 end
 
 assert(ndims(d) == 4, ...
