@@ -7,10 +7,14 @@ authors = ["HarmonizedMRI contributors"]
 FFTW = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
 MAT = "23992714-dd62-5051-b70f-ba57cb901cac"
 MRIFieldmaps = "5af58b90-8a55-4daf-adb4-2008a66a38cf"
+NIfTI = "a3a9e032-41b5-5fc4-967a-a6b7a19844d3"
 ROMEO = "1ea8258b-a15d-4adb-ad20-01632f467a84"
+Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 
 [compat]
 FFTW = "1.10.0"
 MAT = "0.12.1"
 MRIFieldmaps = "0.0.4"
+NIfTI = "0.6.2"
 ROMEO = "1.4.0"
+Revise = "3.16.2"

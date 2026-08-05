@@ -56,9 +56,18 @@ using .B0Reconstruction
 Estimate the field map:
 
 ```julia
-estimate_fieldmap_file(
+restul = estimate_fieldmap_file(
     "reconstruction_input.mat",
     "fieldmap.mat",
+)
+```
+
+Write to NIfTI file:
+
+```julia
+write_fieldmap_nifti(
+    result.fieldmap_hz,
+    "fieldmap_hz.nii.gz",
 )
 ```
 

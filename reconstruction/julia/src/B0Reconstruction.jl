@@ -4,11 +4,14 @@ using FFTW: fftshift, ifftshift, ifft
 using MAT: matread, matwrite
 using MRIFieldmaps: b0init, b0map, b0scale
 using ROMEO: unwrap
+using NIfTI: NIVolume, niwrite
 
 export reconstruct_echoes,
        create_mask,
        estimate_fieldmap,
        estimate_fieldmap_file
+
+export write_nifti
 
 """
     reconstruct_echoes(kspace, n_echoes)
@@ -208,7 +211,7 @@ function estimate_fieldmap(
         fieldmap_hz=fieldmap_hz,
         unwrapped_fieldmap_hz=unwrapped_hz,
         initial_fieldmap_hz=Float32.(initial_hz),
-        magnitude=Float32.(magnitude),
+        magnitude_echo1=Float32.(magnitude),
         mask=processing_mask,
         echo_times=te,
     )
@@ -266,13 +269,64 @@ function estimate_fieldmap_file(
         "fieldmap_hz" => result.fieldmap_hz,
         "unwrapped_fieldmap_hz" => result.unwrapped_fieldmap_hz,
         "initial_fieldmap_hz" => result.initial_fieldmap_hz,
-        "magnitude" => result.magnitude,
+        "magnitude_echo1" => result.magnitude_echo1,
         "mask" => UInt8.(result.mask),
         "echo_times" => result.echo_times,
     )
     matwrite(output_filename, output; compress=true)
 
     return result
+end
+
+"""
+    write_nifti(
+        image,
+        output_filename;
+        fov_mm=(240.0, 240.0, 240.0),
+        description="",
+    )
+
+Write a 3D image to NIfTI format.
+
+The image is assumed to be acquired at scanner isocenter with no rotation
+or translation. The voxel grid is centered at coordinate (0, 0, 0).
+"""
+function write_nifti(
+    image::AbstractArray{<:Real,3},
+    output_filename::AbstractString;
+    fov_mm::NTuple{3,<:Real} = (240.0, 240.0, 240.0),
+    description::AbstractString = "",
+)
+    matrix_size = size(image)
+
+    voxel_size = ntuple(
+        d -> Float32(fov_mm[d] / matrix_size[d]),
+        3,
+    )
+
+    translation = ntuple(
+        d -> -voxel_size[d] * Float32(matrix_size[d] - 1) / 2f0,
+        3,
+    )
+
+    orientation = Float32[
+        voxel_size[1]  0.0             0.0             translation[1]
+        0.0            voxel_size[2]   0.0             translation[2]
+        0.0            0.0             voxel_size[3]   translation[3]
+    ]
+
+    volume = NIVolume(
+        Float32.(image);
+        voxel_size=voxel_size,
+        orientation=orientation,
+        scl_slope=1.0f0,
+        scl_inter=0.0f0,
+        descrip=description,
+    )
+
+    niwrite(output_filename, volume)
+
+    return output_filename
 end
 
 end
