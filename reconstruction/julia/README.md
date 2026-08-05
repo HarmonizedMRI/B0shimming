@@ -29,14 +29,50 @@ a simple relative magnitude threshold is used.
 
 ## Run
 
+### Interactive Julia session 
+
 From this directory:
+
+```bash
+cd reconstruction/julia
+julia
+```
+
+Activate the project and install the required packages (the first time only):
+
+```julia
+using Pkg
+Pkg.activate(".")
+Pkg.instantiate()
+```
+
+Load the reconstruction module:
+
+```julia
+include("src/B0Reconstruction.jl")
+using .B0Reconstruction
+```
+
+Estimate the field map:
+
+```julia
+estimate_fieldmap_file(
+    "reconstruction_input.mat",
+    "fieldmap.mat",
+)
+```
+
+### Command-line
+
+Alternatively, the complete workflow can be run directly from the command line:
 
 ```bash
 julia --project=. estimateFieldMap.jl \
     reconstruction_input.mat fieldmap.mat
 ```
 
-The first run installs the packages listed in `Project.toml`.
+The first run will automatically install the packages listed in `Project.toml`.
+
 
 ## Output
 

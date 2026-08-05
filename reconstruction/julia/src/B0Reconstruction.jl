@@ -165,8 +165,19 @@ function estimate_fieldmap(
     scaled_combined, scale = b0scale(combined, te)
     scaled_images = ComplexF32.(images ./ scale)
 
-    initial_4d = b0init(scaled_images, te)
-    initial_hz = dropdims(initial_4d; dims=4)
+    initial_result = b0init(scaled_images, te)
+
+    initial_hz = if ndims(initial_result) == 4 && size(initial_result, 4) == 1
+        dropdims(initial_result; dims=4)
+    elseif ndims(initial_result) == 3
+        initial_result
+    else
+        throw(DimensionMismatch(
+            "Unexpected output size from b0init: $(size(initial_result))"
+        ))
+    end
+
+    initial_hz = Float32.(initial_hz)
     initial_hz .*= processing_mask
 
     # Convert the initial map to phase difference, unwrap with ROMEO,
@@ -234,10 +245,11 @@ function estimate_fieldmap_file(
     n_echoes = length(echo_times)
 
     mask_threshold = if haskey(input, "mask_threshold")
-        Float64(first(vec(input["mask_threshold"])))
+        Float64(input["mask_threshold"])
     else
         0.40
     end
+
     mask = get(input, "mask", nothing)
 
     images = reconstruct_echoes(kspace, n_echoes)
