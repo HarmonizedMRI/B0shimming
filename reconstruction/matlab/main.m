@@ -40,7 +40,7 @@ d = permute(d, [1 3 4 2]);
 
 addpath ../julia/
 fprintf('saving...')
-saveReconstructionInput('reconstruction_input', d, TE); %, options);
+saveReconstructionInput('reconstruction_input', d, TE, 'MaskThreshold', 0.1);
 
 return
 
