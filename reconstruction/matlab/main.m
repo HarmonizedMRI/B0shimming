@@ -47,6 +47,13 @@ addpath ../julia/
 fprintf('saving...')
 saveReconstructionInput('reconstruction_input', d, TE, 'MaskThreshold', 0.1);
 
+% compute receive coil sensitivity maps
+% Download bart tar-ball and compile (make)
+% In Matlab:
+% >> setenv('TOOLBOX_PATH', '~/Programs/bart')
+% >> addpath(fullfile(getenv('TOOLBOX_PATH'), 'matlab'));
+% tic; sens = bart('ecalib -m 1 -r 20', d(:,1:2:end,:,:)); toc;
+
 return
 
 % -----------------------------------------------------------------------------
