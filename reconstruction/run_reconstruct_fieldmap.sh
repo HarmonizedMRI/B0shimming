@@ -37,9 +37,9 @@ JULIA_DIR="${SCRIPT_DIR}/julia"
 mkdir -p "${OUTPUT_DIR}"
 
 RECON_INPUT="${OUTPUT_DIR}/reconstruction_input.mat"
-FIELDMAP_MAT="${OUTPUT_DIR}/fieldmap_results.mat"
-FIELDMAP_NII="${OUTPUT_DIR}/fieldmap_hz.nii.gz"
-MAGNITUDE_NII="${OUTPUT_DIR}/magnitude_echo1.nii.gz"
+FIELDMAP_MAT="${OUTPUT_DIR}/fieldmap.mat"
+FIELDMAP_NII="${OUTPUT_DIR}/fieldmap.nii.gz"
+MAGNITUDE_NII="${OUTPUT_DIR}/magnitude.nii.gz"
 SENS_MAT="${OUTPUT_DIR}/sens.mat"
 
 

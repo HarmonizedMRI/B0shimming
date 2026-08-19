@@ -59,8 +59,8 @@ Estimate the field map:
 estimate_fieldmap_file(
     "reconstruction_input.mat",
     "fieldmap.mat";
-    fieldmap_nifti="fieldmap_hz.nii.gz",
-    magnitude_nifti="magnitude_echo1.nii.gz",
+    fieldmap_nifti="fieldmap.nii.gz",
+    magnitude_nifti="magnitude.nii.gz",
 )
 ```
 

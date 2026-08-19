@@ -1,5 +1,6 @@
 module B0Reconstruction
 
+using JSON3
 using FFTW: fftshift, ifftshift, ifft
 using MAT: matread, matwrite
 using MRIFieldmaps: b0init, b0map, b0scale
@@ -286,6 +287,16 @@ function estimate_fieldmap_file(
             fov_mm=fov_mm,
             description="B0 field map (Hz)",
         )
+
+        json_filename = nifti_sidecar_filename(fieldmap_nifti)
+
+        open(json_filename, "w") do io
+            JSON3.pretty(io, Dict(
+                "Units" => "Hz",
+                "B0FieldIdentifier" => "b0map01",
+            ))
+            println(io)
+        end
     end
 
     if !isnothing(magnitude_nifti)
@@ -295,6 +306,15 @@ function estimate_fieldmap_file(
             fov_mm=fov_mm,
             description="Magnitude image (echo 1)",
         )
+
+        json_filename = nifti_sidecar_filename(magnitude_nifti)
+
+        open(json_filename, "w") do io
+            JSON3.pretty(io, Dict(
+                "EchoTime" => Float64(result.echo_times[1]),
+            ))
+            println(io)
+        end
     end
 
     return result
@@ -349,6 +369,20 @@ function write_nifti(
     niwrite(output_filename, volume)
 
     return output_filename
+end
+
+function nifti_sidecar_filename(filename::AbstractString)
+
+    if endswith(filename, ".nii.gz")
+        return filename[1:end-7] * ".json"
+    elseif endswith(filename, ".nii")
+        return filename[1:end-4] * ".json"
+    else
+        throw(ArgumentError(
+            "Expected a .nii or .nii.gz filename: $filename"
+        ))
+    end
+
 end
 
 end
