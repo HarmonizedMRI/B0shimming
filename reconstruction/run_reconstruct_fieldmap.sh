@@ -6,12 +6,24 @@ set -euo pipefail
 # Usage
 # -------------------------------------------------------------------------
 
-if [ "$#" -lt 2 ]; then
+usage() {
     echo "Usage:"
-    echo "  $0 <ScanArchive.h5> <output_directory>"
+    echo "  $0 [--sens] <ScanArchive.h5> <output_directory>"
     echo
-    echo "Example:"
+    echo "Examples:"
     echo "  $0 data.h5 output"
+    echo "  $0 --sens data.h5 output"
+}
+
+CALCULATE_SENS=false
+
+if [[ "${1:-}" == "--sens" ]]; then
+    CALCULATE_SENS=true
+    shift
+fi
+
+if [ "$#" -ne 2 ]; then
+    usage
     exit 1
 fi
 
@@ -28,6 +40,7 @@ RECON_INPUT="${OUTPUT_DIR}/reconstruction_input.mat"
 FIELDMAP_MAT="${OUTPUT_DIR}/fieldmap_results.mat"
 FIELDMAP_NII="${OUTPUT_DIR}/fieldmap_hz.nii.gz"
 MAGNITUDE_NII="${OUTPUT_DIR}/magnitude_echo1.nii.gz"
+SENS_MAT="${OUTPUT_DIR}/sens.mat"
 
 
 # -------------------------------------------------------------------------
@@ -40,10 +53,22 @@ echo "MATLAB reconstruction"
 echo "========================================"
 echo
 
+if ${CALCULATE_SENS}; then
+    echo "Sensitivity-map estimation: enabled"
+else
+    echo "Sensitivity-map estimation: disabled"
+fi
+
+echo
+
 matlab -batch "\
     cd('${MATLAB_DIR}'); \
     setup; \
-    reconstructB0('${INPUT}', '${RECON_INPUT}');"
+    reconstructB0( \
+        '${INPUT}', \
+        '${RECON_INPUT}', \
+        'CalculateSens', ${CALCULATE_SENS}, \
+        'SensFile', '${SENS_MAT}');"
 
 
 # -------------------------------------------------------------------------
@@ -82,3 +107,6 @@ echo "  ${FIELDMAP_MAT}"
 echo "  ${FIELDMAP_NII}"
 echo "  ${MAGNITUDE_NII}"
 
+if ${CALCULATE_SENS}; then
+    echo "  ${SENS_MAT}"
+fi								

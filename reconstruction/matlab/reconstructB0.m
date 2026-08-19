@@ -16,14 +16,11 @@ function reconstructB0(inputData, outputFile, options)
 %        dCell = pge2.utils.loaddata('data.h5');
 %        reconstructB0(dCell, 'reconstruction_input.mat')
 %
-%      The cell array must contain
+%      The cell array must contain:
 %
 %        nTE * ny * (NumDummyZ + nz)
 %
 %      acquisitions. Each cell contains an [nx, nCoils] array.
-%
-% The output .mat file is used by the Julia reconstruction code to
-% calculate an unwrapped and regularized B0 field map.
 %
 % Name-value options:
 %
@@ -41,6 +38,15 @@ function reconstructB0(inputData, outputFile, options)
 %
 %   'B0'               Scanner field strength in Tesla.
 %                      Default: 3.0
+%
+%   'CalculateSens'    Calculate ESPIRiT sensitivity maps using BART.
+%                      Default: false
+%
+%   'SensFile'         Output sensitivity-map .mat filename.
+%                      Default: sens.mat in the output directory.
+%
+%   'SensCalibSize'    BART ecalib calibration region (-r).
+%                      Default: 20
 
 arguments
     inputData
@@ -60,7 +66,15 @@ arguments
 
     options.B0 (1,1) double ...
         {mustBePositive} = 3.0
+
+    options.CalculateSens (1,1) logical = false
+
+    options.SensFile (1,:) char = ''
+
+    options.SensCalibSize (1,1) double ...
+        {mustBePositive, mustBeInteger} = 20
 end
+
 
 % -------------------------------------------------------------------------
 % Acquisition parameters
@@ -68,14 +82,16 @@ end
 
 sys = mr.opts('B0', options.B0);
 
-fatChemShift = 3.5e-6;                  % 3.5 ppm
+fatChemShift = 3.5e-6;                         % 3.5 ppm
 fatOffresFreq = sys.gamma * sys.B0 * fatChemShift;  % Hz
 
-% Fat and water in phase at both echoes.
-TE = (1 / fatOffresFreq) * [1 2];       % sec
+% Fat and water in phase for both echoes.
+TE = (1 / fatOffresFreq) * [1 2];              % sec
 
 nTE = length(TE);
-assert(nTE == 2, 'Acquisition must have exactly two echoes.');
+
+assert(nTE == 2, ...
+    'Acquisition must have exactly two echoes.');
 
 nx = options.MatrixSize(1);
 ny = options.MatrixSize(2);
@@ -91,6 +107,7 @@ nDummyZ = options.NumDummyZ;
 if ischar(inputData)
 
     fprintf('Loading %s...\n', inputData);
+
     dCell = pge2.utils.loaddata(inputData);
 
 elseif iscell(inputData)
@@ -145,13 +162,15 @@ d = zeros( ...
     nz, ...
     'like', dCell{1});
 
-% First acquisition after dummy z-encodes.
 shot = nDummyZ * nTE * ny + 1;
 
 for z = 1:nz
     for y = 1:nTE*ny
+
         d(:,:,y,z) = dCell{shot};
+
         shot = shot + 1;
+
     end
 end
 
@@ -165,7 +184,6 @@ d = permute(d, [1 3 4 2]);
 
 fprintf('Saving %s...\n', outputFile);
 
-addpath ../julia/    % saveReconstructionInput.m
 saveReconstructionInput( ...
     outputFile, ...
     d, ...
@@ -181,6 +199,57 @@ save( ...
     'fov', ...
     'matrix_size', ...
     '-append');
+
+
+% -------------------------------------------------------------------------
+% Optional BART ESPIRiT sensitivity maps
+% -------------------------------------------------------------------------
+
+if options.CalculateSens
+
+    assert(exist('bart', 'file') == 2, ...
+        ['BART MATLAB interface not found. Set TOOLBOX_PATH and add ' ...
+         'the BART matlab directory to the MATLAB path.']);
+
+    fprintf('Calculating sensitivity maps with BART ESPIRiT...\n');
+
+    % First echo only.
+    %
+    % d dimensions:
+    %   [nx, nTE*ny, nz, nCoils]
+    %
+    % Result:
+    %   [nx, ny, nz, nCoils]
+    kspaceEcho1 = d(:,1:nTE:end,:,:);
+
+    bartCmd = sprintf( ...
+        'ecalib -m 1 -r %d', ...
+        options.SensCalibSize);
+
+    sens = bart(bartCmd, kspaceEcho1);
+
+    if isempty(options.SensFile)
+
+        outputDir = fileparts(outputFile);
+
+        if isempty(outputDir)
+            outputDir = '.';
+        end
+
+        sensFile = fullfile(outputDir, 'sens.mat');
+
+    else
+
+        sensFile = options.SensFile;
+
+    end
+
+    fprintf('Saving %s...\n', sensFile);
+
+    save(sensFile, 'sens', '-v7.3');
+
+end
+
 
 fprintf('Done.\n');
 

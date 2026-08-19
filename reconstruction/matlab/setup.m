@@ -14,6 +14,10 @@ addpath utils
 % which is available for download at http://weconnect.gehealthcare.com/
 addpath ~/Programs/orchestra-sdk-2.1-1.matlab/
 
+% BART for sensitivity map calculation
+setenv('TOOLBOX_PATH', fullfile(getenv('HOME'), 'Programs', 'bart'));
+addpath(fullfile(getenv('TOOLBOX_PATH'), 'matlab'));
+
 % We will need textprogressbar.m
 system('git clone git@github.com:HarmonizedMRI/pulseg.git');
 addpath pulseg/matlab
