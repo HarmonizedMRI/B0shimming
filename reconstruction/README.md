@@ -9,7 +9,7 @@ The pipeline is split between **MATLAB** and **Julia**:
 
 ## Workflow
 
-```text
+```text id="lktwya"
 Raw scanner data
         │
         ▼
@@ -32,13 +32,13 @@ Julia
 
 The complete MATLAB + Julia pipeline can be run from the `reconstruction/` directory:
 
-```bash
+```bash id="gb5mlf"
 ./run_reconstruct_fieldmap.sh data.h5 output
 ```
 
 This creates:
 
-```text
+```text id="h9rmr8"
 output/
 ├── reconstruction_input.mat
 ├── fieldmap_results.mat
@@ -48,18 +48,53 @@ output/
 
 Sensitivity maps can optionally be calculated using BART ESPIRiT:
 
-```bash
+```bash id="vntkvn"
 ./run_reconstruct_fieldmap.sh --sens data.h5 output
 ```
 
 which additionally creates:
 
-```text
+```text id="r21kqx"
 output/
 └── sens.mat
 ```
 
 BART must be installed and its MATLAB interface available on the MATLAB path when using this option.
+
+## Example using shared HarmonizedMRI data
+
+The scan location can be obtained from the session configuration in the [`Functional`](https://github.com/HarmonizedMRI/Functional) repository.
+
+In MATLAB:
+
+```matlab id="6zk7va"
+addpath ~/github/HarmonizedMRI/Functional/data-processing/session/
+
+dataRoot = '~/dataRoot';
+configRoot = '~/github/HarmonizedMRI/Functional/data-config';
+
+S = loadSession( ...
+    configRoot, ...
+    dataRoot, ...
+    'sub00012-umich-mr750-20250115-1');
+
+datafile = fullfile( ...
+    S.scans.pulseq.datadir, ...
+    S.scans.pulseq.b0.name)
+```
+
+This gives the path to the B0 ScanArchive file. From the shell, run:
+
+```bash id="tlg57w"
+./run_reconstruct_fieldmap.sh --sens /path/to/datafile output
+```
+
+For example, if the path returned by MATLAB is stored in a shell variable:
+
+```bash id="zgbyax"
+datafile=/path/to/ScanArchive.h5
+./run_reconstruct_fieldmap.sh --sens "$datafile" output
+```
 
 ## MATLAB
 
@@ -69,13 +104,13 @@ The MATLAB code is in `matlab/`.
 
 For example:
 
-```matlab
+```matlab id="gnxzm7"
 reconstructB0('data.h5', 'reconstruction_input.mat');
 ```
 
 Sensitivity maps can optionally be calculated using BART ESPIRiT:
 
-```matlab
+```matlab id="iznyk7"
 reconstructB0( ...
     'data.h5', ...
     'reconstruction_input.mat', ...
@@ -88,10 +123,4 @@ The resulting `reconstruction_input.mat` contains the k-space data, echo times, 
 
 The `julia/` directory contains the field map estimation code and its own Julia environment (`Project.toml` and `Manifest.toml`).
 
-The Julia processing can also be run separately for development or debugging. See:
-
-```text
-julia/README.md
-```
-
-for environment setup, interactive Julia usage, input/output details, and NIfTI writing.
+The Julia processing can also be run separately for development or debugging. See `julia/README.md` for environment setup, interactive Julia usage, input/output details, and NIfTI writing.
